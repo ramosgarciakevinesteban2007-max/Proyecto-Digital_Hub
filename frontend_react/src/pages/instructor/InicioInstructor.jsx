@@ -133,8 +133,8 @@ const InicioInstructor = () => {
             ) : (
               <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
                 {ultimosReportes.map(r => (
-                  <div key={r.id_reporte} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 14px',background:'rgba(127,90,240,0.06)',borderRadius:'10px',border:'1px solid rgba(127,90,240,0.12)'}}>
-                    <span style={{fontSize:'13px',color:'#f0eaff',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'65%'}}>{r.descripcion}</span>
+                  <div key={r.id_reporte} className="inst-reporte-item">
+                    <span className="inst-reporte-desc">{r.descripcion}</span>
                     <span style={{fontSize:'11px',fontWeight:700,color:estadoColor(r.estado_reporte),flexShrink:0}}>{r.estado_reporte}</span>
                   </div>
                 ))}
@@ -150,8 +150,8 @@ const InicioInstructor = () => {
             ) : (
               <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
                 {misFichas.map(f => (
-                  <div key={f.id_ficha} onClick={() => navigate('/instructor/fichas')} style={{padding:'10px 12px',background:'rgba(127,90,240,0.06)',borderRadius:'10px',border:'1px solid rgba(127,90,240,0.12)',cursor:'pointer'}}>
-                    <div style={{fontSize:'13px',fontWeight:700,color:'#f0eaff',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{f.nombre}</div>
+                  <div key={f.id_ficha} onClick={() => navigate('/instructor/fichas')} className="inst-ficha-item">
+                    <div className="inst-ficha-nombre">{f.nombre}</div>
                     <div style={{display:'flex',justifyContent:'space-between',marginTop:'4px'}}>
                       <span style={{fontSize:'11px',color:'#b8a8d8'}}>{f.jornada}</span>
                       <span style={{fontSize:'11px',fontWeight:700,color:estadoColor(f.estado)}}>{f.estado}</span>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconBell, IconUser, IconCheck, IconMonitor, IconReport } from '../../components/Icons';
 import SidebarAprendiz from '../../components/SidebarAprendiz';
+import Pagination from '../../components/Pagination';
 import '../../pages/aprendiz/MiFicha.css';
 
 const estadoColor = (e) => ({ activa:'#4ade80', inactiva:'#f87171', cerrada:'#facc15' }[e] || '#c9a8ff');
@@ -15,6 +16,8 @@ const MiFicha = () => {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [uniendose, setUniendose] = useState(null);
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 5;
   const token = localStorage.getItem('token');
 
   useEffect(() => {
@@ -115,15 +118,17 @@ const MiFicha = () => {
         ) : (
           /* NO TIENE FICHA - mostrar disponibles */
           <div>
-            <div style={{background:'rgba(250,204,21,0.08)',border:'1px solid rgba(250,204,21,0.25)',borderRadius:'14px',padding:'16px 20px',marginBottom:'24px',display:'flex',alignItems:'center',gap:'12px'}}>
-              <span style={{fontSize:'20px'}}>📋</span>
+            <div className="mificha-aviso">
+              <div className="mificha-aviso-icon">
+                <IconReport size={20}/>
+              </div>
               <div>
-                <div style={{fontSize:'14px',fontWeight:700,color:'#facc15'}}>Aún no perteneces a ninguna ficha</div>
-                <div style={{fontSize:'12px',color:'#b8a8d8',marginTop:'2px'}}>Únete a una de las fichas activas disponibles abajo</div>
+                <div className="mificha-aviso-titulo">Aún no perteneces a ninguna ficha</div>
+                <div className="mificha-aviso-sub">Únete a una de las fichas activas disponibles abajo</div>
               </div>
             </div>
 
-            <div style={{fontSize:'13px',fontWeight:700,color:'#b8a8d8',textTransform:'uppercase',letterSpacing:'0.6px',marginBottom:'14px'}}>
+            <div className="mificha-seccion-label">
               Fichas disponibles
             </div>
 
@@ -131,15 +136,15 @@ const MiFicha = () => {
               <div style={{textAlign:'center',padding:'48px',color:'#b8a8d8',fontSize:'13px'}}>No hay fichas activas disponibles</div>
             ) : (
               <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
-                {fichasDisponibles.map(f => (
-                  <div key={f.id_ficha} style={{background:'#241545',border:'1px solid rgba(127,90,240,0.3)',borderRadius:'16px',padding:'0',display:'flex',overflow:'hidden'}}>
+                {fichasDisponibles.slice((page-1)*PER_PAGE, page*PER_PAGE).map(f => (
+                  <div key={f.id_ficha} className="mificha-card" style={{display:'flex',overflow:'hidden'}}>
                     <div style={{width:'5px',background:'linear-gradient(180deg,#4ade80,#34d399)',flexShrink:0}}/>
                     <div style={{flex:1,padding:'18px 22px',display:'flex',flexDirection:'column',gap:'6px'}}>
-                      <div style={{fontSize:'16px',fontWeight:800,color:'#f0eaff'}}>{f.nombre}</div>
-                      <div style={{fontSize:'12px',color:'#b8a8d8'}}>{f.programa_formacion}</div>
+                      <div className="mificha-nombre" style={{fontSize:'16px',fontWeight:800,color:'#f0eaff'}}>{f.nombre}</div>
+                      <div className="mificha-programa" style={{fontSize:'12px',color:'#b8a8d8'}}>{f.programa_formacion}</div>
                       <div style={{display:'flex',gap:'12px',marginTop:'4px'}}>
-                        <span style={{fontSize:'11px',color:'#b8a8d8'}}>{jornadaIcon(f.jornada)} {f.jornada}</span>
-                        <span style={{fontSize:'11px',color:'#b8a8d8'}}>Cupo: {f.cupo_maximo}</span>
+                        <span className="mificha-meta" style={{fontSize:'11px',color:'#b8a8d8'}}>{jornadaIcon(f.jornada)} {f.jornada}</span>
+                        <span className="mificha-meta" style={{fontSize:'11px',color:'#b8a8d8'}}>Cupo: {f.cupo_maximo}</span>
                       </div>
                     </div>
                     <div style={{padding:'18px 20px',display:'flex',alignItems:'center',flexShrink:0}}>
@@ -156,6 +161,7 @@ const MiFicha = () => {
                 ))}
               </div>
             )}
+            <Pagination page={page} total={fichasDisponibles.length} perPage={PER_PAGE} onChange={setPage} />
           </div>
         )}
       </main>

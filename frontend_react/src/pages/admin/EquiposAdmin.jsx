@@ -113,7 +113,7 @@ const EquiposAdmin = () => {
     setShowEditModal(true);
   };
 
-  const estadoColor = (e) => ({ disponible: '#4ade80', asignado: '#facc15', 'dañado': '#f87171', mantenimiento: '#fb923c' }[e] || '#c9a8ff');
+  const estadoColor = (e) => ({ disponible: '#4ade80', asignado: '#facc15', 'dañado': '#f87171', danado: '#f87171', mantenimiento: '#fb923c' }[e] || '#c9a8ff');
 
   const filtrados = portatiles.filter(p => {
     const b = filtros.buscar.toLowerCase();

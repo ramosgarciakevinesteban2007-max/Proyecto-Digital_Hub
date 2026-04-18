@@ -184,3 +184,22 @@
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }
 }
+
+/* ===== REPORTE ITEMS ===== */
+.aprendiz-reporte-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(127,90,240,0.06);
+  border-radius: 10px;
+  border: 1px solid rgba(127,90,240,0.12);
+}
+.aprendiz-reporte-desc {
+  font-size: 13px;
+  color: #f0eaff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 65%;
+}

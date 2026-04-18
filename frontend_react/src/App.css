@@ -10,6 +10,7 @@
 }
 
 html { scroll-behavior: smooth; background: #080810; }
+html[data-theme="claro"] { background: #f4f0ff !important; }
 
 body {
   font-family: 'Poppins', 'Segoe UI', Inter, system-ui, sans-serif;
