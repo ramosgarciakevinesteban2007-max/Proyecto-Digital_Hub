@@ -208,10 +208,10 @@ const EquiposAdmin = () => {
                 <div className="form-group"><label>Modelo</label><input type="text" value={formData.modelo} onChange={e => setFormData({ ...formData, modelo: e.target.value })} required /></div>
                 <div className="form-group"><label>Estado</label>
                   <select value={formData.estado} onChange={e => setFormData({ ...formData, estado: e.target.value })}>
-                    <option value="disponible">Disponible</option>
-                    <option value="asignado">Asignado</option>
-                    <option value="dañado">Dañado</option>
-                    <option value="mantenimiento">Mantenimiento</option>
+                    <option value="Disponible">Disponible</option>
+                    <option value="Asignado">Asignado</option>
+                    <option value="Dañado">Dañado</option>
+                    <option value="Mantenimiento">Mantenimiento</option>
                   </select>
                 </div>
                 <div className="modal-actions">
@@ -251,10 +251,10 @@ const EquiposAdmin = () => {
                 <div className="form-group"><label>Modelo</label><input type="text" value={editData.modelo} onChange={e => setEditData({ ...editData, modelo: e.target.value })} required /></div>
                 <div className="form-group"><label>Estado</label>
                   <select value={editData.estado} onChange={e => setEditData({ ...editData, estado: e.target.value })}>
-                    <option value="disponible">Disponible</option>
-                    <option value="asignado">Asignado</option>
-                    <option value="dañado">Dañado</option>
-                    <option value="mantenimiento">Mantenimiento</option>
+                    <option value="Disponible">Disponible</option>
+                    <option value="Asignado">Asignado</option>
+                    <option value="Dañado">Dañado</option>
+                    <option value="Mantenimiento">Mantenimiento</option>
                   </select>
                 </div>
                 <div className="modal-actions">
