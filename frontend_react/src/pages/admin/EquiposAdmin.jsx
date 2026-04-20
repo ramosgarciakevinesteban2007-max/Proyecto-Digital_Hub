@@ -113,7 +113,7 @@ const EquiposAdmin = () => {
     setShowEditModal(true);
   };
 
-  const estadoColor = (e) => ({ disponible: '#4ade80', asignado: '#facc15', 'dañado': '#f87171', mantenimiento: '#fb923c' }[e] || '#c9a8ff');
+  const estadoColor = (e) => ({ Disponible: '#4ade80', Asignado: '#facc15', 'Dañado': '#f87171', Mantenimiento: '#fb923c' }[e] || '#c9a8ff');
 
   const filtrados = portatiles.filter(p => {
     const b = filtros.buscar.toLowerCase();
@@ -151,11 +151,11 @@ const EquiposAdmin = () => {
           </div>
           <div className="stat-card">
             <div className="stat-icon"><IconMonitor size={24} /></div>
-            <div className="stat-card-text"><div className="stat-label">Disponibles</div><div className="stat-value">{portatiles.filter(p => p.estado === 'disponible').length}</div></div>
+            <div className="stat-card-text"><div className="stat-label">Disponibles</div><div className="stat-value">{portatiles.filter(p => p.estado === 'Disponible').length}</div></div>
           </div>
           <div className="stat-card">
             <div className="stat-icon"><IconBarChart size={24} /></div>
-            <div className="stat-card-text"><div className="stat-label">Asignados</div><div className="stat-value">{portatiles.filter(p => p.estado === 'asignado').length}</div></div>
+            <div className="stat-card-text"><div className="stat-label">Asignados</div><div className="stat-value">{portatiles.filter(p => p.estado === 'Asignado').length}</div></div>
           </div>
         </div>
 
@@ -165,12 +165,11 @@ const EquiposAdmin = () => {
           <input className="filter-input" placeholder="Buscar por serie, marca o modelo..." value={filtros.buscar} onChange={e => { setFiltros({ ...filtros, buscar: e.target.value }); setPage(1); }} />
           <select className="filter-input" value={filtros.estado} onChange={e => { setFiltros({ ...filtros, estado: e.target.value }); setPage(1); }}>
             <option value="">Todos los estados</option>
-            <option value="disponible">Disponible</option>
-            <option value="asignado">Asignado</option>
-            <option value="dañado">Dañado</option>
-            <option value="mantenimiento">Mantenimiento</option>
-          </select>
-          <input className="filter-input" placeholder="Filtrar por marca..." value={filtros.marca} onChange={e => { setFiltros({ ...filtros, marca: e.target.value }); setPage(1); }} />
+            <option value="Disponible">Disponible</option>
+            <option value="Asignado">Asignado</option>
+            <option value="Dañado">Dañado</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            </select>
           <button className="filter-clear" onClick={() => { setFiltros({ buscar: '', estado: '', marca: '' }); setPage(1); }}>Limpiar</button>
         </div>
 
