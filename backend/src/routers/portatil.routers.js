@@ -8,6 +8,7 @@ const validarCamposObligatorios = require("../middlewares/validarCamposObligator
 const validarSerialUnico = require("../middlewares/validarSerialUnico");
 const { enviarCorreo } = require("../services/email.service");
 const { asignacionEquipoTemplate } = require("../services/templates/asignacionEquipoTemplate");
+const { crearNotificacion } = require("../services/notificacion.service");
 
 
 /*
@@ -64,10 +65,13 @@ router.get(
       limit = parseInt(limit);
       const offset = (page - 1) * limit;
 
-      // APRENDIZ: solo el portátil que tiene asignado
+      // APRENDIZ: portátiles asignados via portatil_aprendiz
       if (rol === "aprendiz") {
         const [rows] = await pool.query(
-          "SELECT * FROM portatil WHERE id_aprendiz = ?",
+          `SELECT p.*, pa.fecha_asignacion, pa.estado AS estado_asignacion
+           FROM portatil_aprendiz pa
+           JOIN portatil p ON pa.id_portatil = p.id_portatil
+           WHERE pa.id_aprendiz = ? AND pa.estado = 'activo'`,
           [id]
         );
         return res.json({ total: rows.length, pagina: 1, totalPaginas: 1, data: rows });
@@ -166,14 +170,15 @@ router.put(
       );
 
       if (resultado.affectedRows === 0) {
-        return res.status(404).json({
-          mensaje: "Portátil no encontrado"
-        });
+        return res.status(404).json({ mensaje: "Portátil no encontrado" });
       }
 
-      res.json({
-        mensaje: "Portátil actualizado correctamente"
-      });
+      // Si cambia a no-asignado, desactivar en portatil_aprendiz
+      if (estado !== 'asignado') {
+        await pool.query("UPDATE portatil_aprendiz SET estado = 'inactivo' WHERE id_portatil = ?", [id]);
+      }
+
+      res.json({ mensaje: "Portátil actualizado correctamente" });
 
     } catch (error) {
 
@@ -269,9 +274,9 @@ router.post(
         return res.status(400).json({ mensaje: "El aprendiz no está activo" });
       }
 
-      // Validar que el aprendiz no tenga ya un equipo asignado
+      // Validar que el aprendiz no tenga ya un equipo asignado activo
       const [equipoActual] = await pool.query(
-        "SELECT id_portatil FROM portatil WHERE id_aprendiz = ? LIMIT 1",
+        "SELECT id FROM portatil_aprendiz WHERE id_aprendiz = ? AND estado = 'activo' LIMIT 1",
         [aprendiz.id_usuario]
       );
       if (equipoActual.length > 0) {
@@ -287,25 +292,20 @@ router.post(
         return res.status(400).json({ mensaje: "El aprendiz no está inscrito en ninguna ficha" });
       }
 
-      // Actualizar estado del portátil a asignado y guardar id_aprendiz
+      // Insertar en portatil_aprendiz y actualizar portátil
+      await pool.query(
+        "INSERT INTO portatil_aprendiz (id_portatil, id_aprendiz, estado) VALUES (?, ?, 'activo')",
+        [id, aprendiz.id_usuario]
+      );
       await pool.query(
         "UPDATE portatil SET estado = 'asignado', id_aprendiz = ? WHERE id_portatil = ?",
         [aprendiz.id_usuario, id]
       );
 
-      // 📧 Notificación al aprendiz
-      const html = asignacionEquipoTemplate(
-        aprendiz.nombre,
-        portatil.marca,
-        portatil.modelo,
-        portatil.num_serie,
-        "asignado"
-      );
-      await enviarCorreo(
-        aprendiz.correo,
-        "💻 Se te asignó un equipo - Digital Hub",
-        html
-      );
+      // 📧 Correo + 🔔 Notificación interna
+      const html = asignacionEquipoTemplate(aprendiz.nombre, portatil.marca, portatil.modelo, portatil.num_serie, "asignado");
+      await enviarCorreo(aprendiz.correo, "💻 Se te asignó un equipo - Digital Hub", html);
+      await crearNotificacion(aprendiz.id_usuario, "Equipo asignado", `Se te asignó el portátil ${portatil.marca} ${portatil.modelo} (Serie: ${portatil.num_serie})`, "success");
 
       res.json({
         mensaje: `Portátil asignado correctamente a ${aprendiz.nombre}`,
@@ -318,5 +318,28 @@ router.post(
     }
   }
 );
+
+/*
+=========================================
+7. VER APRENDICES DE UN PORTÁTIL
+=========================================
+*/
+router.get("/:id/aprendices", verificarToken, verificarRol(["administrador", "instructor"]), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.query(
+      `SELECT u.id_usuario, u.nombre, u.correo, u.estado, pa.fecha_asignacion, pa.estado AS estado_asignacion
+       FROM portatil_aprendiz pa
+       JOIN usuario u ON pa.id_aprendiz = u.id_usuario
+       WHERE pa.id_portatil = ?
+       ORDER BY pa.fecha_asignacion DESC`,
+      [id]
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error al obtener aprendices del portátil" });
+  }
+});
 
 module.exports = router;

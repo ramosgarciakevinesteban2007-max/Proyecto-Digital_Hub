@@ -1,14 +1,11 @@
 exports.up = async function(knex) {
   const tieneInstructor = await knex.schema.hasColumn('portatil', 'id_instructor');
   const tieneAprendiz   = await knex.schema.hasColumn('portatil', 'id_aprendiz');
-
-  // Agregar columnas sin FK (evita errno 150 de MySQL)
   await knex.schema.alterTable('portatil', function(table) {
     if (!tieneInstructor) table.integer('id_instructor').unsigned().nullable();
     if (!tieneAprendiz)   table.integer('id_aprendiz').unsigned().nullable();
   });
 };
-
 exports.down = async function(knex) {
   await knex.schema.alterTable('portatil', function(table) {
     table.dropColumn('id_instructor');

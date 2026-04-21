@@ -24,6 +24,8 @@ const fichaRouter = require("./routers/ficha.routers");
 const importacionRoutes = require("./routers/importacion.routers");
 const exportacionRoutes = require("./routers/exportacion.routers");
 const recuperacionRouter = require("./routers/recuperacion.routers");
+const chatRouter = require("./routers/chat.routers");
+const notificacionesRouter = require("./routers/notificaciones.routers");
 // ===============================
 // RUTAS PRINCIPALES (API)
 // ===============================
@@ -32,6 +34,8 @@ app.use("/api/portatiles", portatilRouter);
 app.use("/api/reportes", reportesRouter);
 app.use("/api/ambientes", ambienteRouter);
 app.use("/api/fichas", fichaRouter);
+app.use("/api/chat", chatRouter);
+app.use("/api/notificaciones", notificacionesRouter);
 app.use("/importar", importacionRoutes);
 app.use("/exportar", exportacionRoutes);
 app.use("/api/recuperacion", recuperacionRouter);
