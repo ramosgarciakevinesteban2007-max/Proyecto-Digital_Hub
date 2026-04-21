@@ -34,6 +34,7 @@ import AjustesAprendiz from './pages/aprendiz/AjustesAprendiz';
 import FichasAprendiz from './pages/aprendiz/FichasAprendiz';
 import MiDispositivo from './pages/aprendiz/MiDispositivo';
 import MiFicha from './pages/aprendiz/MiFicha';
+import Notificaciones from './pages/Notificaciones';
 
 import './App.css';
 import './theme-claro.css';
@@ -83,6 +84,7 @@ function App() {
         <Route path="/aprendiz/fichas"      element={<FichasAprendiz />} />
         <Route path="/aprendiz/dispositivo" element={<MiDispositivo />} />
         <Route path="/aprendiz/ficha"       element={<MiFicha />} />
+        <Route path="/notificaciones"      element={<Notificaciones />} />
       </Routes>
     </Router>
   );

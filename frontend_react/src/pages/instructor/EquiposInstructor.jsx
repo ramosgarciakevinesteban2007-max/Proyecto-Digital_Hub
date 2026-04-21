@@ -74,7 +74,13 @@ const EquiposInstructor = () => {
     try {
       const res = await fetch(`/api/portatiles/${asignarData.id_portatil}/asignar`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ correo_aprendiz: asignarData.correo }) });
       const data = await res.json();
-      if (res.ok) { setShowAsignarModal(false); setAsignarMsg(`Equipo asignado a ${data.aprendiz.nombre}`); setTimeout(() => setAsignarMsg(""), 4000); cargar(); }
+      if (res.ok) {
+        setShowAsignarModal(false);
+        setAsignarMsg(`Equipo asignado a ${data.aprendiz.nombre}`);
+        setPortatiles(prev => prev.map(p => p.id_portatil === asignarData.id_portatil ? { ...p, estado: 'asignado' } : p));
+        setTimeout(() => setAsignarMsg(""), 4000);
+        cargar();
+      }
       else { setAsignarError(data.mensaje || "Error al asignar"); }
     } catch { setAsignarError("Error de conexion"); }
   };
@@ -129,8 +135,8 @@ const EquiposInstructor = () => {
                     <button className="action-btn view" onClick={() => abrirVer(p)}><IconEye size={16} /></button>
                     <button className="action-btn edit" onClick={() => abrirEditar(p)}><IconPencil size={16} /></button>
                     <button className="action-btn delete" onClick={() => setConfirmId(p.id_portatil)}><IconTrash size={16} /></button>
-                    {p.estado === "disponible" && (
-                      <button className="action-btn" title="Asignar" style={{background:"rgba(74,222,128,0.15)",color:"#4ade80",border:"1px solid rgba(74,222,128,0.3)"}} onClick={() => abrirAsignar(p)}>
+                    {p.estado !== "danado" && p.estado !== "mantenimiento" && (
+                      <button className="action-btn" title={p.estado === "asignado" ? "Asignar a otro aprendiz" : "Asignar"} style={{background:"rgba(74,222,128,0.15)",color:"#4ade80",border:"1px solid rgba(74,222,128,0.3)"}} onClick={() => abrirAsignar(p)}>
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                       </button>
                     )}

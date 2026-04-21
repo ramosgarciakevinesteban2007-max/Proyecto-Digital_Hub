@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconBell, IconMonitor, IconReport, IconCheck, IconUser } from '../../components/Icons';
 import SidebarAprendiz from '../../components/SidebarAprendiz';
-import Pagination from '../../components/Pagination';
 import '../../pages/aprendiz/MiDispositivo.css';
+
+const getFichaId = (f) => f?.id ?? f?.id_ficha ?? '---';
+
+const getFichaDisplay = (f) => f?.nombre ?? f?.id_ficha ?? f?.id ?? '---';
 
 const MiDispositivo = () => {
   const navigate = useNavigate();
@@ -21,8 +24,6 @@ const MiDispositivo = () => {
     fecha_reporte: new Date().toISOString().split('T')[0],
     correo_instructor: ''
   });
-  const [page, setPage] = useState(1);
-  const PER_PAGE = 5;
   const token = localStorage.getItem('token');
 
   useEffect(() => {
@@ -35,11 +36,14 @@ const MiDispositivo = () => {
       setLoading(true);
       localStorage.removeItem('portatiles_local');
       const h = { Authorization: `Bearer ${token}` };
+
+      // Cargar ficha y portátiles en paralelo, sin que uno falle al otro
       const [fRes, pRes] = await Promise.all([
-        fetch('/api/fichas/mia', { headers: h }),
+        fetch('/api/fichas/mia', { headers: h }).catch(() => null),
         fetch('/api/portatiles', { headers: h }),
       ]);
-      const fData = fRes.ok ? await fRes.json() : null;
+
+      const fData = (fRes && fRes.ok) ? await fRes.json() : null;
       const pRaw = await pRes.json();
       const lista = Array.isArray(pRaw) ? pRaw : (Array.isArray(pRaw?.data) ? pRaw.data : []);
       setFicha(fData);
@@ -101,20 +105,20 @@ const MiDispositivo = () => {
         )}
 
         {ficha && (
-          <div className="midispositivo-ficha-banner">
+          <div style={{background:'linear-gradient(135deg,rgba(127,90,240,0.12),rgba(99,102,241,0.06))',border:'1px solid rgba(127,90,240,0.3)',borderRadius:'16px',padding:'18px 22px',marginBottom:'24px',display:'flex',alignItems:'center',gap:'14px'}}>
             <div style={{width:'40px',height:'40px',borderRadius:'10px',background:'rgba(127,90,240,0.2)',display:'flex',alignItems:'center',justifyContent:'center',color:'#c9a8ff',flexShrink:0}}>
               <IconUser size={18}/>
             </div>
             <div>
-              <div className="midispositivo-ficha-label">Ficha asignada</div>
-              <div className="midispositivo-ficha-nombre">{ficha.nombre}</div>
-              <div className="midispositivo-ficha-sub">{ficha.programa_formacion} · {ficha.jornada}</div>
+              <div style={{fontSize:'11px',color:'#b8a8d8',textTransform:'uppercase',letterSpacing:'0.6px',marginBottom:'2px'}}>Ficha asignada</div>
+              <div style={{fontSize:'15px',fontWeight:700,color:'#f0eaff'}}>Ficha #{getFichaDisplay(ficha)}</div>
+              <div style={{fontSize:'12px',color:'#b8a8d8'}}>{ficha.programa_formacion} · {ficha.jornada}</div>
             </div>
             <span style={{marginLeft:'auto',background:'rgba(74,222,128,0.12)',border:'1px solid rgba(74,222,128,0.3)',color:'#4ade80',borderRadius:'50px',padding:'3px 12px',fontSize:'11px',fontWeight:700}}>{ficha.estado}</span>
           </div>
         )}
 
-        <div className="midispositivo-seccion-label">
+        <div style={{fontSize:'13px',fontWeight:700,color:'#b8a8d8',textTransform:'uppercase',letterSpacing:'0.6px',marginBottom:'14px'}}>
           Equipos asignados
         </div>
 
@@ -126,8 +130,8 @@ const MiDispositivo = () => {
           </div>
         ) : (
           <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
-            {portatiles.slice((page-1)*PER_PAGE, page*PER_PAGE).map(p => (
-              <div key={p.id_portatil} className="midispositivo-card">
+            {portatiles.map(p => (
+              <div key={p.id_portatil} style={{background:'linear-gradient(135deg,#2d1a55 0%,#1a0f35 100%)',border:'1px solid rgba(127,90,240,0.35)',borderRadius:'18px',display:'flex',overflow:'hidden'}}>
                 <div style={{width:'5px',background:'linear-gradient(180deg,#7f5af0,#c9a8ff)',flexShrink:0}}/>
                 <div style={{padding:'18px 20px',display:'flex',alignItems:'center',justifyContent:'center',borderRight:'1px dashed rgba(127,90,240,0.2)',flexShrink:0}}>
                   <div style={{width:'52px',height:'52px',borderRadius:'14px',background:'rgba(127,90,240,0.18)',display:'flex',alignItems:'center',justifyContent:'center',color:'#c9a8ff'}}>
@@ -135,10 +139,10 @@ const MiDispositivo = () => {
                   </div>
                 </div>
                 <div style={{flex:1,padding:'18px 22px',display:'flex',flexDirection:'column',justifyContent:'center',gap:'6px'}}>
-                  <div className="midispositivo-nombre">{p.marca} {p.modelo}</div>
+                  <div style={{fontSize:'17px',fontWeight:800,color:'#f0eaff'}}>{p.marca} {p.modelo}</div>
                   <div style={{display:'flex',gap:'16px',flexWrap:'wrap'}}>
-                    <span className="midispositivo-meta">Serie: <span style={{fontFamily:'monospace'}}>{p.num_serie}</span></span>
-                    {p.tipo && <span className="midispositivo-meta">Tipo: <span>{p.tipo}</span></span>}
+                    <span style={{fontSize:'12px',color:'#b8a8d8'}}>Serie: <span style={{color:'#f0eaff',fontFamily:'monospace'}}>{p.num_serie}</span></span>
+                    {p.tipo && <span style={{fontSize:'12px',color:'#b8a8d8'}}>Tipo: <span style={{color:'#f0eaff'}}>{p.tipo}</span></span>}
                   </div>
                   <span style={{fontSize:'11px',color:'#facc15',fontWeight:600,background:'rgba(250,204,21,0.1)',border:'1px solid rgba(250,204,21,0.25)',borderRadius:'50px',padding:'2px 10px',display:'inline-block',width:'fit-content'}}>{p.estado}</span>
                 </div>
@@ -152,7 +156,6 @@ const MiDispositivo = () => {
             ))}
           </div>
         )}
-        <Pagination page={page} total={portatiles.length} perPage={PER_PAGE} onChange={setPage} />
 
         {showModal && (
           <div className="modal-overlay" onClick={() => setShowModal(false)}>

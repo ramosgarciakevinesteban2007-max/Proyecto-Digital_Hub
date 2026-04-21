@@ -1,6 +1,7 @@
 ﻿import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { IconDashboard, IconMonitor, IconHistory, IconTrash, IconUser, IconSettings, IconReport } from './Icons';
+import NotificationBell from './NotificationBell';
 import './Sidebar.css';
 
 const SidebarInstructor = ({ onCollapse }) => {
@@ -58,6 +59,7 @@ const SidebarInstructor = ({ onCollapse }) => {
       </nav>
 
       <div className="sidebar-footer">
+        <NotificationBell />
         <div className="sidebar-user-icon"><IconUser size={15} /></div>
         {!collapsed && <span className="sidebar-user-name">{nombre}</span>}
         {!collapsed && <Link to="/instructor/ajustes" className="sidebar-settings-btn"><IconSettings size={14} /></Link>}
