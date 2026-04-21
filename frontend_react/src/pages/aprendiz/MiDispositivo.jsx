@@ -4,6 +4,10 @@ import { IconBell, IconMonitor, IconReport, IconCheck, IconUser } from '../../co
 import SidebarAprendiz from '../../components/SidebarAprendiz';
 import '../../pages/aprendiz/MiDispositivo.css';
 
+const getFichaId = (f) => f?.id ?? f?.id_ficha ?? '---';
+
+const getFichaDisplay = (f) => f?.nombre ?? f?.id_ficha ?? f?.id ?? '---';
+
 const MiDispositivo = () => {
   const navigate = useNavigate();
   const [ficha, setFicha] = useState(null);
@@ -32,11 +36,14 @@ const MiDispositivo = () => {
       setLoading(true);
       localStorage.removeItem('portatiles_local');
       const h = { Authorization: `Bearer ${token}` };
+
+      // Cargar ficha y portátiles en paralelo, sin que uno falle al otro
       const [fRes, pRes] = await Promise.all([
-        fetch('/api/fichas/mia', { headers: h }),
+        fetch('/api/fichas/mia', { headers: h }).catch(() => null),
         fetch('/api/portatiles', { headers: h }),
       ]);
-      const fData = fRes.ok ? await fRes.json() : null;
+
+      const fData = (fRes && fRes.ok) ? await fRes.json() : null;
       const pRaw = await pRes.json();
       const lista = Array.isArray(pRaw) ? pRaw : (Array.isArray(pRaw?.data) ? pRaw.data : []);
       setFicha(fData);
@@ -104,7 +111,7 @@ const MiDispositivo = () => {
             </div>
             <div>
               <div style={{fontSize:'11px',color:'#b8a8d8',textTransform:'uppercase',letterSpacing:'0.6px',marginBottom:'2px'}}>Ficha asignada</div>
-              <div style={{fontSize:'15px',fontWeight:700,color:'#f0eaff'}}>{ficha.nombre}</div>
+              <div style={{fontSize:'15px',fontWeight:700,color:'#f0eaff'}}>Ficha #{getFichaDisplay(ficha)}</div>
               <div style={{fontSize:'12px',color:'#b8a8d8'}}>{ficha.programa_formacion} · {ficha.jornada}</div>
             </div>
             <span style={{marginLeft:'auto',background:'rgba(74,222,128,0.12)',border:'1px solid rgba(74,222,128,0.3)',color:'#4ade80',borderRadius:'50px',padding:'3px 12px',fontSize:'11px',fontWeight:700}}>{ficha.estado}</span>

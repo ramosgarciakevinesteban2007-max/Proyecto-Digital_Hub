@@ -10,6 +10,7 @@ const PapeleraInstructor = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const [portatiles, setPortatiles] = useState([]);
+  const [fichasEliminadas, setFichasEliminadas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [seleccionado, setSeleccionado] = useState(null);
   const [editData, setEditData] = useState({ marca:'', modelo:'', tipo:'', estado:'disponible' });
@@ -33,6 +34,11 @@ const PapeleraInstructor = () => {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    fetch('/api/fichas/papelera', { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => setFichasEliminadas(Array.isArray(d) ? d : []))
+      .catch(() => {});
   };
 
   const handleRestaurar = async (e) => {
@@ -146,6 +152,30 @@ const PapeleraInstructor = () => {
                   <button type="submit" className="btn-save">Restaurar</button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* FICHAS ELIMINADAS */}
+        {fichasEliminadas.length > 0 && (
+          <div style={{marginTop:'32px'}}>
+            <div style={{fontSize:'13px',fontWeight:700,color:'#b8a8d8',textTransform:'uppercase',letterSpacing:'0.6px',marginBottom:'14px'}}>
+              Fichas eliminadas
+            </div>
+            <div className="table-container">
+              <table className="equipment-table">
+                <thead><tr><th>Nombre</th><th>Programa</th><th>Jornada</th><th>Fecha eliminacion</th></tr></thead>
+                <tbody>
+                  {fichasEliminadas.map(f => (
+                    <tr key={f.id}>
+                      <td style={{fontWeight:600}}>{f.nombre}</td>
+                      <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{f.programa_formacion}</td>
+                      <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{f.jornada}</td>
+                      <td style={{color:'#f87171',fontSize:'13px'}}>{f.fecha_eliminacion?.split('T')[0] || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
