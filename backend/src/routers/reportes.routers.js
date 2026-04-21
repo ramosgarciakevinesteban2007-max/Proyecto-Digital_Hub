@@ -9,6 +9,7 @@ const uploadImagen = require("../middlewares/uploadImagen");
 const { ROLES } = require("../constants/dominio");
 const { enviarCorreo } = require("../services/email.service");
 const { reporteTemplate } = require("../services/templates/reporteTemplate");
+const { createNotification, deleteNotificationsByTipoAndResourceIds } = require("../services/notificacion.service");
 
 // =============================
 // 📥 EXPORTAR EXCEL
@@ -140,10 +141,13 @@ router.post(
         }
       }
 
-      // Verificar que el aprendiz tiene un equipo asignado
+      // Verificar que el aprendiz tiene un equipo asignado activo
       const id_aprendiz = req.usuario.id;
       const [equipoAsignado] = await pool.query(
-        "SELECT id_portatil FROM portatil WHERE id_aprendiz = ? LIMIT 1",
+        `SELECT pa.id_portatil
+         FROM portatil_aprendiz pa
+         WHERE pa.id_aprendiz = ? AND pa.estado = 'activo'
+         LIMIT 1`,
         [id_aprendiz]
       );
       if (equipoAsignado.length === 0) {
@@ -162,18 +166,26 @@ router.post(
 
       const archivo = req.file ? req.file.filename : null;
 
-      await pool.query(
+      const [insertResult] = await pool.query(
         `INSERT INTO reportes (estado_reporte, fecha_reporte, archivo, descripcion, id_aprendiz, id_instructor)
          VALUES (?, ?, ?, ?, ?, ?)`,
         [estado_reporte, fecha_reporte, archivo, descripcion, id_aprendiz, instructor.id_usuario]
       );
 
-      // Datos del aprendiz para los correos
+      // Datos del aprendiz para los correos y notificaciones
       const [aprendizRows] = await pool.query(
         "SELECT nombre, correo FROM usuario WHERE id_usuario = ?",
         [id_aprendiz]
       );
       const aprendiz = aprendizRows[0];
+
+      await createNotification(
+        instructor.id_usuario,
+        'reporte',
+        'Nuevo reporte pendiente',
+        `El aprendiz ${aprendiz ? aprendiz.nombre : 'un aprendiz'} creó un nuevo reporte.`,
+        insertResult.insertId
+      );
 
       // 📧 Correo al aprendiz (confirmación)
       if (aprendiz) {
@@ -281,6 +293,14 @@ router.put("/:id", verificarToken, verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR])
       await enviarCorreo(current.correo_aprendiz, `📋 Tu reporte fue actualizado - Digital Hub`, htmlActualizacion);
     }
 
+    await createNotification(
+      current.id_aprendiz,
+      'reporte',
+      'Reporte actualizado',
+      `Tu reporte #${current.id_reporte} se actualizó a "${estado_reporte}".`,
+      current.id_reporte
+    );
+
     res.json({ message: "Reporte actualizado correctamente" });
   } catch (error) {
     console.error(error);
@@ -298,6 +318,8 @@ router.delete("/:id", verificarToken, verificarRol([ROLES.ADMIN, ROLES.INSTRUCTO
 
     const [resultado] = await pool.query("DELETE FROM reportes WHERE id_reporte = ?", [id]);
     if (resultado.affectedRows === 0) return res.status(404).json({ message: "Reporte no encontrado" });
+
+    await deleteNotificationsByTipoAndResourceIds('reporte', [id]);
 
     res.json({ message: "Reporte eliminado correctamente" });
   } catch (error) {

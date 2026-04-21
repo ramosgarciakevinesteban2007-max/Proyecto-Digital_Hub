@@ -5,6 +5,10 @@ import { IconMonitor, IconReport, IconBell, IconUser, IconCheck, IconClock } fro
 import '../Inicio.css';
 import './InicioAprendiz.css';
 
+const getFichaId = (f) => f?.id ?? f?.id_ficha ?? '---';
+
+const getFichaDisplay = (f) => f?.nombre ?? f?.id_ficha ?? f?.id ?? '---';
+
 const InicioAprendiz = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -110,7 +114,7 @@ const InicioAprendiz = () => {
               <div className="inicio-card-title">Mi Ficha</div>
               <ul className="inicio-card-list">
                 {ficha ? (
-                  <><li>{ficha.nombre}</li><li>{ficha.jornada}</li></>
+                  <><li>Ficha #{getFichaDisplay(ficha)}</li><li>{ficha.jornada}</li></>
                 ) : (
                   <li>Sin ficha asignada</li>
                 )}

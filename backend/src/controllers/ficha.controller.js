@@ -2,6 +2,8 @@ const fichaService = require("../services/ficha.service");
 const { ROLES } = require("../constants/dominio");
 const { enviarCorreo } = require("../services/email.service");
 const { fichaTemplate } = require("../services/templates/fichaTemplate");
+const { crearNotificacion } = require("../services/notificacion.service");
+const { createNotification, deleteNotificationsByTipoAndResourceIds } = require("../services/notificacion.service");
 
 /**
  * Controlador de fichas.
@@ -24,11 +26,11 @@ async function obtenerFichas(req, res) {
       return res.status(200).json(rows);
     }
 
-    // Instructor: solo las fichas que él creó
+    // Instructor: solo las fichas que él creó (no eliminadas)
     if (rol === ROLES.INSTRUCTOR) {
       const pool = require("../db/database");
       const [rows] = await pool.query(
-        "SELECT * FROM ficha WHERE id_instructor = ?", [id]
+        "SELECT * FROM ficha WHERE id_instructor = ? AND (eliminada = 0 OR eliminada IS NULL)", [id]
       );
       return res.status(200).json(rows);
     }
@@ -62,20 +64,16 @@ async function crearFicha(req, res) {
   try {
     // Instructor viene en el token
     const id_instructor = req.usuario.id;
-    const { nombre, programa_formacion, jornada, cupo_maximo } = req.body;
+    const { nombre, programa_formacion, jornada, cupo_maximo, ambiente_nombre, ambiente_nave, ambiente, nave } = req.body;
+    const amb_nombre = ambiente_nombre || ambiente || null;
+    const amb_nave = ambiente_nave || nave || null;
 
-    // Reglas de negocio extra
-    if (req.usuario.rol !== ROLES.INSTRUCTOR) {
-      return res.status(403).json({ mensaje: "Solo instructor puede crear ficha" });
-    }
-
-    // Verificar duplicado por nombre global (no se puede duplicar en todo el sistema)
     const fichaExistente = await fichaService.getFichaByNombre(nombre);
     if (fichaExistente) {
       return res.status(409).json({ mensaje: "Esta ficha ya está registrada" });
     }
 
-    await fichaService.createFicha({ nombre, programa_formacion, jornada, id_instructor, cupo_maximo });
+    await fichaService.createFicha({ nombre, programa_formacion, jornada, id_instructor, cupo_maximo, ambiente_nombre: amb_nombre, ambiente_nave: amb_nave });
     res.status(201).json({ mensaje: "Ficha creada correctamente" });
   } catch (error) {
     console.error("Error crearFicha:", error);
@@ -86,18 +84,17 @@ async function crearFicha(req, res) {
 async function modificarFicha(req, res) {
   try {
     const { id } = req.params;
-    const { nombre, programa_formacion, jornada, cupo_maximo, estado } = req.body;
+    const { nombre, programa_formacion, jornada, cupo_maximo, estado, ambiente_nombre, ambiente_nave, ambiente, nave } = req.body;
+    const amb_nombre = ambiente_nombre || ambiente || null;
+    const amb_nave = ambiente_nave || nave || null;
 
     if (req.usuario.rol !== ROLES.INSTRUCTOR) {
       return res.status(403).json({ mensaje: "Solo instructor puede modificar ficha" });
     }
 
     const ficha = await fichaService.getFichaById(id);
-    if (!ficha) {
-      return res.status(404).json({ mensaje: "Ficha no encontrada" });
-    }
+    if (!ficha) return res.status(404).json({ mensaje: "Ficha no encontrada" });
 
-    // Solo el instructor que creó la ficha puede modificarla
     if (Number(ficha.id_instructor) !== Number(req.usuario.id)) {
       return res.status(403).json({ mensaje: "No tienes permiso para modificar esta ficha" });
     }
@@ -107,7 +104,7 @@ async function modificarFicha(req, res) {
       return res.status(409).json({ mensaje: "Ya existe otra ficha con el mismo nombre" });
     }
 
-    const result = await fichaService.updateFicha(id, { nombre, programa_formacion, jornada, cupo_maximo, estado });
+    const result = await fichaService.updateFicha(id, { nombre, programa_formacion, jornada, cupo_maximo, estado, ambiente_nombre: amb_nombre, ambiente_nave: amb_nave });
     if (result.affectedRows === 0) {
       return res.status(404).json({ mensaje: "No se actualizó (ficha no encontrada)" });
     }
@@ -122,6 +119,7 @@ async function modificarFicha(req, res) {
 async function eliminarFicha(req, res) {
   try {
     const { id } = req.params;
+    const pool = require("../db/database");
 
     if (req.usuario.rol !== ROLES.INSTRUCTOR) {
       return res.status(403).json({ mensaje: "Solo instructor puede eliminar ficha" });
@@ -132,15 +130,43 @@ async function eliminarFicha(req, res) {
       return res.status(404).json({ mensaje: "Ficha no encontrada" });
     }
 
-    // Solo el instructor que creó la ficha puede eliminarla
     if (Number(ficha.id_instructor) !== Number(req.usuario.id)) {
       return res.status(403).json({ mensaje: "No tienes permiso para eliminar esta ficha" });
     }
 
-    const result = await fichaService.deleteFicha(id);
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ mensaje: "Ficha no encontrada" });
+    const [aprendices] = await pool.query("SELECT id_aprendiz FROM ficha_aprendiz WHERE id_ficha = ?", [id]);
+    const aprendizIds = aprendices.map((row) => row.id_aprendiz);
+
+    let reportIds = [];
+    if (aprendizIds.length > 0) {
+      const [reportRows] = await pool.query("SELECT id_reporte FROM reportes WHERE id_aprendiz IN (?)", [aprendizIds]);
+      reportIds = reportRows.map((row) => row.id_reporte);
+      await pool.query("DELETE FROM reportes WHERE id_aprendiz IN (?)", [aprendizIds]);
+      if (reportIds.length > 0) {
+        await deleteNotificationsByTipoAndResourceIds('reporte', reportIds);
+      }
+
+      // Limpiar asignaciones de portátiles relacionadas con esos aprendices
+      const [portatilRows] = await pool.query(
+        `SELECT DISTINCT pa.id_portatil
+         FROM portatil_aprendiz pa
+         WHERE pa.id_aprendiz IN (?) AND pa.estado = 'activo'`,
+        [aprendizIds]
+      );
+      const portatilIds = portatilRows.map((row) => row.id_portatil);
+      if (portatilIds.length > 0) {
+        await pool.query("UPDATE portatil SET estado = 'disponible', id_aprendiz = NULL WHERE id_portatil IN (?)", [portatilIds]);
+        await pool.query("UPDATE portatil_aprendiz SET estado = 'inactivo' WHERE id_aprendiz IN (?) AND estado = 'activo'", [aprendizIds]);
+      }
     }
+
+    await pool.query("DELETE FROM ficha_aprendiz WHERE id_ficha = ?", [id]);
+
+    // Marcar ficha como eliminada (papelera) en vez de borrarla
+    await pool.query(
+      "UPDATE ficha SET eliminada = 1, fecha_eliminacion = NOW(), estado = 'cerrada' WHERE id = ?",
+      [id]
+    );
 
     res.status(200).json({ mensaje: "Ficha eliminada correctamente" });
   } catch (error) {
@@ -245,6 +271,19 @@ async function asignarAprendiz(req, res) {
     // 📧 Notificación al aprendiz asignado
     const html = fichaTemplate(aprendiz.nombre, ficha.nombre, ficha.programa_formacion, ficha.jornada, "asignado");
     await enviarCorreo(aprendiz.correo, "✅ Fuiste asignado a una ficha - Digital Hub", html);
+    await crearNotificacion(
+      aprendiz.id_usuario,
+      "Asignado a ficha",
+      `Fuiste asignado a la ficha "${ficha.nombre}" (${ficha.programa_formacion} · ${ficha.jornada})`,
+      "success"
+    );
+    await createNotification(
+      aprendiz.id_usuario,
+      'ficha',
+      'Asignación a ficha',
+      `Has sido asignado a la ficha ${ficha.nombre}.`,
+      Number(id)
+    );
 
     res.status(201).json({ mensaje: "Aprendiz asignado correctamente" });
   } catch (error) {

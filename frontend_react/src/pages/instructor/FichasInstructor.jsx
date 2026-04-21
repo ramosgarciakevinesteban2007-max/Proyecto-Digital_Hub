@@ -6,6 +6,7 @@ import './FichasInstructor.css';
 import Pagination from '../../components/Pagination';
 import '../../components/Pagination.css';
 import ConfirmModal from '../../components/ConfirmModal';
+import ChatFicha from '../../components/ChatFicha';
 
 const FichasInstructor = () => {
   const navigate = useNavigate();
@@ -23,8 +24,8 @@ const FichasInstructor = () => {
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [correoAsignar, setCorreoAsignar] = useState('');
-  const [formData, setFormData] = useState({ nombre: '', programa_formacion: '', jornada: 'manana', cupo_maximo: 30 });
-  const [editData, setEditData] = useState({ nombre: '', programa_formacion: '', jornada: 'manana', cupo_maximo: 30, estado: 'activa' });
+  const [formData, setFormData] = useState({ nombre: '', programa_formacion: '', jornada: 'manana', cupo_maximo: 30, ambiente: '', nave: '' });
+  const [editData, setEditData] = useState({ nombre: '', programa_formacion: '', jornada: 'manana', cupo_maximo: 30, estado: 'activa', ambiente: '', nave: '' });
   const [filtro, setFiltro] = useState('');
   const [filtroEstadoF, setFiltroEstadoF] = useState('');
   const [filtroJornadaF, setFiltroJornadaF] = useState('');
@@ -197,6 +198,9 @@ const FichasInstructor = () => {
               <span style={{fontSize:'13px',color:'#aaa'}}>{fichaActiva.programa_formacion}</span>
               <span className="fd-topbar-sep">·</span>
               <span className="fd-jornada-pill">{jornadaIcon(fichaActiva.jornada)} {fichaActiva.jornada}</span>
+              <span style={{fontSize:'12px',color:'#aaa'}}>
+                Ambiente {fichaActiva.ambiente_nombre || fichaActiva.ambiente } en Nave {fichaActiva.ambiente_nave || fichaActiva.nave}
+              </span>
             </div>
             <div className="fd-header-actions">
               <span className="fd-estado-pill" style={{background:`${estadoColor(fichaActiva.estado)}22`,border:`1px solid ${estadoColor(fichaActiva.estado)}55`,color:estadoColor(fichaActiva.estado)}}>{fichaActiva.estado}</span>
@@ -204,7 +208,18 @@ const FichasInstructor = () => {
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Excel
               </button>
-              <button className="fd-icon-btn fd-edit-btn" onClick={() => { setEditData({ nombre: fichaActiva.nombre, programa_formacion: fichaActiva.programa_formacion, jornada: fichaActiva.jornada, cupo_maximo: fichaActiva.cupo_maximo, estado: fichaActiva.estado || 'activa' }); setShowEditModal(true); }}><IconPencil size={14}/></button>
+              <button className="fd-icon-btn fd-edit-btn" onClick={() => {
+                setEditData({
+                  nombre: fichaActiva.nombre,
+                  programa_formacion: fichaActiva.programa_formacion,
+                  jornada: fichaActiva.jornada,
+                  cupo_maximo: fichaActiva.cupo_maximo,
+                  estado: fichaActiva.estado || 'activa',
+                  ambiente: fichaActiva.ambiente_nombre || fichaActiva.ambiente || '',
+                  nave: fichaActiva.ambiente_nave || fichaActiva.nave || ''
+                });
+                setShowEditModal(true);
+              }}><IconPencil size={14}/></button>
               <button className="fd-icon-btn fd-del-btn" onClick={() => setConfirmFichaId(fichaActiva.id)}><IconTrash size={14}/></button>
             </div>
           </div>
@@ -261,6 +276,9 @@ const FichasInstructor = () => {
           </div>
 
           <div className="fd-tabs-bar">
+            <button className={`fd-tab ${tab==='chat'?'fd-tab-active':''}`} onClick={()=>setTab('chat')}>
+              Chat
+            </button>
             <button className={`fd-tab ${tab==='aprendices'?'fd-tab-active':''}`} onClick={()=>setTab('aprendices')}>
               <IconUser size={14}/> Aprendices <span className="fd-tab-badge" style={{background:'rgba(127,90,240,0.2)',color:'#c9a8ff'}}>{aprendices.length}</span>
             </button>
@@ -331,6 +349,9 @@ const FichasInstructor = () => {
                   </tbody>
                 </table>
               )}
+              {tab === 'chat' && (
+                <ChatFicha idFicha={fichaActiva.id} token={token} />
+              )}
             </div>
           )}
 
@@ -340,15 +361,32 @@ const FichasInstructor = () => {
                 <h2 className="modal-title">Editar Ficha</h2>
                 {error && <p className="table-error">{error}</p>}
                 <form onSubmit={handleEditar}>
-                  <div className="form-group"><label>Nombre</label><input type="text" value={editData.nombre} onChange={e => setEditData({...editData, nombre: e.target.value})} required /></div>
+                  <div className="form-group"><label>Número de ficha</label><input type="text" placeholder="ej: 4110" value={editData.nombre} onChange={e => setEditData({...editData, nombre: e.target.value})} required /></div>
                   <div className="form-group"><label>Programa de formación</label><input type="text" value={editData.programa_formacion} onChange={e => setEditData({...editData, programa_formacion: e.target.value})} required /></div>
                   <div className="form-group"><label>Jornada</label>
-                    <select value={editData.jornada} onChange={e => setEditData({...editData, Jornada: e.target.value})}>
+                    <select value={editData.jornada} onChange={e => setEditData({...editData, jornada: e.target.value})}>
                       <option value="manana">Mañana</option><option value="tarde">Tarde</option>
                       <option value="noche">Noche</option>
                     </select>
                   </div>
                   <div className="form-group"><label>Cupo máximo</label><input type="number" min="1" value={editData.cupo_maximo} onChange={e => setEditData({...editData, cupo_maximo: parseInt(e.target.value)})} required /></div>
+                  <div className="form-group">
+                    <label>Ambiente</label>
+                    <input 
+                      type="text"
+                      value={editData.ambiente || ''} 
+                      onChange={e => setEditData({...editData, ambiente: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Nave</label>
+                    <input 
+                      type="text"
+                      value={editData.nave || ''} 
+                      onChange={e => setEditData({...editData, nave: e.target.value})}
+                    />
+                  </div>
                   <div className="form-group"><label>Estado</label>
                     <select value={editData.estado} onChange={e => setEditData({...editData, estado: e.target.value})}>
                       <option value="activa">Activa</option><option value="inactiva">Inactiva</option><option value="cerrada">Cerrada</option>
@@ -467,7 +505,7 @@ const FichasInstructor = () => {
               <h2 className="modal-title">Nueva Ficha</h2>
               {error && <p className="table-error">{error}</p>}
               <form onSubmit={handleSubmit}>
-                <div className="form-group"><label>Nombre</label><input type="text" value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} required /></div>
+                <div className="form-group"><label>Número de ficha</label><input type="text" placeholder="ej: 3146013" value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} required /></div>
                 <div className="form-group"><label>Programa de formación</label><input type="text" value={formData.programa_formacion} onChange={e => setFormData({...formData, programa_formacion: e.target.value})} required /></div>
                 <div className="form-group"><label>Jornada</label>
                   <select value={formData.jornada} onChange={e => setFormData({...formData, jornada: e.target.value})}>
@@ -476,6 +514,25 @@ const FichasInstructor = () => {
                   </select>
                 </div>
                 <div className="form-group"><label>Cupo máximo</label><input type="number" min="1" value={formData.cupo_maximo} onChange={e => setFormData({...formData, cupo_maximo: parseInt(e.target.value)})} required /></div>
+                <div className="form-group">
+                <label>Ambiente</label>
+                  <input 
+                    type="text"
+                    placeholder="ej: 4110"
+                    value={formData.ambiente || ''} 
+                    onChange={e => setFormData({...formData, ambiente: e.target.value})}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Nave</label>
+                  <input 
+                    type="text"
+                    placeholder="ej: 4"
+                    value={formData.nave || ''} 
+                    onChange={e => setFormData({...formData, nave: e.target.value})}
+                  />
+                </div>
                 <div className="modal-actions">
                   <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>Cancelar</button>
                   <button type="submit" className="btn-save">Crear Ficha</button>
