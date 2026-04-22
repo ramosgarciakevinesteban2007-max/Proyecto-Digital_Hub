@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconBell, IconEye, IconPencil, IconTrash, IconClock, IconCheck, IconReport } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import Pagination from '../../components/Pagination';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -160,7 +161,7 @@ const importarExcel = async (e) => {
               Importar
             </button>
 
-            <button className="notification-btn"><IconBell size={20}/></button>
+            <NotificacionesBtn />
           </div>
         </div>
 
@@ -197,25 +198,51 @@ const importarExcel = async (e) => {
         </div>
 
         {loading ? <div style={{ textAlign: 'center', padding: '48px', color: '#b8a8d8' }}>Cargando...</div> : (
-          <div className="ra-grid">
-            {paginados.length === 0
-              ? <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '48px', color: '#b8a8d8' }}>Sin resultados</div>
-              : paginados.map(r => (
-                <div key={r.id_reporte} className="ra-card">
-                  <div className="ra-card-top">
-                    <span className="ra-card-id">#{r.id_reporte}</span>
-                    <span className="ra-estado-badge" style={{ background: estadoBg(r.estado_reporte), color: estadoColor(r.estado_reporte), border: `1px solid ${estadoColor(r.estado_reporte)}44` }}>{r.estado_reporte}</span>
-                  </div>
-                  <p className="ra-card-desc">{r.descripcion}</p>
-                  <div className="ra-card-fecha">{r.fecha_reporte?.split('T')[0] || r.fecha_reporte}</div>
-                  <div className="ra-card-actions">
-                    <button className="action-btn view" onClick={() => setSeleccionado(r)}><IconEye size={15}/></button>
-                    <button className="action-btn edit" onClick={() => { setSeleccionado(r); setEditData({ estado_reporte: r.estado_reporte }); setShowEditModal(true); }}><IconPencil size={15}/></button>
-                    <button className="action-btn delete" onClick={() => setConfirmId(r.id_reporte)}><IconTrash size={15}/></button>
-                  </div>
-                </div>
-              ))
-            }
+          <div className="table-container">
+            <table className="equipment-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Aprendiz</th>
+                  <th>Descripción</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                  <th>Evidencia</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginados.length === 0
+                  ? <tr><td colSpan="7" style={{ textAlign: 'center', padding: '48px', color: '#b8a8d8' }}>Sin resultados</td></tr>
+                  : paginados.map(r => (
+                    <tr key={r.id_reporte}>
+                      <td style={{ color: '#b8a8d8', fontSize: '13px' }}>#{r.id_reporte}</td>
+                      <td style={{ fontSize: '13px' }}>{r.nombre_aprendiz || '—'}</td>
+                      <td style={{ maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.descripcion}</td>
+                      <td>
+                        <span style={{ background: estadoBg(r.estado_reporte), color: estadoColor(r.estado_reporte), border: `1px solid ${estadoColor(r.estado_reporte)}44`, borderRadius: '50px', padding: '3px 12px', fontSize: '12px', fontWeight: 600 }}>
+                          {r.estado_reporte}
+                        </span>
+                      </td>
+                      <td style={{ color: '#b8a8d8', fontSize: '13px' }}>{r.fecha_reporte?.split('T')[0] || r.fecha_reporte}</td>
+                      <td>
+                        {r.archivo
+                          ? <a href={`/uploads/${r.archivo}`} target="_blank" rel="noreferrer" style={{ color: '#c9a8ff', fontSize: '12px', fontWeight: 600 }}>Ver</a>
+                          : <span style={{ color: '#6a5a8a', fontSize: '12px' }}>—</span>
+                        }
+                      </td>
+                      <td>
+                        <div className="action-buttons">
+                          <button className="action-btn view" onClick={() => setSeleccionado(r)}><IconEye size={15}/></button>
+                          <button className="action-btn edit" onClick={() => { setSeleccionado(r); setEditData({ estado_reporte: r.estado_reporte }); setShowEditModal(true); }}><IconPencil size={15}/></button>
+                          <button className="action-btn delete" onClick={() => setConfirmId(r.id_reporte)}><IconTrash size={15}/></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
           </div>
         )}
 
@@ -229,7 +256,25 @@ const importarExcel = async (e) => {
               <div className="detalle-grid">
                 <div className="detalle-item"><span className="detalle-label">Estado</span><span className="detalle-valor" style={{ color: estadoColor(seleccionado.estado_reporte), fontWeight: 700 }}>{seleccionado.estado_reporte}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Fecha</span><span className="detalle-valor">{seleccionado.fecha_reporte?.split('T')[0]}</span></div>
+                {seleccionado.nombre_aprendiz && <div className="detalle-item"><span className="detalle-label">Aprendiz</span><span className="detalle-valor">{seleccionado.nombre_aprendiz}</span></div>}
                 <div className="detalle-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}><span className="detalle-label">Descripcion</span><span style={{ fontSize: '14px', color: '#f0eaff', lineHeight: '1.6' }}>{seleccionado.descripcion}</span></div>
+                {seleccionado.archivo && (
+                  <div className="detalle-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
+                    <span className="detalle-label">Evidencia adjunta</span>
+                    {/\.(jpg|jpeg|png)$/i.test(seleccionado.archivo) ? (
+                      <img src={`/uploads/${seleccionado.archivo}`} alt="evidencia"
+                        style={{ maxWidth: '100%', borderRadius: '10px', border: '1px solid rgba(127,90,240,0.3)', cursor: 'pointer' }}
+                        onClick={() => window.open(`/uploads/${seleccionado.archivo}`, '_blank')}
+                      />
+                    ) : (
+                      <a href={`/uploads/${seleccionado.archivo}`} target="_blank" rel="noreferrer"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#c9a8ff', fontSize: '13px', fontWeight: 600, background: 'rgba(127,90,240,0.1)', border: '1px solid rgba(127,90,240,0.3)', borderRadius: '8px', padding: '8px 14px', textDecoration: 'none' }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Ver archivo adjunto
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="modal-actions"><button className="btn-save" onClick={() => setSeleccionado(null)}>Cerrar</button></div>
             </div>

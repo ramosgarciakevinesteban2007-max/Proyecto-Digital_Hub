@@ -118,3 +118,42 @@ export const IconReport = ({ size = 18 }) => (
     <polyline points="10 9 9 9 8 9"/>
   </svg>
 );
+
+// Jornada icons
+export const IconSunrise = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 18a5 5 0 0 0-10 0"/>
+    <line x1="12" y1="2" x2="12" y2="9"/>
+    <line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/>
+    <line x1="1" y1="18" x2="3" y2="18"/>
+    <line x1="21" y1="18" x2="23" y2="18"/>
+    <line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/>
+    <line x1="23" y1="22" x2="1" y2="22"/>
+    <polyline points="8 6 12 2 16 6"/>
+  </svg>
+);
+
+export const IconSunset = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 18a5 5 0 0 0-10 0"/>
+    <line x1="12" y1="9" x2="12" y2="2"/>
+    <line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/>
+    <line x1="1" y1="18" x2="3" y2="18"/>
+    <line x1="21" y1="18" x2="23" y2="18"/>
+    <line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/>
+    <line x1="23" y1="22" x2="1" y2="22"/>
+    <polyline points="16 5 12 9 8 5"/>
+  </svg>
+);
+
+// Helper: devuelve el icono de jornada con color y tamaño
+export const JornadaIcon = ({ jornada, size = 14 }) => {
+  const cfg = {
+    manana: { icon: IconSunrise, color: '#facc15' },
+    tarde:  { icon: IconSunset,  color: '#fb923c' },
+    noche:  { icon: IconMoon,    color: '#c9a8ff' },
+  }[jornada] || { icon: IconClock, color: '#b8a8d8' };
+
+  const Icon = cfg.icon;
+  return <Icon size={size} style={{ color: cfg.color, flexShrink: 0 }} />;
+};

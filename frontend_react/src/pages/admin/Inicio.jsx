@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import { IconUser, IconMonitor, IconReport, IconBell, IconCheck, IconClock } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import './InicioAdmin.css';
 import apiFetch from '../../utils/apiFetch';
 
@@ -54,7 +55,7 @@ const Inicio = () => {
             <div className="admin-badge"><span className="admin-badge-dot" />Panel Activo</div>
             <h1 className="inicio-title admin-title">Bienvenido, {nombre}</h1>
           </div>
-          <button className="notification-btn"><IconBell size={20} /></button>
+          <NotificacionesBtn />
         </div>
 
         <div className="admin-hero">

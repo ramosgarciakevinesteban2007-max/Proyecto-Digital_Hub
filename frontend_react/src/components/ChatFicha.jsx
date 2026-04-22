@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import './ChatFicha.css';
 
 const ChatFicha = ({ idFicha, token }) => {
   const [mensajes, setMensajes] = useState([]);
@@ -41,41 +42,37 @@ const ChatFicha = ({ idFicha, token }) => {
   };
 
   return (
-    <div style={{display:'flex',flexDirection:'column',height:'420px',background:'#0f0820',border:'1px solid rgba(127,90,240,0.3)',borderRadius:'16px',overflow:'hidden'}}>
-      <div style={{flex:1,overflowY:'auto',padding:'16px',display:'flex',flexDirection:'column',gap:'10px'}}>
+    <div className="chat-ficha-wrap">
+      <div className="chat-ficha-messages">
         {loading
-          ? <div style={{color:'#b8a8d8',fontSize:'13px'}}>Cargando...</div>
+          ? <div className="chat-ficha-empty">Cargando...</div>
           : mensajes.length === 0
-            ? <div style={{color:'#b8a8d8',fontSize:'13px',textAlign:'center',marginTop:'40px'}}>No hay mensajes aún. ¡Sé el primero!</div>
+            ? <div className="chat-ficha-empty">No hay mensajes aún. ¡Sé el primero!</div>
             : mensajes.map(m => {
               const esMio = m.nombre === nombre;
               return (
-                <div key={m.id} style={{display:'flex',flexDirection:'column',alignItems: esMio ? 'flex-end' : 'flex-start'}}>
-                  <div style={{fontSize:'11px',color:'#b8a8d8',marginBottom:'3px'}}>{m.nombre} · {m.rol}</div>
-                  <div style={{
-                    background: esMio ? 'linear-gradient(135deg,#7f5af0,#5a3bc0)' : '#241545',
-                    border: esMio ? 'none' : '1px solid rgba(127,90,240,0.3)',
-                    borderRadius: esMio ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                    padding:'10px 14px', maxWidth:'70%', fontSize:'14px', color:'#f0eaff', wordBreak:'break-word'
-                  }}>{m.mensaje}</div>
-                  <div style={{fontSize:'10px',color:'#6a5a8a',marginTop:'3px'}}>
-                    {new Date(m.fecha_envio).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'})}
+                <div key={m.id} className={`chat-msg-row ${esMio ? 'chat-msg-mine' : 'chat-msg-other'}`}>
+                  <div className="chat-msg-author">{m.nombre} · {m.rol}</div>
+                  <div className={`chat-msg-bubble ${esMio ? 'chat-bubble-mine' : 'chat-bubble-other'}`}>
+                    {m.mensaje}
+                  </div>
+                  <div className="chat-msg-time">
+                    {new Date(m.fecha_envio).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
               );
             })
         }
-        <div ref={bottomRef}/>
+        <div ref={bottomRef} />
       </div>
-      <form onSubmit={enviar} style={{display:'flex',gap:'8px',padding:'12px',borderTop:'1px solid rgba(127,90,240,0.2)'}}>
+      <form onSubmit={enviar} className="chat-ficha-form">
         <input
-          value={texto} onChange={e => setTexto(e.target.value)}
+          value={texto}
+          onChange={e => setTexto(e.target.value)}
           placeholder="Escribe un mensaje..."
-          style={{flex:1,background:'#160b2e',border:'1px solid rgba(127,90,240,0.35)',borderRadius:'50px',padding:'10px 16px',color:'#f0eaff',fontSize:'13px',outline:'none'}}
+          className="chat-ficha-input"
         />
-        <button type="submit" style={{background:'linear-gradient(135deg,#7f5af0,#5a3bc0)',border:'none',borderRadius:'50px',padding:'10px 20px',color:'#fff',fontSize:'13px',fontWeight:700,cursor:'pointer'}}>
-          Enviar
-        </button>
+        <button type="submit" className="chat-ficha-btn">Enviar</button>
       </form>
     </div>
   );

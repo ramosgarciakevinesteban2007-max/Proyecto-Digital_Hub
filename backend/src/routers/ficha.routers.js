@@ -64,7 +64,7 @@ router.get("/:id", verificarToken, fichaController.obtenerFichaPorId);
 router.post(
   "/",
   verificarToken,
-  verificarRol(ROLES.INSTRUCTOR),
+  verificarRol([ROLES.INSTRUCTOR, ROLES.ADMIN]),
   validarCamposObligatorios(["nombre", "programa_formacion", "jornada", "cupo_maximo"]),
   fichaController.crearFicha
 );
@@ -72,7 +72,7 @@ router.post(
 router.put(
   "/:id",
   verificarToken,
-  verificarRol(ROLES.INSTRUCTOR),
+  verificarRol([ROLES.INSTRUCTOR, ROLES.ADMIN]),
   validarCamposObligatorios(["nombre", "programa_formacion", "jornada", "cupo_maximo", "estado"]),
   fichaController.modificarFicha
 );
@@ -80,7 +80,7 @@ router.put(
 router.delete(
   "/:id",
   verificarToken,
-  verificarRol(ROLES.INSTRUCTOR),
+  verificarRol([ROLES.INSTRUCTOR, ROLES.ADMIN]),
   fichaController.eliminarFicha
 );
 

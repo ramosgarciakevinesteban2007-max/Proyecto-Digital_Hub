@@ -85,28 +85,44 @@ const generarExcelReportes = async (data) => {
     resuelto:   { bg:C.gBg, text:C.green  },
   };
 
-  data.forEach((item, idx) => {
-    const estado = item.estado_reporte || "";
-    let fecha = "";
-    if (item.fecha_reporte && item.fecha_reporte !== "0000-00-00 00:00:00" && !isNaN(new Date(item.fecha_reporte))) {
-      const d = new Date(item.fecha_reporte);
-      fecha = `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
-    }
-    const row = ws.addRow([item.id_reporte ?? "", estado, fecha, item.archivo ? `uploads/${item.archivo}` : "", item.descripcion || ""]);
-    row.height = item.archivo && fs.existsSync(item.archivo) ? 80 : 22;
-    const rowBg = idx%2===0 ? C.bg3 : C.bg2;
-    const cfg   = eCfg[estado] || { bg:rowBg, text:C.text };
-    row.eachCell((c,col) => {
-      c.fill      = fill(col===2 ? cfg.bg : rowBg);
-      c.font      = fnt({ size:10, color:{ argb:col===2 ? cfg.text : C.text }, bold:col===2 });
-      c.alignment = { vertical:"middle", horizontal:col===5?"left":"center", wrapText:col===5 };
-      c.border    = { bottom:{ style:"thin", color:{ argb:C.card } } };
+    const uploadsDir = path.join(__dirname, '../uploads');
+
+    data.forEach((item, idx) => {
+      const estado = item.estado_reporte || "";
+      let fecha = "";
+      if (item.fecha_reporte && item.fecha_reporte !== "0000-00-00 00:00:00" && !isNaN(new Date(item.fecha_reporte))) {
+        const d = new Date(item.fecha_reporte);
+        fecha = `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+      }
+
+      const archivoPath = item.archivo ? path.join(uploadsDir, item.archivo) : null;
+      const tieneImagen = archivoPath && fs.existsSync(archivoPath) && /\.(jpg|jpeg|png)$/i.test(item.archivo);
+
+      const row = ws.addRow([item.id_reporte ?? "", estado, fecha, tieneImagen ? "" : (item.archivo ? "Ver adjunto" : "Sin evidencia"), item.descripcion || ""]);
+      row.height = tieneImagen ? 80 : 22;
+      const rowBg = idx%2===0 ? C.bg3 : C.bg2;
+      const cfg   = eCfg[estado] || { bg:rowBg, text:C.text };
+      row.eachCell((c,col) => {
+        c.fill      = fill(col===2 ? cfg.bg : rowBg);
+        c.font      = fnt({ size:10, color:{ argb:col===2 ? cfg.text : C.text }, bold:col===2 });
+        c.alignment = { vertical:"middle", horizontal:col===5?"left":"center", wrapText:col===5 };
+        c.border    = { bottom:{ style:"thin", color:{ argb:C.card } } };
+      });
+
+      if (tieneImagen) {
+        try {
+          const ext = item.archivo.split('.').pop().toLowerCase();
+          const imgType = ext === 'png' ? 'png' : 'jpeg';
+          const imgId = wb.addImage({ filename: archivoPath, extension: imgType });
+          const rowNum = row.number;
+          ws.addImage(imgId, {
+            tl: { col: 3, row: rowNum - 1 },
+            br: { col: 4, row: rowNum },
+            editAs: 'oneCell',
+          });
+        } catch(e) { console.error('Error imagen Excel:', e.message); }
+      }
     });
-    if (item.archivo && fs.existsSync(item.archivo)) {
-      try {
-      } catch(e) {}
-    }
-  });
 
   ws.views = [{ state:"frozen", ySplit:4, showGridLines:false }];
 

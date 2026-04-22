@@ -11,3 +11,16 @@ const pruebaConexion = async ()=>{
 }
 
 pruebaConexion()
+
+// ===== GENERADOR =====
+function* estadosPortatil() {
+    yield "disponible";
+    yield "asignado";
+    yield "danado";
+}
+
+const generador = estadosPortatil();
+console.log(generador.next().value); // disponible
+console.log(generador.next().value); // asignado
+console.log(generador.next().value); // danado
+console.log(generador.next().value); // undefined

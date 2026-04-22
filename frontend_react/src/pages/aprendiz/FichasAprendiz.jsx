@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconEye, IconBell } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import SidebarAprendiz from '../../components/SidebarAprendiz';
 import ChatFicha from '../../components/ChatFicha';
 import '../../pages/aprendiz/FichasAprendiz.css';
@@ -47,7 +48,7 @@ const FichasAprendiz = () => {
       <main className="equipment-main">
         <div className="equipment-header">
           <div><h1 className="equipment-title">Mi Ficha</h1><p className="equipment-subtitle">Ficha asignada por tu instructor</p></div>
-          <button className="notification-btn"><IconBell size={20} /></button>
+          <NotificacionesBtn />
         </div>
 
         {error && <p className="table-error">{error}</p>}

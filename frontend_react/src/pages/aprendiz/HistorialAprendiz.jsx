@@ -1,16 +1,11 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconEye, IconBell, IconClock, IconCheck, IconReport } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import SidebarAprendiz from '../../components/SidebarAprendiz';
 import '../../pages/aprendiz/HistorialAprendiz.css';
 import Pagination from '../../components/Pagination';
 import '../../components/Pagination.css';
-
-const LS_REPORTES = 'reportes_local';
-const getLocalR = () => { try { return JSON.parse(localStorage.getItem(LS_REPORTES)) || []; } catch { return []; } };
-
-const LS_KEY = 'portatiles_local';
-const getLocal = () => { try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; } };
 import '../admin/HistorialAdmin.css';
 
 const estadoColor = (e) => ({ pendiente:'#facc15', en_revision:'#fb923c', resuelto:'#4ade80' }[e] || '#c9a8ff');
@@ -33,17 +28,11 @@ const HistorialAprendiz = () => {
 
   useEffect(() => {
     if (!token) { navigate('/login'); return; }
-    fetch('/reportes', { headers: { Authorization: `Bearer ${token}` } })
+    fetch('/api/reportes', { headers: { Authorization: `Bearer ${token}` } })
       .then(r => { if (r.status === 401) { navigate('/login'); return []; } return r.json(); })
       .then(data => {
-        if (Array.isArray(data)) {
-          const local = getLocalR();
-          const backendIds = data.map(r => r.id_reporte);
-          const soloLocales = local.filter(r => !backendIds.includes(r.id_reporte));
-          setReportes([...data, ...soloLocales]);
-        } else {
-          setReportes(getLocalR());
-        }
+        if (Array.isArray(data)) setReportes(data);
+        else setReportes([]);
       })
       .catch(() => setError('Error al cargar el historial'))
       .finally(() => setLoading(false));
@@ -73,7 +62,7 @@ const HistorialAprendiz = () => {
             <h1 className="equipment-title">Mis Reportes</h1>
             <p className="equipment-subtitle">Total: <span>{reportes.length}</span></p>
           </div>
-          <button className="notification-btn"><IconBell size={20} /></button>
+          <NotificacionesBtn />
         </div>
 
         <div className="hist-summary">
