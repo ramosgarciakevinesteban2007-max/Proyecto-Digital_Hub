@@ -57,15 +57,12 @@
   background: rgba(127,90,240,0.18);
   color: #c9a8ff;
 }
-.stat-card:nth-child(2) .stat-icon { background: rgba(74,222,128,0.15); color: #4ade80; }
-.stat-card:nth-child(3) .stat-icon { background: rgba(251,146,60,0.15); color: #fb923c; }
-.stat-card:nth-child(4) .stat-icon { background: rgba(248,113,113,0.15); color: #f87171; }
 
 .stat-card-text { display: flex; flex-direction: column; gap: 2px; }
 .stat-value { font-size: 28px; font-weight: 800; color: #f0eaff; line-height: 1; }
-.stat-card:nth-child(2) .stat-value { color: #4ade80; }
-.stat-card:nth-child(3) .stat-value { color: #fb923c; }
-.stat-card:nth-child(4) .stat-value { color: #f87171; }
+.stat-card:nth-child(2) .stat-value { color: #b8a8d8; }
+.stat-card:nth-child(3) .stat-value { color: #b8a8d8; }
+.stat-card:nth-child(4) .stat-value { color: #b8a8d8; }
 .stat-label { font-size: 11px; font-weight: 600; color: #b8a8d8; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
 
 /* ===== FILTERS ===== */

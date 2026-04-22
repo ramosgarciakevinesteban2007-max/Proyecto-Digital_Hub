@@ -13,22 +13,58 @@ const getLocalU = () => { try { return JSON.parse(localStorage.getItem('usuarios
 const saveLocalU = (data) => localStorage.setItem('usuarios_local', JSON.stringify(data));
 const nextIdU = (list) => list.length ? Math.max(...list.map(u => u.id_usuario || 0)) + 1 : 1;
 
+const normalizeEstado = (estado) => {
+  if (!estado) return 'activo';
+  const value = estado.toString().trim().toLowerCase();
+  return value === 'activo' ? 'activo' : 'inhabilitado';
+};
+
+const displayEstado = (estado) => normalizeEstado(estado) === 'activo' ? 'Activo' : 'Inhabilitado';
+
+const normalizeRole = (rol) => {
+  if (!rol) return '';
+  const value = rol.toString().trim().toLowerCase();
+  if (value === 'administrador') return 'administrador';
+  if (value === 'instructor') return 'instructor';
+  return 'aprendiz';
+};
+
+const displayRole = (rol) => {
+  const normalized = normalizeRole(rol);
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+};
+
 const UsuariosAdmin = () => {
   const navigate = useNavigate();
+  const token = localStorage.getItem('token');
+  const PER_PAGE = 10;
+
+  // Estados para la lista de usuarios
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const PER_PAGE = 10;
   const [error, setError] = useState('');
+
+  // Estados para modales de crear/editar
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [seleccionado, setSeleccionado] = useState(null);
   const [formData, setFormData] = useState({ nombre: '', correo: '', password: '', rol: 'aprendiz', estado: 'activo' });
   const [editData, setEditData] = useState({ nombre: '', correo: '', rol: 'aprendiz', estado: 'activo' });
+  const [seleccionado, setSeleccionado] = useState(null);
+
+  // Estados para filtros
   const [filtro, setFiltro] = useState('');
   const [filtroRol, setFiltroRol] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('');
-  const token = localStorage.getItem('token');
+
+  // Estados para modal de ver detalle
+  const [showVerModal, setShowVerModal] = useState(false);
+  const [verUsuario, setVerUsuario] = useState(null);
+  const [verDetalle, setVerDetalle] = useState({ ficha: null, dispositivo: null, fichas: [] });
+  const [loadingDetalle, setLoadingDetalle] = useState(false);
+
+  // Estado para confirmación de eliminación
+  const [confirmId, setConfirmId] = useState(null);
 
   const exportarExcel = async () => {
   try {
@@ -118,22 +154,17 @@ const importarExcel = async (e) => {
     saveLocalU(local); setUsuarios(local); setConfirmId(null);
   };
 
-  const [showVerModal, setShowVerModal] = useState(false);
-  const [verUsuario, setVerUsuario] = useState(null);
-  const [verDetalle, setVerDetalle] = useState({ ficha: null, dispositivo: null, fichas: [] });
-  const [loadingDetalle, setLoadingDetalle] = useState(false);
-  const [confirmId, setConfirmId] = useState(null);
-  // reset page on filter change
+  // Filtrado de usuarios
   const filtrados = usuarios.filter(u => {
     const b = filtro.toLowerCase();
     return (!b || u.nombre?.toLowerCase().includes(b) || u.correo?.toLowerCase().includes(b))
-      && (!filtroRol || u.rol === filtroRol)
-      && (!filtroEstado || u.estado === filtroEstado);
+      && (!filtroRol || normalizeRole(u.rol) === filtroRol)
+      && (!filtroEstado || normalizeEstado(u.estado) === filtroEstado);
   });
 
   const paginados = filtrados.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  const rolColor = (r) => ({ administrador: '#c9a8ff', instructor: '#60a5fa', aprendiz: '#4ade80' }[r] || '#facc15');
+  const rolColor = (r) => ({ administrador: '#c9a8ff', instructor: '#60a5fa', aprendiz: '#4ade80' }[normalizeRole(r)] || '#facc15');
 
   const abrirVer = async (u) => {
     setVerUsuario(u);
@@ -142,12 +173,12 @@ const importarExcel = async (e) => {
     setLoadingDetalle(true);
     const h = { Authorization: `Bearer ${token}` };
     try {
-      if (u.rol === 'aprendiz') {
+      if (normalizeRole(u.rol) === 'aprendiz') {
         const pRes = await fetch('/api/portatiles', { headers: h }).then(r => r.json()).catch(() => ({ data: [] }));
         const portatiles = Array.isArray(pRes) ? pRes : (pRes?.data || []);
         const dispositivo = portatiles.find(p => p.id_aprendiz === u.id_usuario) || null;
         setVerDetalle({ ficha: null, dispositivo, fichas: [] });
-      } else if (u.rol === 'instructor') {
+      } else if (normalizeRole(u.rol) === 'instructor') {
         const fRes = await fetch('/api/fichas', { headers: h }).then(r => r.json()).catch(() => []);
         const fichasArr = Array.isArray(fRes) ? fRes : [];
         const misFichas = fichasArr.filter(f => f.id_instructor === u.id_usuario);
@@ -186,19 +217,19 @@ const importarExcel = async (e) => {
           </div>
           <div className="stat-card">
             <div className="stat-icon"><IconUser size={20} /></div>
-            <div className="stat-card-text"><div className="stat-value" style={{ color: '#c9a8ff' }}>{usuarios.filter(u => u.rol === 'administrador').length}</div><div className="stat-label">Admins</div></div>
+            <div className="stat-card-text"><div className="stat-value">{usuarios.filter(u => normalizeRole(u.rol) === 'administrador').length}</div><div className="stat-label">Admins</div></div>
           </div>
           <div className="stat-card">
             <div className="stat-icon"><IconUser size={20} /></div>
-            <div className="stat-card-text"><div className="stat-value" style={{ color: '#60a5fa' }}>{usuarios.filter(u => u.rol === 'instructor').length}</div><div className="stat-label">Instructores</div></div>
+            <div className="stat-card-text"><div className="stat-value">{usuarios.filter(u => normalizeRole(u.rol) === 'instructor').length}</div><div className="stat-label">Instructores</div></div>
           </div>
           <div className="stat-card">
             <div className="stat-icon"><IconUser size={20} /></div>
-            <div className="stat-card-text"><div className="stat-value" style={{ color: '#4ade80' }}>{usuarios.filter(u => u.rol === 'aprendiz').length}</div><div className="stat-label">Aprendices</div></div>
+            <div className="stat-card-text"><div className="stat-value">{usuarios.filter(u => normalizeRole(u.rol) === 'aprendiz').length}</div><div className="stat-label">Aprendices</div></div>
           </div>
           <div className="stat-card">
             <div className="stat-icon"><IconUser size={20} /></div>
-            <div className="stat-card-text"><div className="stat-value" style={{ color: '#f87171' }}>{usuarios.filter(u => u.estado === 'inhabilitado').length}</div><div className="stat-label">Inactivos</div></div>
+            <div className="stat-card-text"><div className="stat-value">{usuarios.filter(u => normalizeEstado(u.estado) === 'inhabilitado').length}</div><div className="stat-label">Inhabilitados</div></div>
           </div>
         </div>
         {error && <p className="table-error">{error}</p>}
@@ -238,12 +269,12 @@ const importarExcel = async (e) => {
                   <tr key={u.id_usuario}>
                     <td>{u.nombre}</td>
                     <td style={{ color: 'var(--text-muted-dark)', fontSize: '13px' }}>{u.correo}</td>
-                    <td><span style={{ color: rolColor(u.rol), fontWeight: 600, fontSize: '13px' }}>{u.rol}</span></td>
-                    <td><span style={{ color: u.estado === 'activo' ? '#4ade80' : '#f87171', fontWeight: 600, fontSize: '13px' }}>{u.estado === 'activo' ? 'activo' : 'inactivo'}</span></td>
+                    <td><span style={{ color: rolColor(u.rol), fontWeight: 600, fontSize: '13px' }}>{displayRole(u.rol)}</span></td>
+                    <td><span style={{ color: normalizeEstado(u.estado) === 'activo' ? '#4ade80' : '#f87171', fontWeight: 600, fontSize: '13px' }}>{displayEstado(u.estado)}</span></td>
                     <td>
                       <div className="action-buttons">
                         <button className="action-btn view" onClick={() => abrirVer(u)}><IconEye size={16} /></button>
-                        <button className="action-btn edit" onClick={() => { setSeleccionado(u); setEditData({ nombre: u.nombre, correo: u.correo, rol: u.rol, estado: u.estado }); setShowEditModal(true); }}><IconPencil size={16} /></button>
+                        <button className="action-btn edit" onClick={() => { setSeleccionado(u); setEditData({ nombre: u.nombre, correo: u.correo, rol: normalizeRole(u.rol), estado: normalizeEstado(u.estado) }); setShowEditModal(true); }}><IconPencil size={16} /></button>
                         <button className="action-btn delete" onClick={() => setConfirmId(u.id_usuario)}><IconTrash size={16} /></button>
                       </div>
                     </td>
@@ -270,7 +301,7 @@ const importarExcel = async (e) => {
                   <input type="email" value={formData.correo} onChange={e => setFormData({ ...formData, correo: e.target.value })} required />
                 </div>
                 <div className="form-group">
-                  <label>Contrasena</label>
+                  <label>Contraseña</label>
                   <input type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} required />
                 </div>
                 <div className="form-group">
@@ -285,7 +316,7 @@ const importarExcel = async (e) => {
                   <label>Estado</label>
                   <select value={formData.estado} onChange={e => setFormData({ ...formData, estado: e.target.value })}>
                     <option value="activo">Activo</option>
-                    <option value="inhabilitado">Inactivo</option>
+                    <option value="inhabilitado">Inhabilitado</option>
                   </select>
                 </div>
                 <div className="modal-actions">
@@ -323,7 +354,7 @@ const importarExcel = async (e) => {
                   <label>Estado</label>
                   <select value={editData.estado} onChange={e => setEditData({ ...editData, estado: e.target.value })}>
                     <option value="activo">Activo</option>
-                    <option value="inhabilitado">Inactivo</option>
+                    <option value="inhabilitado">Inhabilitado</option>
                   </select>
                 </div>
                 <div className="modal-actions">
@@ -345,12 +376,12 @@ const importarExcel = async (e) => {
                 <div className="detalle-item"><span className="detalle-label">Nombre</span><span className="detalle-valor">{verUsuario.nombre}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Correo</span><span className="detalle-valor" style={{fontSize:'13px'}}>{verUsuario.correo}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Rol</span><span className="detalle-valor" style={{color:rolColor(verUsuario.rol),fontWeight:700}}>{verUsuario.rol}</span></div>
-                <div className="detalle-item"><span className="detalle-label">Estado</span><span className="detalle-valor" style={{color:verUsuario.estado==='activo'?'#4ade80':'#f87171',fontWeight:700}}>{verUsuario.estado}</span></div>
+                <div className="detalle-item"><span className="detalle-label">Estado</span><span className="detalle-valor" style={{color:normalizeEstado(verUsuario.estado)==='activo'?'#4ade80':'#f87171',fontWeight:700}}>{displayEstado(verUsuario.estado)}</span></div>
               </div>
 
               {loadingDetalle && <div style={{textAlign:'center',padding:'20px',color:'#b8a8d8',fontSize:'13px'}}>Cargando información...</div>}
 
-              {!loadingDetalle && verUsuario.rol === 'aprendiz' && (
+              {!loadingDetalle && verUsuario.rol === 'Aprendiz' && (
                 <div style={{marginTop:'20px'}}>
                   <div style={{fontSize:'12px',fontWeight:700,color:'#b8a8d8',textTransform:'uppercase',letterSpacing:'0.6px',marginBottom:'10px'}}>Dispositivo asignado</div>
                   {verDetalle.dispositivo ? (
@@ -365,7 +396,7 @@ const importarExcel = async (e) => {
                 </div>
               )}
 
-              {!loadingDetalle && verUsuario.rol === 'instructor' && (
+              {!loadingDetalle && verUsuario.rol === 'Instructor' && (
                 <div style={{marginTop:'20px'}}>
                   <div style={{fontSize:'12px',fontWeight:700,color:'#b8a8d8',textTransform:'uppercase',letterSpacing:'0.6px',marginBottom:'10px'}}>Fichas creadas ({verDetalle.fichas.length})</div>
                   {verDetalle.fichas.length === 0 ? (
