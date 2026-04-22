@@ -27,6 +27,9 @@ const EquiposAdmin = () => {
   const [editData, setEditData] = useState({ marca: '', tipo: '', modelo: '', estado: 'disponible' });
   const [filtros, setFiltros] = useState({ buscar: '', estado: '', marca: '' });
   const [confirmId, setConfirmId] = useState(null);
+  const [historial, setHistorial] = useState([]);
+  const [verHistorial, setVerHistorial] = useState(false);
+  const rol = localStorage.getItem("rol");
   const token = localStorage.getItem('token');
 
   useEffect(() => {
@@ -108,10 +111,31 @@ const EquiposAdmin = () => {
 
   const abrirVer = (p) => { setSeleccionado(p); setShowVerModal(true); };
   const abrirEditar = (p) => {
+    
     setSeleccionado(p);
     setEditData({ marca: p.marca, tipo: p.tipo || '', modelo: p.modelo, estado: p.estado });
     setShowEditModal(true);
   };
+
+  const obtenerHistorial = async (id) => {
+    console.log("ID QUE ENVÍO:", id); // 👈 AQUÍ
+
+  try {
+    const res = await fetch(`/api/portatiles/${id}/historial`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const data = await res.json();
+
+    console.log("HISTORIAL BACKEND:", data); // 👈 para verificar
+
+    setHistorial(Array.isArray(data) ? data : []); // 👈 ESTA ES LA CLAVE
+    setVerHistorial(true);
+
+  } catch (error) {
+    console.error("Error cargando historial:", error);
+  }
+};
 
   const estadoColor = (e) => ({ disponible: '#4ade80', asignado: '#facc15', 'dañado': '#f87171', mantenimiento: '#fb923c' }[e] || '#c9a8ff');
 
@@ -244,6 +268,7 @@ const EquiposAdmin = () => {
         {showEditModal && seleccionado && (
           <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
+            {rol === "administrador" && (
               <h2 className="modal-title">Editar pórtatil</h2>
               {error && <p className="table-error">{error}</p>}
               <form onSubmit={handleEditar}>
