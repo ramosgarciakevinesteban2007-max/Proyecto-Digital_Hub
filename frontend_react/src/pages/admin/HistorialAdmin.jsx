@@ -1,7 +1,8 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import { IconBell, IconHistory, IconMonitor, IconCheck } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import './HistorialAdmin.css';
 import Pagination from '../../components/Pagination';
 import '../../components/Pagination.css';
@@ -52,7 +53,7 @@ const HistorialAdmin = () => {
             <h1 className="equipment-title">Historial de Equipos</h1>
             <p className="equipment-subtitle">Registro completo de todos los equipos en el sistema</p>
           </div>
-          <button className="notification-btn"><IconBell size={20} /></button>
+          <NotificacionesBtn />
         </div>
 
         <div className="hist-summary">

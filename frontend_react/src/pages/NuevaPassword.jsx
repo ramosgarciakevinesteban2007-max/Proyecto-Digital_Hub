@@ -12,17 +12,50 @@ const NuevaPassword = () => {
   const [loading, setLoading] = useState(false);
   const [exito, setExito] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError("");
-    if (form.password.length < 6) { setError("La contraseña debe tener al menos 6 caracteres"); return; }
-    if (form.password !== form.confirmar) { setError("Las contraseñas no coinciden"); return; }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setExito(true);
-    }, 800);
-  };
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+
+  if (form.password.length < 6) {
+    setError("La contraseña debe tener al menos 6 caracteres");
+    return;
+  }
+
+  if (form.password !== form.confirmar) {
+    setError("Las contraseñas no coinciden");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const res = await fetch("/api/recuperacion/cambiar-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        correo: correo,
+        codigo: location.state?.codigo,
+        nuevaPassword: form.password
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.mensaje || "Error al cambiar contraseña");
+      return;
+    }
+
+    setExito(true);
+
+  } catch (error) {
+    setError("Error de conexión con el servidor");
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (exito) {
     return (

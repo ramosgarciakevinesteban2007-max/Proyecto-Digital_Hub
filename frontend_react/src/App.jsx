@@ -34,8 +34,14 @@ import AjustesAprendiz from './pages/aprendiz/AjustesAprendiz';
 import FichasAprendiz from './pages/aprendiz/FichasAprendiz';
 import MiDispositivo from './pages/aprendiz/MiDispositivo';
 import MiFicha from './pages/aprendiz/MiFicha';
+import Notificaciones from './pages/Notificaciones';
 
 import './App.css';
+import './theme-claro.css';
+
+// Aplicar tema guardado antes del primer render
+const temaGuardado = localStorage.getItem('tema') || 'oscuro';
+document.documentElement.setAttribute('data-theme', temaGuardado);
 
 function App() {
   return (
@@ -68,6 +74,7 @@ function App() {
         <Route path="/instructor/papelera"    element={<PapeleraInstructor />} />
         <Route path="/instructor/ajustes"     element={<AjustesInstructor />} />
         <Route path="/instructor/fichas"      element={<FichasInstructor />} />
+        <Route path="/instructor/ficha"       element={<Navigate to="/instructor/fichas" replace />} />
 
         <Route path="/aprendiz/inicio"      element={<InicioAprendiz />} />
         <Route path="/aprendiz/equipos"     element={<EquiposAprendiz />} />
@@ -77,6 +84,7 @@ function App() {
         <Route path="/aprendiz/fichas"      element={<FichasAprendiz />} />
         <Route path="/aprendiz/dispositivo" element={<MiDispositivo />} />
         <Route path="/aprendiz/ficha"       element={<MiFicha />} />
+        <Route path="/notificaciones"      element={<Notificaciones />} />
       </Routes>
     </Router>
   );

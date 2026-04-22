@@ -160,3 +160,39 @@
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }
 }
+
+/* ===== ITEMS INICIO INSTRUCTOR ===== */
+.inst-reporte-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(127,90,240,0.06);
+  border-radius: 10px;
+  border: 1px solid rgba(127,90,240,0.12);
+}
+.inst-reporte-desc {
+  font-size: 13px;
+  color: #f0eaff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 65%;
+}
+.inst-ficha-item {
+  padding: 10px 12px;
+  background: rgba(127,90,240,0.06);
+  border-radius: 10px;
+  border: 1px solid rgba(127,90,240,0.12);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.inst-ficha-item:hover { background: rgba(127,90,240,0.12); }
+.inst-ficha-nombre {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f0eaff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -13,6 +13,30 @@ const {
 const fichaController = require("../controllers/ficha.controller");
 const { ROLES } = require("../constants/dominio");
 
+// =============================
+// GET fichas eliminadas (papelera) - INSTRUCTOR
+// =============================
+router.get("/papelera", verificarToken, verificarRol([ROLES.INSTRUCTOR, ROLES.ADMIN]), async (req, res) => {
+  try {
+    const pool = require("../db/database");
+    const { rol, id } = req.usuario;
+    let rows;
+    if (rol === ROLES.INSTRUCTOR) {
+      [rows] = await pool.query(
+        "SELECT * FROM ficha WHERE eliminada = 1 AND id_instructor = ? ORDER BY fecha_eliminacion DESC", [id]
+      );
+    } else {
+      [rows] = await pool.query(
+        "SELECT * FROM ficha WHERE eliminada = 1 ORDER BY fecha_eliminacion DESC"
+      );
+    }
+    res.json(rows);
+  } catch (e) {
+    console.error(e.message);
+    res.status(500).json({ mensaje: "Error al obtener papelera" });
+  }
+});
+
 // Listar fichas y obtener ficha por id (público autenticado)
 router.get("/", verificarToken, fichaController.obtenerFichas);
 
@@ -40,7 +64,7 @@ router.get("/:id", verificarToken, fichaController.obtenerFichaPorId);
 router.post(
   "/",
   verificarToken,
-  verificarRol(ROLES.INSTRUCTOR),
+  verificarRol([ROLES.INSTRUCTOR, ROLES.ADMIN]),
   validarCamposObligatorios(["nombre", "programa_formacion", "jornada", "cupo_maximo"]),
   fichaController.crearFicha
 );
@@ -48,7 +72,7 @@ router.post(
 router.put(
   "/:id",
   verificarToken,
-  verificarRol(ROLES.INSTRUCTOR),
+  verificarRol([ROLES.INSTRUCTOR, ROLES.ADMIN]),
   validarCamposObligatorios(["nombre", "programa_formacion", "jornada", "cupo_maximo", "estado"]),
   fichaController.modificarFicha
 );
@@ -56,7 +80,7 @@ router.put(
 router.delete(
   "/:id",
   verificarToken,
-  verificarRol(ROLES.INSTRUCTOR),
+  verificarRol([ROLES.INSTRUCTOR, ROLES.ADMIN]),
   fichaController.eliminarFicha
 );
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SidebarInstructor from '../../components/SidebarInstructor';
 import { IconBell } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import '../Ajustes.css';
 
 const AjustesInstructor = () => {
@@ -36,7 +37,7 @@ const AjustesInstructor = () => {
             <h1 className="equipment-title">Ajustes</h1>
             <p className="equipment-subtitle">Personaliza tu experiencia</p>
           </div>
-          <button className="notification-btn"><IconBell size={20} /></button>
+          <NotificacionesBtn />
         </div>
 
         <div className="ajustes-section">

@@ -1,7 +1,8 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SidebarInstructor from '../../components/SidebarInstructor';
 import { IconBell, IconTrash, IconEye, IconPencil } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import '../../pages/instructor/PapeleraInstructor.css';
 import Pagination from '../../components/Pagination';
 import '../../components/Pagination.css';
@@ -10,6 +11,7 @@ const PapeleraInstructor = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const [portatiles, setPortatiles] = useState([]);
+  const [fichasEliminadas, setFichasEliminadas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [seleccionado, setSeleccionado] = useState(null);
   const [editData, setEditData] = useState({ marca:'', modelo:'', tipo:'', estado:'disponible' });
@@ -33,15 +35,20 @@ const PapeleraInstructor = () => {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    fetch('/api/fichas/papelera', { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => setFichasEliminadas(Array.isArray(d) ? d : []))
+      .catch(() => {});
   };
 
   const handleRestaurar = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`/api/portatiles/${seleccionado.id_portatil}`, {
-        method: 'PUT',
+      const res = await fetch(`/api/portatiles/${seleccionado.id_portatil}/estado`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(editData),
+        body: JSON.stringify({ estado: editData.estado }),
       });
       if (res.ok) { setSeleccionado(null); cargar(); }
       else { const d = await res.json(); setError(d.mensaje || 'Error'); }
@@ -66,7 +73,7 @@ const PapeleraInstructor = () => {
             <h1 className="equipment-title">Papelera</h1>
             <p className="equipment-subtitle">Equipos con fallas o en mantenimiento: <span>{portatiles.length}</span></p>
           </div>
-          <button className="notification-btn"><IconBell size={20} /></button>
+          <NotificacionesBtn />
         </div>
 
         {portatiles.length === 0 && !loading && filtro === '' && filtroEstado === '' && (
@@ -91,12 +98,12 @@ const PapeleraInstructor = () => {
           </div>
           <div className="pap-grid">
             {paginados.map(p => (
-              <div key={p.id_portatil} className={`pap-card ${p.estado === 'danado' || p.estado === 'dañado' ? 'pap-card-danger' : 'pap-card-warning'}`}>
+              <div key={p.id_portatil} className={`pap-card ${p.estado === 'dañado' || p.estado === 'dañado' ? 'pap-card-danger' : 'pap-card-warning'}`}>
                 <div className="pap-card-top">
                   <div className="pap-card-icon">
                     <IconTrash size={20} />
                   </div>
-                  <span className={`pap-status ${p.estado === 'danado' || p.estado === 'dañado' ? 'pap-status-danger' : 'pap-status-warning'}`}>
+                  <span className={`pap-status ${p.estado === 'dañado' || p.estado === 'dañado' ? 'pap-status-danger' : 'pap-status-warning'}`}>
                     {p.estado}
                   </span>
                 </div>
@@ -146,6 +153,30 @@ const PapeleraInstructor = () => {
                   <button type="submit" className="btn-save">Restaurar</button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* FICHAS ELIMINADAS */}
+        {fichasEliminadas.length > 0 && (
+          <div style={{marginTop:'32px'}}>
+            <div style={{fontSize:'13px',fontWeight:700,color:'#b8a8d8',textTransform:'uppercase',letterSpacing:'0.6px',marginBottom:'14px'}}>
+              Fichas eliminadas
+            </div>
+            <div className="table-container">
+              <table className="equipment-table">
+                <thead><tr><th>Nombre</th><th>Programa</th><th>Jornada</th><th>Fecha eliminacion</th></tr></thead>
+                <tbody>
+                  {fichasEliminadas.map(f => (
+                    <tr key={f.id}>
+                      <td style={{fontWeight:600}}>{f.nombre}</td>
+                      <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{f.programa_formacion}</td>
+                      <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{f.jornada}</td>
+                      <td style={{color:'#f87171',fontSize:'13px'}}>{f.fecha_eliminacion?.split('T')[0] || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

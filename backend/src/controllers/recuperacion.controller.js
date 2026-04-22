@@ -98,6 +98,9 @@ const validarCodigo = async (req, res) => {
 // 3. CAMBIAR CONTRASEÑA
 // ===============================
 const cambiarPassword = async (req, res) => {
+
+  console.log("🚀 ENTRÓ A cambiarPassword");
+  console.log("📥 BODY:", req.body);
   try {
     const { correo, codigo, nuevaPassword } = req.body;
 
@@ -125,10 +128,13 @@ const cambiarPassword = async (req, res) => {
     // 🔐 encriptar nueva contraseña
     const hash = await bcrypt.hash(nuevaPassword, 10);
 
-    await pool.query(
-      "UPDATE usuario SET password = ? WHERE correo = ?",
-      [hash, correo]
-    );
+   const [resultado] = await pool.query(
+  "UPDATE usuario SET password_hash = ? WHERE LOWER(correo) = LOWER(?)",
+  [hash, correo]
+);
+console.log("🔎 Filas afectadas:", resultado.affectedRows);
+console.log("🔐 Nuevo hash:", hash);
+console.log("📧 Correo usado:", correo);
 
     // 🔹 marcar código como usado
     await pool.query(

@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconBell, IconUser, IconCheck, IconMonitor, IconReport } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import SidebarAprendiz from '../../components/SidebarAprendiz';
+import ChatFicha from '../../components/ChatFicha';
 import '../../pages/aprendiz/MiFicha.css';
 
 const estadoColor = (e) => ({ activa:'#4ade80', inactiva:'#f87171', cerrada:'#facc15' }[e] || '#c9a8ff');
 const jornadaIcon = (j) => ({ manana:'🌅', tarde:'🌇', noche:'🌙' }[j] || '📅');
+const getFichaDisplay = (f) => f?.nombre ?? f?.id_ficha ?? f?.id ?? '---';
+const getFichaRouteId = (f) => f?.id ?? f?.id_ficha ?? '---';
 
 const MiFicha = () => {
   const navigate = useNavigate();
@@ -64,7 +68,7 @@ const MiFicha = () => {
             <h1 className="equipment-title">Mi Ficha</h1>
             <p className="equipment-subtitle">{ficha ? 'Tu grupo de formacion' : 'Unete a una ficha disponible'}</p>
           </div>
-          <button className="notification-btn"><IconBell size={20}/></button>
+          <NotificacionesBtn />
         </div>
 
         {successMsg && (
@@ -83,7 +87,7 @@ const MiFicha = () => {
               <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:'20px'}}>
                 <div>
                   <div style={{fontSize:'11px',color:'#b8a8d8',textTransform:'uppercase',letterSpacing:'0.6px',marginBottom:'6px'}}>Ficha asignada</div>
-                  <h2 style={{fontSize:'22px',fontWeight:800,color:'#f0eaff',margin:0}}>{ficha.nombre}</h2>
+                  <h2 style={{fontSize:'22px',fontWeight:800,color:'#f0eaff',margin:0}}>Ficha #{getFichaDisplay(ficha)}</h2>
                   <p style={{fontSize:'13px',color:'#b8a8d8',marginTop:'4px'}}>{ficha.programa_formacion}</p>
                 </div>
                 <span style={{background:`${estadoColor(ficha.estado)}18`,border:`1px solid ${estadoColor(ficha.estado)}44`,color:estadoColor(ficha.estado),borderRadius:'50px',padding:'5px 14px',fontSize:'12px',fontWeight:700}}>{ficha.estado}</span>
@@ -99,17 +103,28 @@ const MiFicha = () => {
                 </div>
                 <div style={{background:'rgba(255,255,255,0.04)',borderRadius:'12px',padding:'14px 16px'}}>
                   <div style={{fontSize:'11px',color:'#b8a8d8',marginBottom:'4px',textTransform:'uppercase',letterSpacing:'0.5px'}}>ID</div>
-                  <div style={{fontSize:'15px',fontWeight:700,color:'#c9a8ff'}}>#{ficha.id_ficha}</div>
+                  <div style={{fontSize:'15px',fontWeight:700,color:'#c9a8ff'}}>#{getFichaDisplay(ficha)}</div>
                 </div>
               </div>
             </div>
-            <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
-              <button className="btn-add-equipment" onClick={() => navigate('/aprendiz/dispositivo')} style={{borderRadius:'10px',padding:'10px 20px',fontSize:'13px'}}>
-                <IconMonitor size={14}/> Mi Dispositivo
-              </button>
-              <button className="btn-add-equipment" onClick={() => navigate('/aprendiz/historial')} style={{borderRadius:'10px',padding:'10px 20px',fontSize:'13px',background:'linear-gradient(135deg,#1e3a5f,#1a2a4a)'}}>
-                <IconReport size={14}/> Mis Reportes
-              </button>
+            <div style={{display:'grid',gridTemplateColumns:'1.5fr 1fr',gap:'22px',marginTop:'24px'}}>
+              <div style={{background:'#13081f',border:'1px solid rgba(127,90,240,0.2)',borderRadius:'20px',padding:'18px',minHeight:'420px'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'14px'}}>
+                  <div>
+                    <div style={{fontSize:'13px',color:'#b8a8d8',textTransform:'uppercase',letterSpacing:'0.6px',marginBottom:'4px'}}>Chat de la ficha</div>
+                    <div style={{fontSize:'16px',fontWeight:700,color:'#f0eaff'}}>Ficha #{getFichaDisplay(ficha)}</div>
+                  </div>
+                </div>
+                <ChatFicha idFicha={getFichaRouteId(ficha)} token={token} />
+              </div>
+              <div style={{display:'flex',gap:'12px',flexDirection:'column',justifyContent:'flex-start'}}>
+                <button className="btn-add-equipment" onClick={() => navigate('/aprendiz/dispositivo')} style={{borderRadius:'10px',padding:'10px 20px',fontSize:'13px'}}>
+                  <IconMonitor size={14}/> Mi Dispositivo
+                </button>
+                <button className="btn-add-equipment" onClick={() => navigate('/aprendiz/historial')} style={{borderRadius:'10px',padding:'10px 20px',fontSize:'13px',background:'linear-gradient(135deg,#1e3a5f,#1a2a4a)'}}>
+                  <IconReport size={14}/> Mis Reportes
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -135,7 +150,7 @@ const MiFicha = () => {
                   <div key={f.id_ficha} style={{background:'#241545',border:'1px solid rgba(127,90,240,0.3)',borderRadius:'16px',padding:'0',display:'flex',overflow:'hidden'}}>
                     <div style={{width:'5px',background:'linear-gradient(180deg,#4ade80,#34d399)',flexShrink:0}}/>
                     <div style={{flex:1,padding:'18px 22px',display:'flex',flexDirection:'column',gap:'6px'}}>
-                      <div style={{fontSize:'16px',fontWeight:800,color:'#f0eaff'}}>{f.nombre}</div>
+                      <div style={{fontSize:'16px',fontWeight:800,color:'#f0eaff'}}>Ficha #{f.nombre ?? f.id_ficha ?? f.id}</div>
                       <div style={{fontSize:'12px',color:'#b8a8d8'}}>{f.programa_formacion}</div>
                       <div style={{display:'flex',gap:'12px',marginTop:'4px'}}>
                         <span style={{fontSize:'11px',color:'#b8a8d8'}}>{jornadaIcon(f.jornada)} {f.jornada}</span>
@@ -144,9 +159,9 @@ const MiFicha = () => {
                     </div>
                     <div style={{padding:'18px 20px',display:'flex',alignItems:'center',flexShrink:0}}>
                       <button
-                        onClick={() => handleUnirse(f.id_ficha)}
-                        disabled={uniendose === f.id_ficha}
-                        style={{background:'linear-gradient(135deg,#4ade80,#22c55e)',border:'none',borderRadius:'10px',padding:'10px 20px',color:'#0a0a0f',fontSize:'13px',fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',opacity: uniendose === f.id_ficha ? 0.6 : 1}}
+                        onClick={() => handleUnirse(f.id)}
+                        disabled={uniendose === f.id}
+                        style={{background:'linear-gradient(135deg,#4ade80,#22c55e)',border:'none',borderRadius:'10px',padding:'10px 20px',color:'#0a0a0f',fontSize:'13px',fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',opacity: uniendose === f.id ? 0.6 : 1}}
                       >
                         <IconCheck size={14}/>
                         {uniendose === f.id_ficha ? 'Uniendose...' : 'Unirse'}

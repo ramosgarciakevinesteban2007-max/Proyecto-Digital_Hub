@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconEye, IconBell, IconClock, IconCheck } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import SidebarInstructor from '../../components/SidebarInstructor';
 import '../../pages/instructor/ReportesInstructor.css';
 import Pagination from '../../components/Pagination';
@@ -170,7 +171,7 @@ const importarExcel = async (e) => {
               Importar
             </button>
 
-            <button className="notification-btn"><IconBell size={20}/></button>
+            <NotificacionesBtn />
           </div>
         </div>
         <div className="stats-grid">
@@ -191,19 +192,26 @@ const importarExcel = async (e) => {
         </div>
         <div className="table-container">
           <table className="equipment-table">
-            <thead><tr><th>ID</th><th>Descripción</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>ID</th><th>Aprendiz</th><th>Descripción</th><th>Estado</th><th>Fecha</th><th>Evidencia</th><th>Acciones</th></tr></thead>
             <tbody>
-              {loading ? <tr><td colSpan="5" style={{textAlign:'center',padding:'32px'}}>Cargando...</td></tr>
-              : filtrados.length === 0 ? <tr><td colSpan="5" style={{textAlign:'center',padding:'32px',color:'var(--text-muted-dark)'}}>Sin resultados</td></tr>
+              {loading ? <tr><td colSpan="7" style={{textAlign:'center',padding:'32px'}}>Cargando...</td></tr>
+              : filtrados.length === 0 ? <tr><td colSpan="7" style={{textAlign:'center',padding:'32px',color:'var(--text-muted-dark)'}}>Sin resultados</td></tr>
               : paginados.map(r => (
                 <tr key={r.id_reporte}>
-                  <td>#{r.id_reporte}</td>
-                  <td style={{maxWidth:'250px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.descripcion}</td>
+                  <td style={{color:'#b8a8d8',fontSize:'13px'}}>#{r.id_reporte}</td>
+                  <td style={{fontSize:'13px'}}>{r.nombre_aprendiz || '—'}</td>
+                  <td style={{maxWidth:'220px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.descripcion}</td>
                   <td><span style={{color:estadoColor(r.estado_reporte),fontWeight:600,fontSize:'13px'}}>{r.estado_reporte}</span></td>
-                  <td>{r.fecha_reporte?.split('T')[0] || r.fecha_reporte}</td>
+                  <td style={{color:'#b8a8d8',fontSize:'13px'}}>{r.fecha_reporte?.split('T')[0] || r.fecha_reporte}</td>
+                  <td>
+                    {r.archivo
+                      ? <a href={`/uploads/${r.archivo}`} target="_blank" rel="noreferrer" style={{color:'#c9a8ff',fontSize:'12px',fontWeight:600}}>Ver</a>
+                      : <span style={{color:'#6a5a8a',fontSize:'12px'}}>—</span>
+                    }
+                  </td>
                   <td><div className="action-buttons">
                     <button className="action-btn view" onClick={() => abrirVer(r)}><IconEye size={16} /></button>
-                    <button className="action-btn edit" onClick={() => abrirEditar(r)} title="Cambiar estado" style={{fontSize:'11px',padding:'4px 8px',borderRadius:'8px'}}>Estado</button>
+                    <button className="action-btn edit" onClick={() => abrirEditar(r)} style={{fontSize:'11px',padding:'4px 8px',borderRadius:'8px',color:'#60a5fa',border:'1px solid rgba(96,165,250,0.3)'}}>Estado</button>
                   </div></td>
                 </tr>
               ))}
@@ -245,6 +253,24 @@ const importarExcel = async (e) => {
                 <div className="detalle-item"><span className="detalle-label">Descripción</span><span className="detalle-valor">{seleccionado.descripcion}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Estado</span><span className="detalle-valor" style={{color:estadoColor(seleccionado.estado_reporte),fontWeight:600}}>{seleccionado.estado_reporte}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Fecha</span><span className="detalle-valor">{seleccionado.fecha_reporte?.split('T')[0] || seleccionado.fecha_reporte}</span></div>
+                {seleccionado.nombre_aprendiz && <div className="detalle-item"><span className="detalle-label">Aprendiz</span><span className="detalle-valor">{seleccionado.nombre_aprendiz}</span></div>}
+                {seleccionado.archivo && (
+                  <div className="detalle-item" style={{flexDirection:'column',alignItems:'flex-start',gap:'10px'}}>
+                    <span className="detalle-label">Evidencia adjunta</span>
+                    {/\.(jpg|jpeg|png)$/i.test(seleccionado.archivo) ? (
+                      <img src={`/uploads/${seleccionado.archivo}`} alt="evidencia"
+                        style={{maxWidth:'100%',borderRadius:'10px',border:'1px solid rgba(127,90,240,0.3)',cursor:'pointer'}}
+                        onClick={() => window.open(`/uploads/${seleccionado.archivo}`, '_blank')}
+                      />
+                    ) : (
+                      <a href={`/uploads/${seleccionado.archivo}`} target="_blank" rel="noreferrer"
+                        style={{display:'inline-flex',alignItems:'center',gap:'8px',color:'#c9a8ff',fontSize:'13px',fontWeight:600,background:'rgba(127,90,240,0.1)',border:'1px solid rgba(127,90,240,0.3)',borderRadius:'8px',padding:'8px 14px',textDecoration:'none'}}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Ver archivo adjunto
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="modal-actions"><button className="btn-save" onClick={() => setShowVerModal(false)}>Cerrar</button></div>
             </div>

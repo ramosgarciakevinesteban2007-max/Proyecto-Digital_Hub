@@ -41,25 +41,27 @@
 }
 
 [data-theme="claro"] {
-  --bg:        #f0eeff;
+  --bg:        #e8e0ff;
   --bg-card:   #ffffff;
-  --bg-card-2: #f5f2ff;
-  --bg-input:  #ffffff;
-  --bg-sidebar:#2d1b6e;
-  --border:    rgba(127,90,240,0.2);
-  --border-2:  rgba(127,90,240,0.4);
+  --bg-card-2: #f5f0ff;
+  --bg-input:  #f5f0ff;
+  --bg-sidebar:#faf8ff;
+  --border:    rgba(127,90,240,0.22);
+  --border-2:  rgba(127,90,240,0.5);
   --text:           #1a0a3a;
   --text-dark:      #1a0a3a;
   --text-2:         #4a3a6a;
   --text-muted-dark:#4a3a6a;
   --text-3:         #7a6a9a;
-  --layout-bg-1: rgba(200,180,255,0.25);
-  --layout-bg-2: rgba(180,160,240,0.15);
-  --layout-bg-3: rgba(160,140,220,0.1);
-  --shadow-glow: 0 0 20px rgba(127,90,240,0.15);
+  --layout-bg-1: rgba(127,90,240,0.12);
+  --layout-bg-2: rgba(127,90,240,0.07);
+  --layout-bg-3: rgba(127,90,240,0.04);
+  --shadow-glow: 0 0 24px rgba(127,90,240,0.18);
 }
 
 html { scroll-behavior: smooth; background: #0d0d18; }
+[data-theme="claro"] html,
+html[data-theme="claro"] { background: #f4f0ff !important; }
 
 body {
   font-family: 'Poppins', 'Segoe UI', Inter, system-ui, sans-serif;
@@ -77,4 +79,132 @@ body {
   display: flex;
   flex-direction: column;
   background: var(--bg);
+}
+
+/* fin */
+
+/* ===== TIPOGRAFÍA BASE — aplica en ambos temas ===== */
+
+/* Títulos de página */
+.equipment-title,
+.inicio-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+/* Valores numéricos grandes en stat cards */
+.stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+/* Inicio card value */
+.inicio-card-value {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+/* Labels de sección uppercase */
+.inicio-card-title,
+.stat-label,
+.ajustes-section-title,
+.fd-widget-label,
+.hist-summary-label,
+.usr-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+/* Nombres en cards — TODOS iguales */
+.hist-serial,
+.ficha-card-nombre,
+.pap-card-serial,
+.amb-card-nombre,
+.mificha-nombre,
+.midispositivo-nombre,
+.ra-card-desc {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.1px;
+}
+
+/* Texto secundario — TODOS iguales */
+.ficha-card-programa,
+.hist-card-body span,
+.pap-card-info,
+.amb-card-dir,
+.inicio-card-list li,
+.ajustes-row-desc,
+.mificha-meta,
+.midispositivo-meta,
+.ra-card-fecha {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+}
+
+/* Tabla */
+.equipment-table th {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.equipment-table td {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* Sidebar */
+.sidebar-item {
+  font-size: 13px;
+  font-weight: 500;
+}
+.sidebar-item.active {
+  font-weight: 600;
+}
+
+/* Modal */
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* Ajustes */
+.ajustes-row-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Subtítulos */
+.equipment-subtitle {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* Widgets fichas */
+.fd-widget-num {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+/* Hist summary */
+.hist-summary-num {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+/* Usuarios stats */
+.usr-stat-num {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1;
 }
