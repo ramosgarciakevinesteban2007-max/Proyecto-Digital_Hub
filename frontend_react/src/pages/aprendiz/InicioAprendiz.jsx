@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SidebarAprendiz from '../../components/SidebarAprendiz';
 import { IconMonitor, IconReport, IconBell, IconUser, IconCheck, IconClock } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import '../Inicio.css';
 import './InicioAprendiz.css';
 
@@ -53,7 +54,7 @@ const InicioAprendiz = () => {
             <h1 className="inicio-title aprendiz-title">Hola, {nombre}</h1>
             <p className="aprendiz-subtitle">Bienvenido a tu panel de aprendiz.</p>
           </div>
-          <button className="notification-btn"><IconBell size={20} /></button>
+          <NotificacionesBtn />
         </div>
 
         <div className="aprendiz-hero">

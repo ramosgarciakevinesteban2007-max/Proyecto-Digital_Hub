@@ -287,3 +287,65 @@
   letter-spacing: 0.6px;
   margin-bottom: 14px;
 }
+
+/* ===== FILE UPLOAD ===== */
+.file-upload-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.file-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  background: linear-gradient(135deg, rgba(127,90,240,0.15), rgba(127,90,240,0.08));
+  border: 1.5px dashed rgba(127,90,240,0.45);
+  border-radius: 12px;
+  color: #c9a8ff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.file-upload-btn:hover {
+  background: rgba(127,90,240,0.22);
+  border-color: #7f5af0;
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(127,90,240,0.12);
+}
+.file-upload-clear {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(248,113,113,0.35);
+  background: rgba(248,113,113,0.1);
+  color: #f87171;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.file-upload-clear:hover {
+  background: rgba(248,113,113,0.2);
+  border-color: #f87171;
+}
+
+/* Tema claro */
+[data-theme="claro"] .file-upload-btn {
+  background: rgba(127,90,240,0.08) !important;
+  border-color: rgba(127,90,240,0.4) !important;
+  color: #7f5af0 !important;
+}
+[data-theme="claro"] .file-upload-btn:hover {
+  background: rgba(127,90,240,0.15) !important;
+  color: #5a3bc0 !important;
+}

@@ -47,7 +47,6 @@ router.post(
   }
 );
 
-
 /*
 =========================================
 2. LISTAR TODOS LOS PORTÁTILES HOLA
@@ -191,6 +190,43 @@ router.put(
   }
 );
 
+
+/*
+=========================================
+4.5 CAMBIAR ESTADO (papelera / restaurar)
+=========================================
+*/
+router.patch(
+  "/:id/estado",
+  verificarToken,
+  verificarRol(["administrador", "instructor"]),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { estado } = req.body;
+      if (!estado) return res.status(400).json({ mensaje: "estado es obligatorio" });
+
+      const [rows] = await pool.query("SELECT * FROM portatil WHERE id_portatil = ?", [id]);
+      if (rows.length === 0) return res.status(404).json({ mensaje: "Portátil no encontrado" });
+
+      if (req.usuario.rol === "instructor" && rows[0].id_instructor !== req.usuario.id) {
+        return res.status(403).json({ mensaje: "No tienes permiso sobre este portátil" });
+      }
+
+      await pool.query("UPDATE portatil SET estado = ? WHERE id_portatil = ?", [estado, id]);
+
+      // Si pasa a no-asignado, desactivar asignación
+      if (estado !== "asignado") {
+        await pool.query("UPDATE portatil_aprendiz SET estado = 'inactivo' WHERE id_portatil = ?", [id]);
+      }
+
+      res.json({ mensaje: "Estado actualizado correctamente" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ mensaje: "Error al actualizar estado" });
+    }
+  }
+);
 
 /*
 =========================================

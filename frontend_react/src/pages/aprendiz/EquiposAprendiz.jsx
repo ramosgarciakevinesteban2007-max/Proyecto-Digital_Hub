@@ -1,6 +1,7 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconEye, IconBell, IconMonitor, IconBarChart } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import SidebarAprendiz from '../../components/SidebarAprendiz';
 import '../../pages/aprendiz/EquiposAprendiz.css';
 
@@ -35,7 +36,7 @@ const EquiposAprendiz = () => {
 
 
   const abrirVer = (p) => { setSeleccionado(p); setShowVerModal(true); };
-  const estadoColor = (e) => ({ disponible: '#4ade80', asignado: '#facc15', danado: '#f87171', 'en reparacion': '#fb923c' }[e] || '#c9a8ff');
+  const estadoColor = (e) => ({ disponible: '#4ade80', asignado: '#facc15', 'dañado': '#f87171', mantenimiento: '#fb923c' }[e] || '#c9a8ff');
 
   const filtrados = portatiles.filter(p => {
     const b = filtros.buscar.toLowerCase();
@@ -50,7 +51,7 @@ const EquiposAprendiz = () => {
       <main className="equipment-main">
         <div className="equipment-header">
           <div><h1 className="equipment-title">Equipos</h1><p className="equipment-subtitle">Total: <span>{portatiles.length}</span></p></div>
-          <button className="notification-btn"><IconBell size={20} /></button>
+          <NotificacionesBtn />
         </div>
 
         <div className="stats-grid">
@@ -67,8 +68,8 @@ const EquiposAprendiz = () => {
             <option value="">Todos los estados</option>
             <option value="disponible">Disponible</option>
             <option value="asignado">Asignado</option>
-            <option value="danado">Dañado</option>
-            <option value="en reparacion">En reparación</option>
+            <option value="dañado">Dañado</option>
+            <option value="mantenimiento">Mantenimiento</option>
           </select>
           <input className="filter-input" placeholder="Filtrar por marca..." value={filtros.marca} onChange={e => setFiltros({...filtros, marca: e.target.value})} />
           <button className="filter-clear" onClick={() => setFiltros({ buscar: '', estado: '', marca: '' })}>Limpiar</button>

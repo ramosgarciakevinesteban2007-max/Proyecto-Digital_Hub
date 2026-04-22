@@ -82,7 +82,7 @@ async function getAprendizById(id) {
 
 async function getFichaByNombre(nombre) {
   const [rows] = await pool.query(
-    "SELECT * FROM ficha WHERE nombre = ?",
+    "SELECT * FROM ficha WHERE nombre = ? AND (eliminada = 0 OR eliminada IS NULL)",
     [nombre]
   );
   return rows[0] || null;

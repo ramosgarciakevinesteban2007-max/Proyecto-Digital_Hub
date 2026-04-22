@@ -1,15 +1,13 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SidebarInstructor from '../../components/SidebarInstructor';
 import { IconBell, IconHistory, IconMonitor, IconCheck } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import './HistorialInstructor.css';
 import Pagination from '../../components/Pagination';
 import '../../components/Pagination.css';
 
-const LS_KEY = 'portatiles_local';
-const getLocal = () => { try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; } };
-
-const estadoColor = (e) => ({ disponible:'#4ade80', asignado:'#facc15', danado:'#f87171', mantenimiento:'#fb923c' }[e] || '#c9a8ff');
+const estadoColor = (e) => ({ disponible:'#4ade80', asignado:'#facc15', 'dañado':'#f87171', mantenimiento:'#fb923c' }[e] || '#c9a8ff');
 
 const HistorialInstructor = () => {
   const navigate = useNavigate();
@@ -24,19 +22,13 @@ const HistorialInstructor = () => {
 
   useEffect(() => {
     if (!token) { navigate('/login'); return; }
-    fetch('/portatil', { headers: { Authorization: `Bearer ${token}` } })
+    fetch('/api/portatiles', { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.status === 401 ? navigate('/login') : r.json())
       .then(d => {
-        if (Array.isArray(d)) {
-          const local = getLocal();
-          const backendIds = d.map(p => p.id_portatil);
-          const soloLocales = local.filter(p => !backendIds.includes(p.id_portatil));
-          setPortatiles([...d, ...soloLocales]);
-        } else {
-          setPortatiles(getLocal());
-        }
+        const lista = Array.isArray(d) ? d : (Array.isArray(d?.data) ? d.data : []);
+        setPortatiles(lista);
       })
-      .catch(() => setPortatiles(getLocal()))
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -61,7 +53,7 @@ const HistorialInstructor = () => {
             <h1 className="equipment-title">Historial de Equipos</h1>
             <p className="equipment-subtitle">Registro completo de todos los equipos en el sistema</p>
           </div>
-          <button className="notification-btn"><IconBell size={20} /></button>
+          <NotificacionesBtn />
         </div>
 
         <div className="hist-summary">
@@ -79,7 +71,7 @@ const HistorialInstructor = () => {
           </div>
           <div className="hist-summary-card">
             <div className="hist-summary-icon" style={{background:'rgba(248,113,113,0.12)',color:'#f87171'}}><IconMonitor size={20}/></div>
-            <div><div className="hist-summary-num" style={{color:'#f87171'}}>{portatiles.filter(p=>p.estado==='danado').length}</div><div className="hist-summary-label">Con fallas</div></div>
+            <div><div className="hist-summary-num" style={{color:'#f87171'}}>{portatiles.filter(p=>p.estado==='dañado').length}</div><div className="hist-summary-label">Con fallas</div></div>
           </div>
         </div>
 

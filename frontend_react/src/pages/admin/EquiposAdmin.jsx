@@ -1,6 +1,7 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconEye, IconPencil, IconTrash, IconBell, IconMonitor, IconBarChart } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import './EquiposAdmin.css';
 import Pagination from '../../components/Pagination';
@@ -77,7 +78,11 @@ const EquiposAdmin = () => {
 
   const handleEliminar = async (id) => {
     try {
-      const res = await fetch(`/api/portatiles/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`/api/portatiles/${id}/estado`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ estado: 'dañado' })
+      });
       if (res.ok) { setConfirmId(null); cargar(); }
     } catch {}
     setConfirmId(null);
@@ -113,7 +118,7 @@ const EquiposAdmin = () => {
     setShowEditModal(true);
   };
 
-  const estadoColor = (e) => ({ Disponible: '#4ade80', Asignado: '#facc15', 'Dañado': '#f87171', Mantenimiento: '#fb923c' }[e] || '#c9a8ff');
+  const estadoColor = (e) => ({ disponible: '#4ade80', asignado: '#facc15', 'dañado': '#f87171', mantenimiento: '#fb923c' }[e] || '#c9a8ff');
 
   const filtrados = portatiles.filter(p => {
     const b = filtros.buscar.toLowerCase();
@@ -141,7 +146,7 @@ const EquiposAdmin = () => {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               CSV
             </button>
-            <button className="notification-btn"><IconBell size={20} /></button>
+            <NotificacionesBtn />
           </div>
         </div>
 
@@ -151,11 +156,11 @@ const EquiposAdmin = () => {
           </div>
           <div className="stat-card">
             <div className="stat-icon"><IconMonitor size={24} /></div>
-            <div className="stat-card-text"><div className="stat-label">Disponibles</div><div className="stat-value">{portatiles.filter(p => p.estado === 'Disponible').length}</div></div>
+            <div className="stat-card-text"><div className="stat-label">Disponibles</div><div className="stat-value">{portatiles.filter(p => p.estado === 'disponible').length}</div></div>
           </div>
           <div className="stat-card">
             <div className="stat-icon"><IconBarChart size={24} /></div>
-            <div className="stat-card-text"><div className="stat-label">Asignados</div><div className="stat-value">{portatiles.filter(p => p.estado === 'Asignado').length}</div></div>
+            <div className="stat-card-text"><div className="stat-label">Asignados</div><div className="stat-value">{portatiles.filter(p => p.estado === 'asignado').length}</div></div>
           </div>
         </div>
 
@@ -165,11 +170,12 @@ const EquiposAdmin = () => {
           <input className="filter-input" placeholder="Buscar por serie, marca o modelo..." value={filtros.buscar} onChange={e => { setFiltros({ ...filtros, buscar: e.target.value }); setPage(1); }} />
           <select className="filter-input" value={filtros.estado} onChange={e => { setFiltros({ ...filtros, estado: e.target.value }); setPage(1); }}>
             <option value="">Todos los estados</option>
-            <option value="Disponible">Disponible</option>
-            <option value="Asignado">Asignado</option>
-            <option value="Dañado">Dañado</option>
-            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="disponible">Disponible</option>
+            <option value="asignado">Asignado</option>
+            <option value="dañado">Dañado</option>
+            <option value="mantenimiento">Mantenimiento</option>
             </select>
+          <input className="filter-input" placeholder="Filtrar por marca..." value={filtros.marca} onChange={e => { setFiltros({ ...filtros, marca: e.target.value }); setPage(1); }} />
           <button className="filter-clear" onClick={() => { setFiltros({ buscar: '', estado: '', marca: '' }); setPage(1); }}>Limpiar</button>
         </div>
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconBell, IconPencil, IconTrash, IconEye } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import Pagination from '../../components/Pagination';
 import '../../components/Pagination.css';
@@ -121,7 +122,7 @@ const importarExcel = async (e) => {
             <p className="equipment-subtitle">Total: <span>{ambientes.length}</span></p>
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <button className="notification-btn"><IconBell size={20} /></button>
+            <NotificacionesBtn />
           </div>
         </div>
 

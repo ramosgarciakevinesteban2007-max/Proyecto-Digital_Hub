@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconBell, IconUser, IconMonitor, IconReport, IconPencil, IconTrash } from '../../components/Icons';
+import { IconBell, IconUser, IconMonitor, IconReport, IconPencil, IconTrash, JornadaIcon } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import Pagination from '../../components/Pagination';
 import '../../components/Pagination.css';
@@ -8,8 +9,7 @@ import '../../pages/admin/EquiposAdmin.css';
 import '../../pages/admin/FichasAdmin.css';
 import ConfirmModal from '../../components/ConfirmModal';
 
-const estadoColor = (e) => ({ activa:'#4ade80', inactiva:'#f87171', cerrada:'#facc15', disponible:'#4ade80', asignado:'#facc15', danado:'#f87171', mantenimiento:'#fb923c', pendiente:'#facc15', en_revision:'#fb923c', resuelto:'#4ade80' }[e] || '#c9a8ff');
-const jornadaIcon = (j) => ({ manana:'🌅', tarde:'🌇', noche:'🌙'}[j] || '📅');
+const estadoColor = (e) => ({ activa:'#4ade80', inactiva:'#f87171', cerrada:'#facc15', disponible:'#4ade80', asignado:'#facc15', 'dañado':'#f87171', mantenimiento:'#fb923c', pendiente:'#facc15', en_revision:'#fb923c', resuelto:'#4ade80' }[e] || '#c9a8ff');
 
 const FichasAdmin = () => {
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ const FichasAdmin = () => {
   const cargar = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/ficha', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch('/api/fichas', { headers: { Authorization: `Bearer ${token}` } });
       if (res.status === 401) { navigate('/login'); return; }
       setFichas(await res.json());
     } catch (err) { console.error('Error cargando fichas:', err); }
@@ -59,9 +59,9 @@ const FichasAdmin = () => {
     const id = ficha.id_ficha ?? ficha.id;
     try {
       const [ra, rp, rr] = await Promise.all([
-        fetch(`/ficha/${id}/aprendices`, { headers: h }).then(r => r.json()).catch(() => []),
-        fetch(`/ficha/${id}/portatiles`, { headers: h }).then(r => r.json()).catch(() => []),
-        fetch(`/ficha/${id}/reportes`,   { headers: h }).then(r => r.json()).catch(() => []),
+        fetch(`/api/fichas/${id}/aprendices`, { headers: h }).then(r => r.json()).catch(() => []),
+        fetch(`/api/fichas/${id}/portatiles`, { headers: h }).then(r => r.json()).catch(() => []),
+        fetch(`/api/fichas/${id}/reportes`,   { headers: h }).then(r => r.json()).catch(() => []),
       ]);
       setAprendices(Array.isArray(ra) ? ra : []);
       setPortatiles(Array.isArray(rp) ? rp : []);
@@ -90,14 +90,14 @@ const FichasAdmin = () => {
           <div className="fd-header">
             <button onClick={() => setVista('lista')} className="fd-back-btn">← Volver</button>
             <div className="fd-header-info">
-              <div className="fd-jornada-pill">{jornadaIcon(fichaActiva.jornada)} {fichaActiva.jornada}</div>
+              <div className="fd-jornada-pill"><JornadaIcon jornada={fichaActiva.jornada} size={13}/> {fichaActiva.jornada}</div>
               <h1 className="fd-title">{fichaActiva.nombre}</h1>
               <p className="fd-subtitle">{fichaActiva.programa_formacion}</p>
             </div>
             <div className="fd-header-actions">
               <span className="fd-estado-pill" style={{background:`${estadoColor(fichaActiva.estado)}18`,border:`1px solid ${estadoColor(fichaActiva.estado)}44`,color:estadoColor(fichaActiva.estado)}}>{fichaActiva.estado}</span>
 
-              <button className="notification-btn"><IconBell size={20}/></button>
+              <NotificacionesBtn />
               
             </div>
           </div>
@@ -214,7 +214,7 @@ const FichasAdmin = () => {
   const cargarAmbientes = async () => {
     setLoadingAmb(true);
     try {
-      const res = await fetch('/ambiente', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch('/api/ambientes', { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       setAmbientes(Array.isArray(data) ? data : []);
     } catch (err) { console.error('Error cargando ambientes:', err); }
@@ -224,7 +224,7 @@ const FichasAdmin = () => {
   const handleAmbSubmit = async (e) => {
     e.preventDefault(); setErrorAmb('');
     try {
-      const res = await fetch('/ambiente', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(formAmb) });
+      const res = await fetch('/api/ambientes', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(formAmb) });
       if (res.ok) { setShowModalAmb(false); setFormAmb({ nombre: '', direccion: '' }); cargarAmbientes(); }
       else { const d = await res.json(); setErrorAmb(d.message || 'Error'); }
     } catch { setErrorAmb('Error de conexión'); }
@@ -233,7 +233,7 @@ const FichasAdmin = () => {
   const handleAmbEditar = async (e) => {
     e.preventDefault(); setErrorAmb('');
     try {
-      const res = await fetch(`/ambiente/${selAmb.id_ambiente}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(editAmb) });
+      const res = await fetch(`/api/ambientes/${selAmb.id_ambiente}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(editAmb) });
       if (res.ok) { setShowEditAmb(false); cargarAmbientes(); }
       else { const d = await res.json(); setErrorAmb(d.message || 'Error'); }
     } catch { setErrorAmb('Error de conexión'); }
@@ -245,7 +245,7 @@ const FichasAdmin = () => {
 
   const doAmbEliminar = async (id) => {
     try {
-      const res = await fetch(`/ambiente/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`/api/ambientes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) cargarAmbientes();
     } catch (err) { console.error('Error eliminando ambiente:', err); }
   };
@@ -287,7 +287,7 @@ const FichasAdmin = () => {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Excel
             </button>
-            <button className="notification-btn"><IconBell size={20}/></button>
+            <NotificacionesBtn />
             </div>
           </div>
         </div>
@@ -342,7 +342,7 @@ const FichasAdmin = () => {
                 : paginados.map(f => (
                   <div key={f.id_ficha ?? f.id} className="ficha-card" onClick={() => abrirFicha(f)}>
                     <div className="ficha-card-top">
-                      <span className="ficha-jornada-badge">{jornadaIcon(f.jornada)} {f.jornada}</span>
+                      <span className="ficha-jornada-badge"><JornadaIcon jornada={f.jornada} size={12}/> {f.jornada}</span>
                       <span style={{background:`${estadoColor(f.estado)}18`,border:`1px solid ${estadoColor(f.estado)}44`,color:estadoColor(f.estado),borderRadius:'50px',padding:'2px 10px',fontSize:'11px',fontWeight:600}}>{f.estado}</span>
                     </div>
                     <div className="ficha-card-nombre">{f.nombre}</div>

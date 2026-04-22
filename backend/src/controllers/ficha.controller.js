@@ -30,7 +30,7 @@ async function obtenerFichas(req, res) {
     if (rol === ROLES.INSTRUCTOR) {
       const pool = require("../db/database");
       const [rows] = await pool.query(
-        "SELECT * FROM ficha WHERE id_instructor = ? AND (eliminada = 0 OR eliminada IS NULL)", [id]
+        "SELECT * FROM ficha WHERE id_instructor = ? AND (eliminada = 0 OR eliminada IS NULL) ORDER BY fecha_creacion DESC", [id]
       );
       return res.status(200).json(rows);
     }

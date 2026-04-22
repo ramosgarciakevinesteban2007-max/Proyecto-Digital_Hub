@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconBell, IconUser, IconCheck, IconMonitor, IconReport } from '../../components/Icons';
+import NotificacionesBtn from '../../components/NotificacionesBtn';
 import SidebarAprendiz from '../../components/SidebarAprendiz';
 import ChatFicha from '../../components/ChatFicha';
 import '../../pages/aprendiz/MiFicha.css';
@@ -67,7 +68,7 @@ const MiFicha = () => {
             <h1 className="equipment-title">Mi Ficha</h1>
             <p className="equipment-subtitle">{ficha ? 'Tu grupo de formacion' : 'Unete a una ficha disponible'}</p>
           </div>
-          <button className="notification-btn"><IconBell size={20}/></button>
+          <NotificacionesBtn />
         </div>
 
         {successMsg && (
