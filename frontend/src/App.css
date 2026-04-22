@@ -1,0 +1,22 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap&subset=latin,latin-ext');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary-purple: #7f5af0;
+  --secondary-purple: #c9a8ff;
+  --accent-purple: #9b6cff;
+  --bg-dark: #080810;
+  --text-dark: #e9e1ff;
+  --text-muted-dark: #a09abf;
+}
+
+html { scroll-behavior: smooth; background: #080810; }
+html[data-theme="claro"] { background: #f4f0ff !important; }
+
+body {
+  font-family: 'Poppins', 'Segoe UI', Inter, system-ui, sans-serif;
+  overflow-x: hidden;
+  line-height: 1.6;
+  background: #080810;
+}

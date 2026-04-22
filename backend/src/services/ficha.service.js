@@ -14,20 +14,20 @@ async function getFichaById(id) {
   return rows[0] || null;
 }
 
-async function createFicha({ nombre, programa_formacion, jornada, id_instructor, cupo_maximo }) {
+async function createFicha({ nombre, programa_formacion, jornada, id_instructor, cupo_maximo, ambiente_nombre, ambiente_nave }) {
   const fecha_creacion = new Date();
   const estado = "activa";
   const [result] = await pool.query(
-    `INSERT INTO ficha (nombre, programa_formacion, jornada, id_instructor, cupo_maximo, estado, fecha_creacion)
-      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [nombre, programa_formacion, jornada, id_instructor, cupo_maximo, estado, fecha_creacion]
+    `INSERT INTO ficha (nombre, programa_formacion, jornada, id_instructor, cupo_maximo, estado, fecha_creacion, ambiente_nombre, ambiente_nave)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [nombre, programa_formacion, jornada, id_instructor, cupo_maximo, estado, fecha_creacion, ambiente_nombre || null, ambiente_nave || null]
   );
   return result;
 }
 
-async function updateFicha(id, { nombre, programa_formacion, jornada, cupo_maximo, estado }) {
-  const query = `UPDATE ficha SET nombre = ?, programa_formacion = ?, jornada = ?, cupo_maximo = ?, estado = ? WHERE id = ?`;
-  const [result] = await pool.query(query, [nombre, programa_formacion, jornada, cupo_maximo, estado, id]);
+async function updateFicha(id, { nombre, programa_formacion, jornada, cupo_maximo, estado, ambiente_nombre, ambiente_nave }) {
+  const query = `UPDATE ficha SET nombre = ?, programa_formacion = ?, jornada = ?, cupo_maximo = ?, estado = ?, ambiente_nombre = ?, ambiente_nave = ? WHERE id = ?`;
+  const [result] = await pool.query(query, [nombre, programa_formacion, jornada, cupo_maximo, estado, ambiente_nombre || null, ambiente_nave || null, id]);
   return result;
 }
 
@@ -82,7 +82,7 @@ async function getAprendizById(id) {
 
 async function getFichaByNombre(nombre) {
   const [rows] = await pool.query(
-    "SELECT * FROM ficha WHERE nombre = ?",
+    "SELECT * FROM ficha WHERE nombre = ? AND (eliminada = 0 OR eliminada IS NULL)",
     [nombre]
   );
   return rows[0] || null;
