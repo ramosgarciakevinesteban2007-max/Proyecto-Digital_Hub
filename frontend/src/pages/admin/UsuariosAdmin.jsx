@@ -307,9 +307,9 @@ const importarExcel = async (e) => {
                 <div className="form-group">
                   <label>Rol</label>
                   <select value={formData.rol} onChange={e => setFormData({ ...formData, rol: e.target.value })}>
-                    <option value="Aprendiz">Aprendiz</option>
-                    <option value="Instructor">Instructor</option>
-                    <option value="Administrador">Administrador</option>
+                    <option value="aprendiz">Aprendiz</option>
+                    <option value="instructor">Instructor</option>
+                    <option value="administrador">Administrador</option>
                   </select>
                 </div>
                 <div className="form-group">
@@ -345,9 +345,9 @@ const importarExcel = async (e) => {
                 <div className="form-group">
                   <label>Rol</label>
                   <select value={editData.rol} onChange={e => setEditData({ ...editData, rol: e.target.value })}>
-                    <option value="Aprendiz">Aprendiz</option>
-                    <option value="Instructor">Instructor</option>
-                    <option value="Administrador">Administrador</option>
+                    <option value="aprendiz">Aprendiz</option>
+                    <option value="instructor">Instructor</option>
+                    <option value="administrador">Administrador</option>
                   </select>
                 </div>
                 <div className="form-group">
