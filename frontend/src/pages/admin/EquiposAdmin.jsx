@@ -28,6 +28,9 @@ const EquiposAdmin = () => {
   const [editData, setEditData] = useState({ marca: '', tipo: '', modelo: '', estado: 'Disponible' });
   const [filtros, setFiltros] = useState({ buscar: '', estado: '', marca: '' });
   const [confirmId, setConfirmId] = useState(null);
+  const [historial, setHistorial] = useState([]);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
+  const [showHistorial, setShowHistorial] = useState(false);
   const token = localStorage.getItem('token');
 
   useEffect(() => {
@@ -112,11 +115,24 @@ const EquiposAdmin = () => {
   };
 
   const abrirVer = (p) => { setSeleccionado(p); setShowVerModal(true); };
-  const abrirEditar = (p) => {
-    setSeleccionado(p);
-    setEditData({ marca: p.marca, tipo: p.tipo || '', modelo: p.modelo, estado: p.estado });
-    setShowEditModal(true);
-  };
+  const abrirEditar = async (p) => {
+  setSeleccionado(p);
+  setEditData({ marca: p.marca, tipo: p.tipo || '', modelo: p.modelo, estado: p.estado });
+  setShowHistorial(false);
+  setHistorial([]);
+  setShowEditModal(true);
+  try {
+    setLoadingHistorial(true);
+    const res = await fetch(`/api/portatiles/${p.id_portatil}/historial`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setHistorial(data);
+    }
+  } catch {}
+  finally { setLoadingHistorial(false); }
+};
 
   const estadoColor = (e) => ({ Disponible: '#4ade80', Asignado: '#facc15', 'Dañado': '#f87171', Mantenimiento: '#fb923c' }[e] || '#c9a8ff');
 
@@ -246,30 +262,110 @@ const EquiposAdmin = () => {
         )}
 
         {showEditModal && seleccionado && (
-          <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <h2 className="modal-title">Editar pórtatil</h2>
-              {error && <p className="table-error">{error}</p>}
-              <form onSubmit={handleEditar}>
-                <div className="form-group"><label>Marca</label><input type="text" value={editData.marca} onChange={e => setEditData({ ...editData, marca: e.target.value })} required /></div>
-                <div className="form-group"><label>Tipo</label><input type="text" value={editData.tipo} onChange={e => setEditData({ ...editData, tipo: e.target.value })} required /></div>
-                <div className="form-group"><label>Modelo</label><input type="text" value={editData.modelo} onChange={e => setEditData({ ...editData, modelo: e.target.value })} required /></div>
-                <div className="form-group"><label>Estado</label>
-                  <select value={editData.estado} onChange={e => setEditData({ ...editData, estado: e.target.value })}>
-                    <option value="Disponible">Disponible</option>
-                    <option value="Asignado">Asignado</option>
-                    <option value="Dañado">Dañado</option>
-                    <option value="Mantenimiento">Mantenimiento</option>
-                  </select>
-                </div>
-                <div className="modal-actions">
-                  <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancelar</button>
-                  <button type="submit" className="btn-save">Guardar cambios</button>
-                </div>
-              </form>
+  <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+    <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth:'520px'}}>
+
+      {/* TABS */}
+      <div style={{display:'flex', gap:'8px', marginBottom:'18px'}}>
+        <button
+          type="button"
+          onClick={() => setShowHistorial(false)}
+          style={{
+            flex:1, padding:'8px', borderRadius:'8px', border:'none', cursor:'pointer',
+            background: !showHistorial ? '#7f5af0' : 'rgba(127,90,240,0.15)',
+            color: !showHistorial ? '#fff' : '#b8a8d8',
+            fontWeight:700, fontSize:'13px'
+          }}>
+          Editar
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowHistorial(true)}
+          style={{
+            flex:1, padding:'8px', borderRadius:'8px', border:'none', cursor:'pointer',
+            background: showHistorial ? '#7f5af0' : 'rgba(127,90,240,0.15)',
+            color: showHistorial ? '#fff' : '#b8a8d8',
+            fontWeight:700, fontSize:'13px'
+          }}>
+          Historial {historial.length > 0 && `(${historial.length})`}
+        </button>
+      </div>
+
+      {!showHistorial ? (
+        <>
+          <h2 className="modal-title">Editar pórtatil</h2>
+          {error && <p className="table-error">{error}</p>}
+          <form onSubmit={handleEditar}>
+            <div className="form-group"><label>Marca</label>
+              <input type="text" value={editData.marca} onChange={e => setEditData({...editData, marca: e.target.value})} required />
             </div>
+            <div className="form-group"><label>Tipo</label>
+              <input type="text" value={editData.tipo} onChange={e => setEditData({...editData, tipo: e.target.value})} required />
+            </div>
+            <div className="form-group"><label>Modelo</label>
+              <input type="text" value={editData.modelo} onChange={e => setEditData({...editData, modelo: e.target.value})} required />
+            </div>
+            <div className="form-group"><label>Estado</label>
+              <select value={editData.estado} onChange={e => setEditData({...editData, estado: e.target.value})}>
+                <option value="Disponible">Disponible</option>
+                <option value="Asignado">Asignado</option>
+                <option value="Dañado">Dañado</option>
+                <option value="Mantenimiento">Mantenimiento</option>
+              </select>
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancelar</button>
+              <button type="submit" className="btn-save">Guardar cambios</button>
+            </div>
+          </form>
+        </>
+      ) : (
+        <>
+          <h2 className="modal-title">Historial — {seleccionado.marca} {seleccionado.modelo}</h2>
+          {loadingHistorial ? (
+            <p style={{color:'#b8a8d8', textAlign:'center', padding:'30px 0'}}>Cargando historial...</p>
+          ) : historial.length === 0 ? (
+            <p style={{color:'#7a6a9a', textAlign:'center', padding:'30px 0'}}>Sin cambios registrados aún.</p>
+          ) : (
+            <div style={{display:'flex', flexDirection:'column', gap:'10px', maxHeight:'320px', overflowY:'auto'}}>
+              {historial.map(h => (
+                <div key={h.id} style={{
+                  background:'rgba(127,90,240,0.08)',
+                  border:'1px solid rgba(127,90,240,0.25)',
+                  borderRadius:'10px', padding:'12px 14px'
+                }}>
+                  <div style={{display:'flex', justifyContent:'space-between', marginBottom:'6px'}}>
+                    <span style={{color:'#c9a8ff', fontWeight:700, fontSize:'13px', textTransform:'capitalize'}}>
+                      {h.campo_modificado}
+                    </span>
+                    <span style={{color:'#7a6a9a', fontSize:'11px'}}>
+                      {new Date(h.fecha).toLocaleString('es-CO')}
+                    </span>
+                  </div>
+                  <div style={{display:'flex', alignItems:'center', gap:'8px', fontSize:'13px'}}>
+                    <span style={{color:'#f87171', background:'rgba(248,113,113,0.1)', borderRadius:'6px', padding:'2px 8px'}}>
+                      {h.valor_anterior}
+                    </span>
+                    <span style={{color:'#7a6a9a'}}>→</span>
+                    <span style={{color:'#4ade80', background:'rgba(74,222,128,0.1)', borderRadius:'6px', padding:'2px 8px'}}>
+                      {h.valor_nuevo}
+                    </span>
+                  </div>
+                  <div style={{marginTop:'6px', fontSize:'11px', color:'#7a6a9a'}}>
+                    Por: {h.modificado_por}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="modal-actions" style={{marginTop:'16px'}}>
+            <button className="btn-save" onClick={() => setShowEditModal(false)}>Cerrar</button>
           </div>
-        )}
+        </>
+      )}
+    </div>
+  </div>
+)}
 
         <Pagination page={page} total={filtrados.length} perPage={PER_PAGE} onChange={p => setPage(p)} />
         {confirmId && <ConfirmModal mensaje="Esta acción no se puede deshacer." onConfirm={() => handleEliminar(confirmId)} onCancel={() => setConfirmId(null)} />}
