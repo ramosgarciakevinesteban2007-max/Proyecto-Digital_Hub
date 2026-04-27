@@ -59,10 +59,6 @@ const SidebarAdmin = ({ onCollapse }) => {
           <span className="sidebar-icon"><IconHistory size={17} /></span>
           {!collapsed && <span className="sidebar-label">Historial</span>}
         </Link>
-        <Link to="/admin/papelera" className={`sidebar-item ${isActive('/admin/papelera') ? 'active' : ''}`} title={collapsed ? 'Papelera' : ''}>
-          <span className="sidebar-icon"><IconTrash size={17} /></span>
-          {!collapsed && <span className="sidebar-label">Papelera</span>}
-        </Link>
       </nav>
 
       <div className="sidebar-footer">

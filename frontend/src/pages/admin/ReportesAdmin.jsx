@@ -83,7 +83,7 @@ const importarExcel = async (e) => {
   const cargar = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/reportes', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch('/api/reportes', { headers: { Authorization: `Bearer ${token}` } });
       if (res.status === 401) { navigate('/login'); return; }
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
@@ -220,7 +220,8 @@ const importarExcel = async (e) => {
                       <td style={{ fontSize: '13px' }}>{r.nombre_aprendiz || '—'}</td>
                       <td style={{ maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.descripcion}</td>
                       <td>
-                        <span style={{ background: estadoBg(r.estado_reporte), color: estadoColor(r.estado_reporte), border: `1px solid ${estadoColor(r.estado_reporte)}44`, borderRadius: '50px', padding: '3px 12px', fontSize: '12px', fontWeight: 600 }}>
+                        <span style={{ color: estadoColor(r.estado_reporte), fontWeight: 600, fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: estadoColor(r.estado_reporte) }} />
                           {r.estado_reporte}
                         </span>
                       </td>
@@ -251,24 +252,30 @@ const importarExcel = async (e) => {
 
         {seleccionado && !showEditModal && (
           <div className="modal-overlay" onClick={() => setSeleccionado(null)}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth:'520px'}}>
               <h2 className="modal-title">Reporte #{seleccionado.id_reporte}</h2>
               <div className="detalle-grid">
+                <div className="detalle-item"><span className="detalle-label">Aprendiz</span><span className="detalle-valor">{seleccionado.nombre_aprendiz || '—'}</span></div>
+                <div className="detalle-item"><span className="detalle-label">Correo</span><span className="detalle-valor" style={{fontSize:'13px'}}>{seleccionado.correo_aprendiz || '—'}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Estado</span><span className="detalle-valor" style={{ color: estadoColor(seleccionado.estado_reporte), fontWeight: 700 }}>{seleccionado.estado_reporte}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Fecha</span><span className="detalle-valor">{seleccionado.fecha_reporte?.split('T')[0]}</span></div>
-                {seleccionado.nombre_aprendiz && <div className="detalle-item"><span className="detalle-label">Aprendiz</span><span className="detalle-valor">{seleccionado.nombre_aprendiz}</span></div>}
-                <div className="detalle-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}><span className="detalle-label">Descripcion</span><span style={{ fontSize: '14px', color: '#f0eaff', lineHeight: '1.6' }}>{seleccionado.descripcion}</span></div>
+                <div className="detalle-item" style={{ gridColumn:'1/-1', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                  <span className="detalle-label">Descripción</span>
+                  <span style={{ fontSize: '14px', color: '#f0eaff', lineHeight: '1.6', whiteSpace:'pre-wrap' }}>{seleccionado.descripcion}</span>
+                </div>
                 {seleccionado.archivo && (
-                  <div className="detalle-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
+                  <div className="detalle-item" style={{ gridColumn:'1/-1', flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
                     <span className="detalle-label">Evidencia adjunta</span>
-                    {/\.(jpg|jpeg|png)$/i.test(seleccionado.archivo) ? (
-                      <img src={`/uploads/${seleccionado.archivo}`} alt="evidencia"
-                        style={{ maxWidth: '100%', borderRadius: '10px', border: '1px solid rgba(127,90,240,0.3)', cursor: 'pointer' }}
+                    {/\.(jpg|jpeg|png|gif|webp)$/i.test(seleccionado.archivo) ? (
+                      <img
+                        src={`/uploads/${seleccionado.archivo}`}
+                        alt="evidencia"
+                        style={{ maxWidth: '100%', maxHeight: '300px', objectFit:'contain', borderRadius: '10px', border: '1px solid rgba(127,90,240,0.3)', cursor: 'pointer' }}
                         onClick={() => window.open(`/uploads/${seleccionado.archivo}`, '_blank')}
                       />
                     ) : (
                       <a href={`/uploads/${seleccionado.archivo}`} target="_blank" rel="noreferrer"
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#c9a8ff', fontSize: '13px', fontWeight: 600, background: 'rgba(127,90,240,0.1)', border: '1px solid rgba(127,90,240,0.3)', borderRadius: '8px', padding: '8px 14px', textDecoration: 'none' }}>
+                        style={{ display:'inline-flex', alignItems:'center', gap:'8px', color:'#c9a8ff', fontSize:'13px', fontWeight:600, background:'rgba(127,90,240,0.1)', border:'1px solid rgba(127,90,240,0.3)', borderRadius:'8px', padding:'8px 14px', textDecoration:'none' }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         Ver archivo adjunto
                       </a>
@@ -276,7 +283,10 @@ const importarExcel = async (e) => {
                   </div>
                 )}
               </div>
-              <div className="modal-actions"><button className="btn-save" onClick={() => setSeleccionado(null)}>Cerrar</button></div>
+              <div className="modal-actions">
+                <button className="btn-cancel" onClick={() => { setSeleccionado(null); setShowEditModal(true); setEditData({ estado_reporte: seleccionado.estado_reporte }); }}>Cambiar estado</button>
+                <button className="btn-save" onClick={() => setSeleccionado(null)}>Cerrar</button>
+              </div>
             </div>
           </div>
         )}

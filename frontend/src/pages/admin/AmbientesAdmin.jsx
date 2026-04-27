@@ -57,7 +57,7 @@ const importarExcel = async (e) => {
   const cargar = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/ambiente', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch('/api/ambientes', { headers: { Authorization: `Bearer ${token}` } });
       if (res.status === 401) { navigate('/login'); return; }
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
@@ -74,7 +74,7 @@ const importarExcel = async (e) => {
   const handleSubmit = async (e) => {
     e.preventDefault(); setError('');
     try {
-      const res = await fetch('/ambiente', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(formData) });
+      const res = await fetch('/api/ambientes', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(formData) });
       const d = await res.json();
       if (!res.ok) { setError(d.message || 'Error'); return; }
       setShowModal(false); setFormData({ nombre: '', direccion: '' }); cargar();
@@ -88,7 +88,7 @@ const importarExcel = async (e) => {
   const handleEditar = async (e) => {
     e.preventDefault(); setError('');
     try {
-      const res = await fetch(`/ambiente/${seleccionado.id_ambiente}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(editData) });
+      const res = await fetch(`/api/ambientes/${seleccionado.id_ambiente}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(editData) });
       const d = await res.json();
       if (!res.ok) { setError(d.message || 'Error'); return; }
       setShowEditModal(false); cargar();
@@ -100,7 +100,7 @@ const importarExcel = async (e) => {
   const handleEliminar = async (id) => {
     if (!confirm('Eliminar este ambiente?')) return;
     try {
-      const res = await fetch(`/ambiente/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`/api/ambientes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) cargar();
     } catch {}
     const local = getLocalA().filter(a => a.id_ambiente !== id);

@@ -148,18 +148,42 @@ router.get(
 Solo ADMIN o INSTRUCTOR
 */
 
+
 router.put(
   "/:id",
   verificarToken,
   verificarRol(["administrador", "instructor"]),
   validarCamposObligatorios(["marca", "tipo", "modelo", "estado"]),
   async (req, res) => {
-
     try {
-
       const { id } = req.params;
       const { marca, tipo, modelo, estado, ubicacion, descripcion } = req.body;
 
+      // Obtener valores anteriores
+      const [anterior] = await pool.query(
+        "SELECT * FROM portatil WHERE id_portatil = ?", [id]
+      );
+      if (anterior.length === 0)
+        return res.status(404).json({ mensaje: "Portátil no encontrado" });
+
+      const viejo = anterior[0];
+      const modificadoPor = req.usuario?.correo || req.usuario?.nombre || `usuario #${req.usuario?.id}`;
+
+      // Detectar cambios y registrarlos
+      const campos = { marca, tipo, modelo, estado };
+      for (const [campo, valorNuevo] of Object.entries(campos)) {
+        const valorAnterior = viejo[campo];
+        if (String(valorAnterior) !== String(valorNuevo)) {
+          await pool.query(
+            `INSERT INTO historial_portatil 
+             (id_portatil, campo_modificado, valor_anterior, valor_nuevo, modificado_por)
+             VALUES (?, ?, ?, ?, ?)`,
+            [id, campo, valorAnterior, valorNuevo, modificadoPor]
+          );
+        }
+      }
+
+      // Actualizar portátil
       const [resultado] = await pool.query(
         `UPDATE portatil
          SET marca = ?, tipo = ?, modelo = ?, estado = ?, ubicacion = ?, descripcion = ?,
@@ -168,25 +192,48 @@ router.put(
         [marca, tipo, modelo, estado, ubicacion || '', descripcion || '', estado, id]
       );
 
-      if (resultado.affectedRows === 0) {
+      if (resultado.affectedRows === 0)
         return res.status(404).json({ mensaje: "Portátil no encontrado" });
-      }
 
-      // Si cambia a no-asignado, desactivar en portatil_aprendiz
       if (estado !== 'asignado') {
-        await pool.query("UPDATE portatil_aprendiz SET estado = 'inactivo' WHERE id_portatil = ?", [id]);
+        await pool.query(
+          "UPDATE portatil_aprendiz SET estado = 'inactivo' WHERE id_portatil = ?", [id]
+        );
       }
 
       res.json({ mensaje: "Portátil actualizado correctamente" });
 
     } catch (error) {
-
-      res.status(500).json({
-        mensaje: "Error al actualizar el portátil"
-      });
-
+      console.error("ERROR EDITAR:", error.message);
+      res.status(500).json({ mensaje: "Error al actualizar el portátil" });
     }
+  }
+);
 
+
+/*
+=========================================
+4.1 HISTORIAL DE CAMBIOS DE UN PORTÁTIL
+=========================================
+*/
+router.get(
+  "/:id/historial",
+  verificarToken,
+  verificarRol(["administrador", "instructor"]),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const [rows] = await pool.query(
+        `SELECT * FROM historial_portatil 
+         WHERE id_portatil = ? 
+         ORDER BY fecha DESC`,
+        [id]
+      );
+      res.json(rows);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ mensaje: "Error al obtener historial" });
+    }
   }
 );
 
