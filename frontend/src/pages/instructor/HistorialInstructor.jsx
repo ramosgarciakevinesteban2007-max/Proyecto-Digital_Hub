@@ -22,7 +22,13 @@ const HistorialInstructor = () => {
 
   useEffect(() => {
     if (!token) { navigate('/login'); return; }
-    fetch('/api/portatiles', { headers: { Authorization: `Bearer ${token}` } })
+    cargar();
+    const interval = setInterval(cargar, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const cargar = () => {
+    fetch('/api/portatiles?limit=500', { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.status === 401 ? navigate('/login') : r.json())
       .then(d => {
         const lista = Array.isArray(d) ? d : (Array.isArray(d?.data) ? d.data : []);
@@ -30,7 +36,7 @@ const HistorialInstructor = () => {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  };
 
   const filtrados = portatiles.filter(p => {
     const b = filtro.toLowerCase();
@@ -53,7 +59,12 @@ const HistorialInstructor = () => {
             <h1 className="equipment-title">Historial de Equipos</h1>
             <p className="equipment-subtitle">Registro completo de todos los equipos en el sistema</p>
           </div>
-          <NotificacionesBtn />
+          <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
+            <button onClick={cargar} style={{background:'rgba(127,90,240,0.15)',border:'1px solid rgba(127,90,240,0.35)',borderRadius:'10px',padding:'8px 16px',color:'#c9a8ff',fontSize:'13px',fontWeight:600,cursor:'pointer'}}>
+              ↻ Actualizar
+            </button>
+            <NotificacionesBtn />
+          </div>
         </div>
 
         <div className="hist-summary">
@@ -75,9 +86,14 @@ const HistorialInstructor = () => {
           </div>
         </div>
 
-        <div className="hist-search-row">
-          <input className="filter-input" placeholder="Buscar por serie o marca..." value={filtro} onChange={e => { setFiltro(e.target.value); setPage(1); }} style={{maxWidth:'280px'}} />
-          <select className="filter-input" value={filtroEstado} onChange={e => { setFiltroEstado(e.target.value); setPage(1); }} style={{maxWidth:'180px'}}>
+        <div className="filters-row">
+          <input
+            className="filter-input"
+            placeholder="Buscar por serie, marca o modelo..."
+            value={filtro}
+            onChange={e => { setFiltro(e.target.value); setPage(1); }}
+          />
+          <select className="filter-input" value={filtroEstado} onChange={e => { setFiltroEstado(e.target.value); setPage(1); }}>
             <option value="">Todos los estados</option>
             <option value="disponible">Disponible</option>
             <option value="asignado">Asignado</option>

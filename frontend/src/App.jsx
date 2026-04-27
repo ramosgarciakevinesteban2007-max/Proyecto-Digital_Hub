@@ -10,7 +10,6 @@ import NuevaPassword from './pages/NuevaPassword';
 import InicioAdmin from './pages/admin/Inicio';
 import EquiposAdmin from './pages/admin/EquiposAdmin';
 import HistorialAdmin from './pages/admin/HistorialAdmin';
-import PapeleraAdmin from './pages/admin/PapeleraAdmin';
 import AjustesAdmin from './pages/admin/AjustesAdmin';
 import UsuariosAdmin from './pages/admin/UsuariosAdmin';
 import ReportesAdmin from './pages/admin/ReportesAdmin';
@@ -21,7 +20,6 @@ import InicioInstructor from './pages/instructor/InicioInstructor';
 import EquiposInstructor from './pages/instructor/EquiposInstructor';
 import ReportesInstructor from './pages/instructor/ReportesInstructor';
 import HistorialInstructor from './pages/instructor/HistorialInstructor';
-import PapeleraInstructor from './pages/instructor/PapeleraInstructor';
 import AjustesInstructor from './pages/instructor/AjustesInstructor';
 import FichasInstructor from './pages/instructor/FichasInstructor';
 import UsuariosInstructor from './pages/instructor/UsuariosInstructor';
@@ -57,7 +55,6 @@ function App() {
         <Route path="/admin/inicio"      element={<InicioAdmin />} />
         <Route path="/admin/equipos"     element={<EquiposAdmin />} />
         <Route path="/admin/historial"   element={<HistorialAdmin />} />
-        <Route path="/admin/papelera"    element={<PapeleraAdmin />} />
         <Route path="/admin/ajustes"     element={<AjustesAdmin />} />
         <Route path="/admin/usuarios"    element={<UsuariosAdmin />} />
         <Route path="/admin/reportes"    element={<ReportesAdmin />} />
@@ -71,7 +68,6 @@ function App() {
         <Route path="/instructor/comentarios" element={<ReportesInstructor />} />
         <Route path="/instructor/usuarios"    element={<UsuariosInstructor />} />
         <Route path="/instructor/historial"   element={<HistorialInstructor />} />
-        <Route path="/instructor/papelera"    element={<PapeleraInstructor />} />
         <Route path="/instructor/ajustes"     element={<AjustesInstructor />} />
         <Route path="/instructor/fichas"      element={<FichasInstructor />} />
         <Route path="/instructor/ficha"       element={<Navigate to="/instructor/fichas" replace />} />

@@ -808,13 +808,11 @@ const FichasInstructor = () => {
 
             <div className="modal-overlay" onClick={() => setShowVerReporte(false)}>
 
-              <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth:'520px'}}>
 
-                <h2 className="modal-title">Detalle del reporte</h2>
+                <h2 className="modal-title">Reporte #{reporteSeleccionado.id_reporte}</h2>
 
                 <div className="detalle-grid">
-
-                  <div className="detalle-item"><span className="detalle-label">ID</span><span className="detalle-valor">#{reporteSeleccionado.id_reporte}</span></div>
 
                   <div className="detalle-item"><span className="detalle-label">Aprendiz</span><span className="detalle-valor">{reporteSeleccionado.aprendiz}</span></div>
 
@@ -822,7 +820,30 @@ const FichasInstructor = () => {
 
                   <div className="detalle-item"><span className="detalle-label">Fecha</span><span className="detalle-valor">{reporteSeleccionado.fecha_reporte?.split('T')[0]}</span></div>
 
-                  <div className="detalle-item" style={{flexDirection:'column',alignItems:'flex-start',gap:'8px'}}><span className="detalle-label">Descripción</span><span style={{fontSize:'14px',color:'#f0eaff',lineHeight:'1.6'}}>{reporteSeleccionado.descripcion}</span></div>
+                  <div className="detalle-item" style={{gridColumn:'1/-1',flexDirection:'column',alignItems:'flex-start',gap:'8px'}}>
+                    <span className="detalle-label">Descripción</span>
+                    <span style={{fontSize:'14px',color:'#f0eaff',lineHeight:'1.6',whiteSpace:'pre-wrap'}}>{reporteSeleccionado.descripcion}</span>
+                  </div>
+
+                  {reporteSeleccionado.archivo && (
+                    <div className="detalle-item" style={{gridColumn:'1/-1',flexDirection:'column',alignItems:'flex-start',gap:'10px'}}>
+                      <span className="detalle-label">Evidencia adjunta</span>
+                      {/\.(jpg|jpeg|png|gif|webp)$/i.test(reporteSeleccionado.archivo) ? (
+                        <img
+                          src={`/uploads/${reporteSeleccionado.archivo}`}
+                          alt="evidencia"
+                          style={{maxWidth:'100%',maxHeight:'300px',objectFit:'contain',borderRadius:'10px',border:'1px solid rgba(127,90,240,0.3)',cursor:'pointer'}}
+                          onClick={() => window.open(`/uploads/${reporteSeleccionado.archivo}`, '_blank')}
+                        />
+                      ) : (
+                        <a href={`/uploads/${reporteSeleccionado.archivo}`} target="_blank" rel="noreferrer"
+                          style={{display:'inline-flex',alignItems:'center',gap:'8px',color:'#c9a8ff',fontSize:'13px',fontWeight:600,background:'rgba(127,90,240,0.1)',border:'1px solid rgba(127,90,240,0.3)',borderRadius:'8px',padding:'8px 14px',textDecoration:'none'}}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                          Ver archivo adjunto
+                        </a>
+                      )}
+                    </div>
+                  )}
 
                 </div>
 

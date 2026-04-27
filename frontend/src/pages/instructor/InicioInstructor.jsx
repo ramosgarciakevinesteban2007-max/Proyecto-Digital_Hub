@@ -39,7 +39,7 @@ const InicioInstructor = () => {
 
       Promise.all([
 
-        fetch('/api/portatiles', { headers: h }).then(r => r.json()).catch(() => ({ data: [] })),
+        fetch('/api/portatiles?limit=500', { headers: h }).then(r => r.json()).catch(() => ({ data: [] })),
 
         fetch('/api/fichas',     { headers: h }).then(r => r.json()).catch(() => []),
 

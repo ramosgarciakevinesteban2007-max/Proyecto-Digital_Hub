@@ -19,10 +19,10 @@ const Inicio = () => {
     const cargar = () => {
       const headers = { Authorization: `Bearer ${token}` };
       Promise.all([
-        fetch('/api/portatiles', { headers }).then(r => r.json()).catch(() => ({ data: [] })),
-        fetch('/api/fichas',     { headers }).then(r => r.json()).catch(() => []),
-        fetch('/api/reportes',   { headers }).then(r => r.json()).catch(() => []),
-        fetch('/api/usuarios',   { headers }).then(r => r.json()).catch(() => []),
+        fetch('/api/portatiles?limit=500', { headers }).then(r => r.json()).catch(() => ({ data: [] })),
+        fetch('/api/fichas',               { headers }).then(r => r.json()).catch(() => []),
+        fetch('/api/reportes',             { headers }).then(r => r.json()).catch(() => []),
+        fetch('/api/usuarios',             { headers }).then(r => r.json()).catch(() => []),
       ]).then(([portatilesRes, fichas, reportes, usuarios]) => {
         const pArr = Array.isArray(portatilesRes) ? portatilesRes : (Array.isArray(portatilesRes?.data) ? portatilesRes.data : []);
         const rArr = Array.isArray(reportes) ? reportes : [];
