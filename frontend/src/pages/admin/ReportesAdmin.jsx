@@ -220,7 +220,8 @@ const importarExcel = async (e) => {
                       <td style={{ fontSize: '13px' }}>{r.nombre_aprendiz || '—'}</td>
                       <td style={{ maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.descripcion}</td>
                       <td>
-                        <span style={{ background: estadoBg(r.estado_reporte), color: estadoColor(r.estado_reporte), border: `1px solid ${estadoColor(r.estado_reporte)}44`, borderRadius: '50px', padding: '3px 12px', fontSize: '12px', fontWeight: 600 }}>
+                        <span style={{ color: estadoColor(r.estado_reporte), fontWeight: 600, fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: estadoColor(r.estado_reporte) }} />
                           {r.estado_reporte}
                         </span>
                       </td>

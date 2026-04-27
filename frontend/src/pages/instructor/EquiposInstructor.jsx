@@ -16,8 +16,6 @@ import "../../components/Pagination.css";
 
 import ConfirmModal from "../../components/ConfirmModal";
 
-
-
 const EquiposInstructor = () => {
 
   const navigate = useNavigate();
@@ -38,9 +36,9 @@ const EquiposInstructor = () => {
 
   const [seleccionado, setSeleccionado] = useState(null);
 
-  const [formData, setFormData] = useState({ num_serie: "", marca: "", tipo: "", modelo: "", estado: "disponible" });
+  const [formData, setFormData] = useState({ num_serie: "", marca: "", tipo: "", modelo: "", estado: "disponible", ubicacion: "", descripcion: "" });
 
-  const [editData, setEditData] = useState({ marca: "", tipo: "", modelo: "", estado: "disponible" });
+  const [editData, setEditData] = useState({ marca: "", tipo: "", modelo: "", estado: "disponible", ubicacion: "", descripcion: "" });
 
   const [asignarData, setAsignarData] = useState({ correo: "", id_portatil: null });
 
@@ -56,9 +54,7 @@ const EquiposInstructor = () => {
 
   const token = localStorage.getItem("token");
 
-
-
-  useEffect(() => {
+useEffect(() => {
 
     if (!token) { navigate("/login"); return; }
 
@@ -66,15 +62,13 @@ const EquiposInstructor = () => {
 
   }, []);
 
-
-
-  const cargar = async () => {
+const cargar = async () => {
 
     try {
 
       setLoading(true);
 
-      const res = await fetch("/api/portatiles", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch("/api/portatiles?limit=500", { headers: { Authorization: `Bearer ${token}` } });
 
       if (res.status === 401) { navigate("/login"); return; }
 
@@ -90,9 +84,7 @@ const EquiposInstructor = () => {
 
   };
 
-
-
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
 
     e.preventDefault(); setError("");
 
@@ -100,7 +92,7 @@ const EquiposInstructor = () => {
 
       const res = await fetch("/api/portatiles", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(formData) });
 
-      if (res.ok) { setShowModal(false); setFormData({ num_serie: "", marca: "", tipo: "", modelo: "", estado: "disponible" }); cargar(); return; }
+      if (res.ok) { setShowModal(false); setFormData({ num_serie: "", marca: "", tipo: "", modelo: "", estado: "disponible", ubicacion: "", descripcion: "" }); setFiltros({ buscar: "", estado: "", marca: "" }); setPage(1); cargar(); return; }
 
       const d = await res.json(); setError(d.mensaje || "Error al guardar");
 
@@ -108,9 +100,7 @@ const EquiposInstructor = () => {
 
   };
 
-
-
-  const handleEditar = async (e) => {
+const handleEditar = async (e) => {
 
     e.preventDefault(); setError("");
 
@@ -126,13 +116,9 @@ const EquiposInstructor = () => {
 
   };
 
+const [confirmId, setConfirmId] = useState(null);
 
-
-  const [confirmId, setConfirmId] = useState(null);
-
-
-
-  const handleEliminar = async (id) => {
+const handleEliminar = async (id) => {
 
     try {
 
@@ -154,9 +140,7 @@ const EquiposInstructor = () => {
 
   };
 
-
-
-  const handleAsignar = async (e) => {
+const handleAsignar = async (e) => {
 
     e.preventDefault(); setAsignarError("");
 
@@ -186,35 +170,29 @@ const EquiposInstructor = () => {
 
   };
 
+const abrirVer = (p) => { setSeleccionado(p); setShowVerModal(true); };
 
-
-  const abrirVer = (p) => { setSeleccionado(p); setShowVerModal(true); };
-
-  const abrirEditar = (p) => { setSeleccionado(p); setEditData({ marca: p.marca, tipo: p.tipo || "", modelo: p.modelo, estado: p.estado }); setShowEditModal(true); };
+  const abrirEditar = (p) => { setSeleccionado(p); setEditData({ marca: p.marca, tipo: p.tipo || "", modelo: p.modelo, estado: p.estado, ubicacion: p.ubicacion || "", descripcion: p.descripcion || "" }); setShowEditModal(true); };
 
   const abrirAsignar = (p) => { setAsignarData({ correo: "", id_portatil: p.id_portatil }); setAsignarError(""); setShowAsignarModal(true); };
 
-  const estadoColor = (e) => ({ disponible: "#4ade80", asignado: "#facc15", 'dañado': "#f87171", mantenimiento: "#fb923c" }[e] || "#c9a8ff");
+  const estadoColor = (e) => {
+    const estado = (e || '').toLowerCase();
+    return { disponible: "#4ade80", asignado: "#facc15", 'dañado': "#f87171", mantenimiento: "#fb923c" }[estado] || "#c9a8ff";
+  };
 
-
-
-  const filtrados = portatiles.filter(p => {
+const filtrados = portatiles.filter(p => {
 
     const b = filtros.buscar.toLowerCase();
-
     return (!b || p.num_serie?.toLowerCase().includes(b) || p.marca?.toLowerCase().includes(b) || p.modelo?.toLowerCase().includes(b))
-
-      && (!filtros.estado || p.estado === filtros.estado)
-
+      && (!filtros.estado || p.estado?.toLowerCase() === filtros.estado.toLowerCase())
       && (!filtros.marca || p.marca?.toLowerCase().includes(filtros.marca.toLowerCase()));
 
   });
 
   const paginados = filtrados.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-
-
-  return (
+return (
 
     <div className="equipment-layout">
 
@@ -234,9 +212,8 @@ const EquiposInstructor = () => {
 
           <div className="stat-card"><div className="stat-label">Total</div><div className="stat-value">{portatiles.length}</div></div>
 
-          <div className="stat-card"><div className="stat-icon"><IconMonitor size={24} /></div><div className="stat-label">Disponibles</div><div className="stat-value">{portatiles.filter(p => p.estado === "disponible").length}</div></div>
-
-          <div className="stat-card"><div className="stat-icon"><IconBarChart size={24} /></div><div className="stat-label">Asignados</div><div className="stat-value">{portatiles.filter(p => p.estado === "asignado").length}</div></div>
+          <div className="stat-card"><div className="stat-icon"><IconMonitor size={24} /></div><div className="stat-label">Disponibles</div><div className="stat-value">{portatiles.filter(p => p.estado?.toLowerCase() === "disponible").length}</div></div>
+          <div className="stat-card"><div className="stat-icon"><IconBarChart size={24} /></div><div className="stat-label">Asignados</div><div className="stat-value">{portatiles.filter(p => p.estado?.toLowerCase() === "asignado").length}</div></div>
 
         </div>
 
@@ -264,21 +241,22 @@ const EquiposInstructor = () => {
 
           <table className="equipment-table">
 
-            <thead><tr><th>N Serie</th><th>Marca</th><th>Modelo</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>N Serie</th><th>Marca</th><th>Modelo</th><th>Ubicación</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr></thead>
 
             <tbody>
 
-              {loading ? <tr><td colSpan="5" style={{textAlign:"center",padding:"32px"}}>Cargando...</td></tr>
+              {loading ? <tr><td colSpan="7" style={{textAlign:"center",padding:"32px"}}>Cargando...</td></tr>
 
-              : filtrados.length === 0 ? <tr><td colSpan="5" style={{textAlign:"center",padding:"32px",color:"var(--text-muted-dark)"}}>Sin resultados</td></tr>
+              : filtrados.length === 0 ? <tr><td colSpan="7" style={{textAlign:"center",padding:"32px",color:"var(--text-muted-dark)"}}>Sin resultados</td></tr>
 
               : paginados.map(p => (
 
                 <tr key={p.id_portatil}>
 
                   <td>{p.num_serie}</td><td>{p.marca}</td><td>{p.modelo}</td>
-
-                  <td><span style={{color:estadoColor(p.estado),fontWeight:600,fontSize:"13px"}}>{p.estado}</span></td>
+                  <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{p.ubicacion || '—'}</td>
+                  <td style={{color:'var(--text-muted-dark)',fontSize:'13px',maxWidth:'160px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={p.descripcion}>{p.descripcion || '—'}</td>
+                  <td><span style={{color:estadoColor(p.estado),fontWeight:600,fontSize:"13px",display:'inline-flex',alignItems:'center',gap:'5px'}}><span style={{width:'6px',height:'6px',borderRadius:'50%',background:estadoColor(p.estado)}} />{p.estado}</span></td>
 
                   <td><div className="action-buttons">
 
@@ -288,7 +266,7 @@ const EquiposInstructor = () => {
 
                     <button className="action-btn delete" onClick={() => setConfirmId(p.id_portatil)}><IconTrash size={16} /></button>
 
-                    {p.estado !== "danado" && p.estado !== "mantenimiento" && (
+                    {p.estado !== "dañado" && p.estado !== "mantenimiento" && (
 
                       <button className="action-btn" title={p.estado === "asignado" ? "Asignar a otro aprendiz" : "Asignar"} style={{background:"rgba(74,222,128,0.15)",color:"#4ade80",border:"1px solid rgba(74,222,128,0.3)"}} onClick={() => abrirAsignar(p)}>
 
@@ -316,11 +294,68 @@ const EquiposInstructor = () => {
 
         <button className="btn-add-equipment" onClick={() => { setError(""); setShowModal(true); }}>Añadir Portatil</button>
 
-        {showModal && (<div className="modal-overlay" onClick={() => setShowModal(false)}><div className="modal-content" onClick={e => e.stopPropagation()}><h2 className="modal-title">Añadir portatil</h2>{error && <p className="table-error">{error}</p>}<form onSubmit={handleSubmit}><div className="form-group"><label>Número de serie</label><input type="text" value={formData.num_serie} onChange={e => setFormData({...formData, num_serie: e.target.value})} required /></div><div className="form-group"><label>Marca</label><input type="text" value={formData.marca} onChange={e => setFormData({...formData, marca: e.target.value})} required /></div><div className="form-group"><label>Tipo</label><input type="text" value={formData.tipo} onChange={e => setFormData({...formData, tipo: e.target.value})} required /></div><div className="form-group"><label>Modelo</label><input type="text" value={formData.modelo} onChange={e => setFormData({...formData, modelo: e.target.value})} required /></div><div className="form-group"><label>Estado</label><select value={formData.estado} onChange={e => setFormData({...formData, estado: e.target.value})}><option value="disponible">Disponible</option><option value="asignado">Asignado</option><option value="dañado">Dañado</option><option value="mantenimiento">Mantenimiento</option></select></div><div className="modal-actions"><button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>Cancelar</button><button type="submit" className="btn-save">Guardar</button></div></form></div></div>)}
+        {showModal && (
+          <div className="modal-overlay" onClick={() => setShowModal(false)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth:'560px'}}>
+              <h2 className="modal-title">Añadir portátil</h2>
+              {error && <p className="table-error">{error}</p>}
+              <form onSubmit={handleSubmit}>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
+                  <div className="form-group"><label>Número de serie</label><input type="text" value={formData.num_serie} onChange={e => setFormData({...formData, num_serie: e.target.value})} required /></div>
+                  <div className="form-group"><label>Marca</label><input type="text" value={formData.marca} onChange={e => setFormData({...formData, marca: e.target.value})} required /></div>
+                  <div className="form-group"><label>Tipo</label><input type="text" placeholder="ej: laptop, tablet..." value={formData.tipo} onChange={e => setFormData({...formData, tipo: e.target.value})} required /></div>
+                  <div className="form-group"><label>Modelo</label><input type="text" value={formData.modelo} onChange={e => setFormData({...formData, modelo: e.target.value})} required /></div>
+                  <div className="form-group"><label>Estado</label>
+                    <select value={formData.estado} onChange={e => setFormData({...formData, estado: e.target.value})}>
+                      <option value="disponible">Disponible</option>
+                      <option value="asignado">Asignado</option>
+                      <option value="dañado">Dañado</option>
+                      <option value="mantenimiento">Mantenimiento</option>
+                    </select>
+                  </div>
+                  <div className="form-group"><label>Ubicación</label><input type="text" placeholder="ej: Sala 3, Bloque B..." value={formData.ubicacion} onChange={e => setFormData({...formData, ubicacion: e.target.value})} /></div>
+                  <div className="form-group" style={{gridColumn:'1/-1'}}><label>Descripción</label><textarea rows="2" placeholder="Observaciones del equipo..." value={formData.descripcion} onChange={e => setFormData({...formData, descripcion: e.target.value})} style={{resize:'vertical'}} /></div>
+                </div>
+                <div className="modal-actions">
+                  <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>Cancelar</button>
+                  <button type="submit" className="btn-save">Guardar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
-        {showVerModal && seleccionado && (<div className="modal-overlay" onClick={() => setShowVerModal(false)}><div className="modal-content" onClick={e => e.stopPropagation()}><h2 className="modal-title">Detalle del portatil</h2><div className="detalle-grid"><div className="detalle-item"><span className="detalle-label">N Serie</span><span className="detalle-valor">{seleccionado.num_serie}</span></div><div className="detalle-item"><span className="detalle-label">Marca</span><span className="detalle-valor">{seleccionado.marca}</span></div><div className="detalle-item"><span className="detalle-label">Tipo</span><span className="detalle-valor">{seleccionado.tipo}</span></div><div className="detalle-item"><span className="detalle-label">Modelo</span><span className="detalle-valor">{seleccionado.modelo}</span></div><div className="detalle-item"><span className="detalle-label">Estado</span><span className="detalle-valor" style={{color:estadoColor(seleccionado.estado),fontWeight:600}}>{seleccionado.estado}</span></div></div><div className="modal-actions"><button className="btn-save" onClick={() => setShowVerModal(false)}>Cerrar</button></div></div></div>)}
+        {showVerModal && seleccionado && (<div className="modal-overlay" onClick={() => setShowVerModal(false)}><div className="modal-content" onClick={e => e.stopPropagation()}><h2 className="modal-title">Detalle del portatil</h2><div className="detalle-grid"><div className="detalle-item"><span className="detalle-label">N Serie</span><span className="detalle-valor">{seleccionado.num_serie}</span></div><div className="detalle-item"><span className="detalle-label">Marca</span><span className="detalle-valor">{seleccionado.marca}</span></div><div className="detalle-item"><span className="detalle-label">Tipo</span><span className="detalle-valor">{seleccionado.tipo}</span></div><div className="detalle-item"><span className="detalle-label">Modelo</span><span className="detalle-valor">{seleccionado.modelo}</span></div><div className="detalle-item"><span className="detalle-label">Estado</span><span className="detalle-valor" style={{color:estadoColor(seleccionado.estado),fontWeight:600}}>{seleccionado.estado}</span></div><div className="detalle-item"><span className="detalle-label">Ubicación</span><span className="detalle-valor">{seleccionado.ubicacion || '—'}</span></div><div className="detalle-item" style={{gridColumn:'1/-1'}}><span className="detalle-label">Descripción</span><span className="detalle-valor" style={{whiteSpace:'pre-wrap'}}>{seleccionado.descripcion || '—'}</span></div></div><div className="modal-actions"><button className="btn-save" onClick={() => setShowVerModal(false)}>Cerrar</button></div></div></div>)}
 
-        {showEditModal && seleccionado && (<div className="modal-overlay" onClick={() => setShowEditModal(false)}><div className="modal-content" onClick={e => e.stopPropagation()}><h2 className="modal-title">Editar portatil</h2>{error && <p className="table-error">{error}</p>}<form onSubmit={handleEditar}><div className="form-group"><label>Marca</label><input type="text" value={editData.marca} onChange={e => setEditData({...editData, marca: e.target.value})} required /></div><div className="form-group"><label>Tipo</label><input type="text" value={editData.tipo} onChange={e => setEditData({...editData, tipo: e.target.value})} required /></div><div className="form-group"><label>Modelo</label><input type="text" value={editData.modelo} onChange={e => setEditData({...editData, modelo: e.target.value})} required /></div><div className="form-group"><label>Estado</label><select value={editData.estado} onChange={e => setEditData({...editData, estado: e.target.value})}><option value="disponible">Disponible</option><option value="asignado">Asignado</option><option value="dañado">Dañado</option><option value="mantenimiento">Mantenimiento</option></select></div><div className="modal-actions"><button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancelar</button><button type="submit" className="btn-save">Guardar cambios</button></div></form></div></div>)}
+        {showEditModal && seleccionado && (
+          <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth:'560px'}}>
+              <h2 className="modal-title">Editar portátil — {seleccionado.num_serie}</h2>
+              {error && <p className="table-error">{error}</p>}
+              <form onSubmit={handleEditar}>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
+                  <div className="form-group"><label>Marca</label><input type="text" value={editData.marca} onChange={e => setEditData({...editData, marca: e.target.value})} required /></div>
+                  <div className="form-group"><label>Tipo</label><input type="text" value={editData.tipo} onChange={e => setEditData({...editData, tipo: e.target.value})} required /></div>
+                  <div className="form-group"><label>Modelo</label><input type="text" value={editData.modelo} onChange={e => setEditData({...editData, modelo: e.target.value})} required /></div>
+                  <div className="form-group"><label>Estado</label>
+                    <select value={editData.estado} onChange={e => setEditData({...editData, estado: e.target.value})}>
+                      <option value="disponible">Disponible</option>
+                      <option value="asignado">Asignado</option>
+                      <option value="dañado">Dañado</option>
+                      <option value="mantenimiento">Mantenimiento</option>
+                    </select>
+                  </div>
+                  <div className="form-group" style={{gridColumn:'1/-1'}}><label>Ubicación</label><input type="text" placeholder="ej: Sala 3, Bloque B..." value={editData.ubicacion} onChange={e => setEditData({...editData, ubicacion: e.target.value})} /></div>
+                  <div className="form-group" style={{gridColumn:'1/-1'}}><label>Descripción</label><textarea rows="2" value={editData.descripcion} onChange={e => setEditData({...editData, descripcion: e.target.value})} style={{resize:'vertical'}} /></div>
+                </div>
+                <div className="modal-actions">
+                  <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancelar</button>
+                  <button type="submit" className="btn-save">Guardar cambios</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {showAsignarModal && (<div className="modal-overlay" onClick={() => setShowAsignarModal(false)}><div className="modal-content" onClick={e => e.stopPropagation()}><h2 className="modal-title">Asignar equipo a aprendiz</h2><p style={{fontSize:"13px",color:"var(--text-muted-dark)",marginBottom:"16px"}}>Ingresa el correo del aprendiz. Se le notificar¡ por email.</p>{asignarError && <p className="table-error">{asignarError}</p>}<form onSubmit={handleAsignar}><div className="form-group"><label>Correo del aprendiz</label><input type="email" placeholder="correo@ejemplo.com" value={asignarData.correo} onChange={e => setAsignarData({...asignarData, correo: e.target.value})} required /></div><div className="modal-actions"><button type="button" className="btn-cancel" onClick={() => setShowAsignarModal(false)}>Cancelar</button><button type="submit" className="btn-save">Asignar y notificar</button></div></form></div></div>)}
 
@@ -331,8 +366,6 @@ const EquiposInstructor = () => {
   );
 
 };
-
-
 
 export default EquiposInstructor;
 

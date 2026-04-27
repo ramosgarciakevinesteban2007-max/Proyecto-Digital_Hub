@@ -134,7 +134,10 @@ const EquiposAdmin = () => {
   finally { setLoadingHistorial(false); }
 };
 
-  const estadoColor = (e) => ({ disponible: '#4ade80', asignado: '#facc15', 'dañado': '#f87171', mantenimiento: '#fb923c' }[e] || '#c9a8ff');
+  const estadoColor = (e) => {
+    const estado = (e || '').toLowerCase();
+    return { disponible: '#4ade80', asignado: '#facc15', 'dañado': '#f87171', mantenimiento: '#fb923c' }[estado] || '#c9a8ff';
+  };
 
   const filtrados = portatiles.filter(p => {
     const b = filtros.buscar.toLowerCase();
@@ -172,11 +175,11 @@ const EquiposAdmin = () => {
           </div>
           <div className="stat-card">
             <div className="stat-icon"><IconMonitor size={24} /></div>
-            <div className="stat-card-text"><div className="stat-label">Disponibles</div><div className="stat-value">{portatiles.filter(p => p.estado === 'disponible').length}</div></div>
+            <div className="stat-card-text"><div className="stat-label">Disponibles</div><div className="stat-value">{portatiles.filter(p => p.estado?.toLowerCase() === 'disponible').length}</div></div>
           </div>
           <div className="stat-card">
             <div className="stat-icon"><IconBarChart size={24} /></div>
-            <div className="stat-card-text"><div className="stat-label">Asignados</div><div className="stat-value">{portatiles.filter(p => p.estado === 'asignado').length}</div></div>
+            <div className="stat-card-text"><div className="stat-label">Asignados</div><div className="stat-value">{portatiles.filter(p => p.estado?.toLowerCase() === 'asignado').length}</div></div>
           </div>
         </div>
 
@@ -205,7 +208,7 @@ const EquiposAdmin = () => {
                   <td>{p.num_serie}</td><td>{p.marca}</td><td>{p.modelo}</td>
                   <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{p.ubicacion || '—'}</td>
                   <td style={{color:'var(--text-muted-dark)',fontSize:'13px',maxWidth:'180px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={p.descripcion}>{p.descripcion || '—'}</td>
-                  <td><span style={{ color: estadoColor(p.estado), fontWeight: 600, fontSize: '13px' }}>{p.estado}</span></td>
+                  <td><span style={{ color: estadoColor(p.estado), fontWeight: 600, fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{width:'6px',height:'6px',borderRadius:'50%',background:estadoColor(p.estado)}} />{p.estado}</span></td>
                   <td><div className="action-buttons">
                     <button className="action-btn view" onClick={() => abrirVer(p)}><IconEye size={16} /></button>
                     <button className="action-btn edit" onClick={() => abrirEditar(p)}><IconPencil size={16} /></button>
@@ -221,24 +224,26 @@ const EquiposAdmin = () => {
 
         {showModal && (
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <h2 className="modal-title">Añadir portatil</h2>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth:'560px'}}>
+              <h2 className="modal-title">Añadir portátil</h2>
               {error && <p className="table-error">{error}</p>}
               <form onSubmit={handleSubmit}>
-                <div className="form-group"><label>Número de serie</label><input type="text" value={formData.num_serie} onChange={e => setFormData({ ...formData, num_serie: e.target.value })} required /></div>
-                <div className="form-group"><label>Marca</label><input type="text" value={formData.marca} onChange={e => setFormData({ ...formData, marca: e.target.value })} required /></div>
-                <div className="form-group"><label>Tipo</label><input type="text" placeholder="ej: laptop, tablet..." value={formData.tipo} onChange={e => setFormData({ ...formData, tipo: e.target.value })} required /></div>
-                <div className="form-group"><label>Modelo</label><input type="text" value={formData.modelo} onChange={e => setFormData({ ...formData, modelo: e.target.value })} required /></div>
-                <div className="form-group"><label>Estado</label>
-                  <select value={formData.estado} onChange={e => setFormData({ ...formData, estado: e.target.value })}>
-                    <option value="disponible">Disponible</option>
-                    <option value="asignado">Asignado</option>
-                    <option value="dañado">Dañado</option>
-                    <option value="mantenimiento">Mantenimiento</option>
-                  </select>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
+                  <div className="form-group"><label>Número de serie</label><input type="text" value={formData.num_serie} onChange={e => setFormData({ ...formData, num_serie: e.target.value })} required /></div>
+                  <div className="form-group"><label>Marca</label><input type="text" value={formData.marca} onChange={e => setFormData({ ...formData, marca: e.target.value })} required /></div>
+                  <div className="form-group"><label>Tipo</label><input type="text" placeholder="ej: laptop, tablet..." value={formData.tipo} onChange={e => setFormData({ ...formData, tipo: e.target.value })} required /></div>
+                  <div className="form-group"><label>Modelo</label><input type="text" value={formData.modelo} onChange={e => setFormData({ ...formData, modelo: e.target.value })} required /></div>
+                  <div className="form-group"><label>Estado</label>
+                    <select value={formData.estado} onChange={e => setFormData({ ...formData, estado: e.target.value })}>
+                      <option value="disponible">Disponible</option>
+                      <option value="asignado">Asignado</option>
+                      <option value="dañado">Dañado</option>
+                      <option value="mantenimiento">Mantenimiento</option>
+                    </select>
+                  </div>
+                  <div className="form-group"><label>Ubicación</label><input type="text" placeholder="ej: Sala 3, Bloque B..." value={formData.ubicacion} onChange={e => setFormData({ ...formData, ubicacion: e.target.value })} /></div>
+                  <div className="form-group" style={{gridColumn:'1/-1'}}><label>Descripción</label><textarea rows="2" placeholder="Observaciones del equipo..." value={formData.descripcion} onChange={e => setFormData({ ...formData, descripcion: e.target.value })} style={{resize:'vertical'}} /></div>
                 </div>
-                <div className="form-group"><label>Ubicación</label><input type="text" placeholder="ej: Sala 3, Bloque B..." value={formData.ubicacion} onChange={e => setFormData({ ...formData, ubicacion: e.target.value })} /></div>
-                <div className="form-group"><label>Descripción</label><textarea rows="2" placeholder="Observaciones del equipo..." value={formData.descripcion} onChange={e => setFormData({ ...formData, descripcion: e.target.value })} /></div>
                 <div className="modal-actions">
                   <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>Cancelar</button>
                   <button type="submit" className="btn-save">Guardar</button>
@@ -299,31 +304,33 @@ const EquiposAdmin = () => {
 
       {!showHistorial ? (
         <>
-          <h2 className="modal-title">Editar pórtatil</h2>
+          <h2 className="modal-title">Editar portátil — {seleccionado.num_serie}</h2>
           {error && <p className="table-error">{error}</p>}
           <form onSubmit={handleEditar}>
-            <div className="form-group"><label>Marca</label>
-              <input type="text" value={editData.marca} onChange={e => setEditData({...editData, marca: e.target.value})} required />
-            </div>
-            <div className="form-group"><label>Tipo</label>
-              <input type="text" value={editData.tipo} onChange={e => setEditData({...editData, tipo: e.target.value})} required />
-            </div>
-            <div className="form-group"><label>Modelo</label>
-              <input type="text" value={editData.modelo} onChange={e => setEditData({...editData, modelo: e.target.value})} required />
-            </div>
-            <div className="form-group"><label>Estado</label>
-              <select value={editData.estado} onChange={e => setEditData({...editData, estado: e.target.value})}>
-                <option value="disponible">Disponible</option>
-                <option value="asignado">Asignado</option>
-                <option value="dañado">Dañado</option>
-                <option value="mantenimiento">Mantenimiento</option>
-              </select>
-            </div>
-            <div className="form-group"><label>Ubicación</label>
-              <input type="text" placeholder="ej: Sala 3, Bloque B..." value={editData.ubicacion} onChange={e => setEditData({...editData, ubicacion: e.target.value})} />
-            </div>
-            <div className="form-group"><label>Descripción</label>
-              <textarea rows="2" value={editData.descripcion} onChange={e => setEditData({...editData, descripcion: e.target.value})} />
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
+              <div className="form-group"><label>Marca</label>
+                <input type="text" value={editData.marca} onChange={e => setEditData({...editData, marca: e.target.value})} required />
+              </div>
+              <div className="form-group"><label>Tipo</label>
+                <input type="text" value={editData.tipo} onChange={e => setEditData({...editData, tipo: e.target.value})} required />
+              </div>
+              <div className="form-group"><label>Modelo</label>
+                <input type="text" value={editData.modelo} onChange={e => setEditData({...editData, modelo: e.target.value})} required />
+              </div>
+              <div className="form-group"><label>Estado</label>
+                <select value={editData.estado} onChange={e => setEditData({...editData, estado: e.target.value})}>
+                  <option value="disponible">Disponible</option>
+                  <option value="asignado">Asignado</option>
+                  <option value="dañado">Dañado</option>
+                  <option value="mantenimiento">Mantenimiento</option>
+                </select>
+              </div>
+              <div className="form-group" style={{gridColumn:'1/-1'}}><label>Ubicación</label>
+                <input type="text" placeholder="ej: Sala 3, Bloque B..." value={editData.ubicacion} onChange={e => setEditData({...editData, ubicacion: e.target.value})} />
+              </div>
+              <div className="form-group" style={{gridColumn:'1/-1'}}><label>Descripción</label>
+                <textarea rows="2" value={editData.descripcion} onChange={e => setEditData({...editData, descripcion: e.target.value})} style={{resize:'vertical'}} />
+              </div>
             </div>
             <div className="modal-actions">
               <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancelar</button>
