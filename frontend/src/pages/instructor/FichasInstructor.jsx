@@ -732,7 +732,7 @@ const FichasInstructor = () => {
 
                     <select value={editData.jornada} onChange={e => setEditData({...editData, jornada: e.target.value})}>
 
-                      <option value="manana">Mañana</option><option value="tarde">Tarde</option>
+                      <option value="Mañana">Mañana</option><option value="tarde">Tarde</option>
 
                       <option value="noche">Noche</option>
 
@@ -938,11 +938,11 @@ const FichasInstructor = () => {
 
             <option value="">Todas las jornadas</option>
 
-            <option value="manana">Mañana</option>
+            <option value="Mañana">Mañana</option>
 
-            <option value="tarde">Tarde</option>
+            <option value="Tarde">Tarde</option>
 
-            <option value="noche">Noche</option>
+            <option value="Noche">Noche</option>
 
           </select>
 
@@ -1020,9 +1020,11 @@ const FichasInstructor = () => {
 
                   <select value={formData.jornada} onChange={e => setFormData({...formData, jornada: e.target.value})}>
 
-                    <option value="manana">Mañana</option><option value="tarde">Tarde</option>
+                    <option value="Mañana">Mañana</option>
 
-                    <option value="noche">Noche</option>
+                    <option value="Tarde">Tarde</option>
+
+                    <option value="Noche">Noche</option>
 
                   </select>
 
