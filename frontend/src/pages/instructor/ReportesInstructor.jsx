@@ -201,7 +201,7 @@ const importarExcel = async (e) => {
                   <td style={{color:'#b8a8d8',fontSize:'13px'}}>#{r.id_reporte}</td>
                   <td style={{fontSize:'13px'}}>{r.nombre_aprendiz || '—'}</td>
                   <td style={{maxWidth:'220px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.descripcion}</td>
-                  <td><span style={{color:estadoColor(r.estado_reporte),fontWeight:600,fontSize:'13px'}}>{r.estado_reporte}</span></td>
+                  <td><span style={{color:estadoColor(r.estado_reporte),fontWeight:600,fontSize:'13px',display:'inline-flex',alignItems:'center',gap:'5px'}}><span style={{width:'6px',height:'6px',borderRadius:'50%',background:estadoColor(r.estado_reporte)}} />{r.estado_reporte}</span></td>
                   <td style={{color:'#b8a8d8',fontSize:'13px'}}>{r.fecha_reporte?.split('T')[0] || r.fecha_reporte}</td>
                   <td>
                     {r.archivo

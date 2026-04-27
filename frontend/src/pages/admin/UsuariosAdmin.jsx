@@ -269,8 +269,8 @@ const importarExcel = async (e) => {
                   <tr key={u.id_usuario}>
                     <td>{u.nombre}</td>
                     <td style={{ color: 'var(--text-muted-dark)', fontSize: '13px' }}>{u.correo}</td>
-                    <td><span style={{ color: rolColor(u.rol), fontWeight: 600, fontSize: '13px' }}>{displayRole(u.rol)}</span></td>
-                    <td><span style={{ color: normalizeEstado(u.estado) === 'activo' ? '#4ade80' : '#f87171', fontWeight: 600, fontSize: '13px' }}>{displayEstado(u.estado)}</span></td>
+                    <td><span style={{ color: '#b8a8d8', fontWeight: 600, fontSize: '13px' }}>{displayRole(u.rol)}</span></td>
+                    <td><span style={{ color: normalizeEstado(u.estado) === 'activo' ? '#4ade80' : '#f87171', fontWeight: 600, fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{width:'6px',height:'6px',borderRadius:'50%',background:normalizeEstado(u.estado) === 'activo' ? '#4ade80' : '#f87171'}} />{displayEstado(u.estado)}</span></td>
                     <td>
                       <div className="action-buttons">
                         <button className="action-btn view" onClick={() => abrirVer(u)}><IconEye size={16} /></button>
@@ -375,7 +375,7 @@ const importarExcel = async (e) => {
               <div className="detalle-grid">
                 <div className="detalle-item"><span className="detalle-label">Nombre</span><span className="detalle-valor">{verUsuario.nombre}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Correo</span><span className="detalle-valor" style={{fontSize:'13px'}}>{verUsuario.correo}</span></div>
-                <div className="detalle-item"><span className="detalle-label">Rol</span><span className="detalle-valor" style={{color:rolColor(verUsuario.rol),fontWeight:700}}>{verUsuario.rol}</span></div>
+                <div className="detalle-item"><span className="detalle-label">Rol</span><span className="detalle-valor" style={{color:'#b8a8d8',fontWeight:700}}>{verUsuario.rol}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Estado</span><span className="detalle-valor" style={{color:normalizeEstado(verUsuario.estado)==='activo'?'#4ade80':'#f87171',fontWeight:700}}>{displayEstado(verUsuario.estado)}</span></div>
               </div>
 

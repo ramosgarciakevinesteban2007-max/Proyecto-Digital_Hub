@@ -40,6 +40,9 @@ const FichasAdmin = () => {
   const [confirmAmbId, setConfirmAmbId] = useState(null);
   const [page, setPage] = useState(1);
   const [errorExport, setErrorExport] = useState('');
+  const [showModalFicha, setShowModalFicha] = useState(false);
+  const [formFicha, setFormFicha] = useState({ nombre: '', programa_formacion: '', jornada: 'manana', cupo_maximo: 30, ambiente: '', nave: '' });
+  const [errorFicha, setErrorFicha] = useState('');
   const PER_PAGE = 9;
   const token = localStorage.getItem('token');
 
@@ -91,16 +94,25 @@ const FichasAdmin = () => {
         <main className="equipment-main">
           <div className="fd-header">
             <button onClick={() => setVista('lista')} className="fd-back-btn">← Volver</button>
-            <div className="fd-header-info">
-              <div className="fd-jornada-pill"><JornadaIcon jornada={fichaActiva.jornada} size={13}/> {fichaActiva.jornada}</div>
-              <h1 className="fd-title">{fichaActiva.nombre}</h1>
-              <p className="fd-subtitle">{fichaActiva.programa_formacion}</p>
+            <div className="fd-header-info" style={{display:'flex',alignItems:'center',gap:'10px',flex:1,flexWrap:'wrap'}}>
+              <span className="fd-jornada-pill"><JornadaIcon jornada={fichaActiva.jornada} size={13}/> {fichaActiva.jornada}</span>
+              <h1 className="fd-title" style={{margin:0,fontSize:'20px',fontWeight:800,color:'#fff'}}>{fichaActiva.nombre}</h1>
+              <span style={{color:'rgba(255,255,255,0.2)'}}>·</span>
+              <p className="fd-subtitle" style={{margin:0,fontSize:'14px',color:'#b8a8d8'}}>{fichaActiva.programa_formacion}</p>
+              {(fichaActiva.ambiente_nombre || fichaActiva.ambiente || fichaActiva.ambiente_nave || fichaActiva.nave) && (
+                <>
+                  <span style={{color:'rgba(255,255,255,0.2)'}}>·</span>
+                  <span style={{fontSize:'12px',color:'#aaa'}}>
+                    {(fichaActiva.ambiente_nombre || fichaActiva.ambiente) && `Ambiente ${fichaActiva.ambiente_nombre || fichaActiva.ambiente}`}
+                    {(fichaActiva.ambiente_nombre || fichaActiva.ambiente) && (fichaActiva.ambiente_nave || fichaActiva.nave) && ' en '}
+                    {(fichaActiva.ambiente_nave || fichaActiva.nave) && `Nave ${fichaActiva.ambiente_nave || fichaActiva.nave}`}
+                  </span>
+                </>
+              )}
             </div>
             <div className="fd-header-actions">
               <span className="fd-estado-pill" style={{background:`${estadoColor(fichaActiva.estado)}18`,border:`1px solid ${estadoColor(fichaActiva.estado)}44`,color:estadoColor(fichaActiva.estado)}}>{fichaActiva.estado}</span>
-
               <NotificacionesBtn />
-              
             </div>
           </div>
 
@@ -166,7 +178,7 @@ const FichasAdmin = () => {
                         <tr key={a.id_usuario}>
                           <td><div style={{display:'flex',alignItems:'center',gap:'8px'}}><div className="fd-avatar" style={{background:'rgba(127,90,240,0.25)',color:'#c9a8ff'}}>{a.nombre?.[0]?.toUpperCase()}</div>{a.nombre}</div></td>
                           <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{a.correo}</td>
-                          <td><span style={{color:estadoColor(a.estado),fontWeight:600,fontSize:'12px'}}>{a.estado}</span></td>
+                          <td><span style={{color:estadoColor(a.estado),fontWeight:600,fontSize:'12px',display:'inline-flex',alignItems:'center',gap:'5px'}}><span style={{width:'6px',height:'6px',borderRadius:'50%',background:estadoColor(a.estado)}} />{a.estado}</span></td>
                           <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{a.fecha_union?.split('T')[0] || a.fecha_union}</td>
                         </tr>
                       ))}
@@ -183,7 +195,7 @@ const FichasAdmin = () => {
                         <tr key={p.id_portatil}>
                           <td style={{fontFamily:'monospace',fontSize:'13px'}}>{p.num_serie}</td>
                           <td>{p.marca}</td><td>{p.modelo}</td>
-                          <td><span style={{color:estadoColor(p.estado),fontWeight:600,fontSize:'12px'}}>{p.estado}</span></td>
+                          <td><span style={{color:estadoColor(p.estado),fontWeight:600,fontSize:'12px',display:'inline-flex',alignItems:'center',gap:'5px'}}><span style={{width:'6px',height:'6px',borderRadius:'50%',background:estadoColor(p.estado)}} />{p.estado}</span></td>
                         </tr>
                       ))}
                   </tbody>
@@ -199,7 +211,7 @@ const FichasAdmin = () => {
                         <tr key={r.id_reporte}>
                           <td>{r.aprendiz}</td>
                           <td style={{maxWidth:'260px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'var(--text-muted-dark)',fontSize:'13px'}}>{r.descripcion}</td>
-                          <td><span style={{color:estadoColor(r.estado_reporte),fontWeight:600,fontSize:'12px'}}>{r.estado_reporte}</span></td>
+                          <td><span style={{color:estadoColor(r.estado_reporte),fontWeight:600,fontSize:'12px',display:'inline-flex',alignItems:'center',gap:'5px'}}><span style={{width:'6px',height:'6px',borderRadius:'50%',background:estadoColor(r.estado_reporte)}} />{r.estado_reporte}</span></td>
                           <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{r.fecha_reporte?.split('T')[0] || r.fecha_reporte}</td>
                           <td><button className="action-btn view" onClick={() => setReporteSeleccionado(r)}><IconEye size={15}/></button></td>
                         </tr>
@@ -309,6 +321,22 @@ const FichasAdmin = () => {
     } catch (err) { console.error('Error exportando:', err); setErrorExport('Error de conexión al exportar.'); }
   };
 
+  const handleFichaSubmit = async (e) => {
+    e.preventDefault(); setErrorFicha('');
+    try {
+      const res = await fetch('/api/fichas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(formFicha)
+      });
+      const data = await res.json();
+      if (!res.ok) { setErrorFicha(data.mensaje || data.message || 'Error al crear'); return; }
+      setShowModalFicha(false);
+      setFormFicha({ nombre: '', programa_formacion: '', jornada: 'manana', cupo_maximo: 30, ambiente: '', nave: '' });
+      cargar();
+    } catch { setErrorFicha('Error al conectar'); }
+  };
+
   // ===== LISTA =====
   return (
     <div className="equipment-layout">
@@ -331,17 +359,7 @@ const FichasAdmin = () => {
           </div>
         </div>
 
-        <div className="fd-tabs-bar" style={{marginBottom:'20px'}}>
-          <button className={`fd-tab ${tabPrincipal==='fichas'?'fd-tab-active':''}`} onClick={() => setTabPrincipal('fichas')}>
-            <IconUser size={14}/> Fichas <span className="fd-tab-badge" style={{background:'rgba(127,90,240,0.2)',color:'#c9a8ff'}}>{fichas.length}</span>
-          </button>
-          <button className={`fd-tab ${tabPrincipal==='ambientes'?'fd-tab-active':''}`} onClick={() => { setTabPrincipal('ambientes'); if(!ambientes.length) cargarAmbientes(); }}>
-            <IconMonitor size={14}/> Ambientes <span className="fd-tab-badge" style={{background:'rgba(96,165,250,0.2)',color:'#60a5fa'}}>{ambientes.length}</span>
-          </button>
-        </div>
-
-        {tabPrincipal === 'fichas' && (<>
-          <div className="stats-grid">
+        <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-icon"><IconUser size={20}/></div>
               <div className="stat-card-text"><div className="stat-value">{fichas.length}</div><div className="stat-label">Total</div></div>
@@ -386,6 +404,13 @@ const FichasAdmin = () => {
                     </div>
                     <div className="ficha-card-nombre">{f.nombre}</div>
                     <div className="ficha-card-programa">{f.programa_formacion}</div>
+                    {(f.ambiente_nombre || f.ambiente || f.ambiente_nave || f.nave) && (
+                      <div style={{fontSize:'11px',color:'#7a6a9a',marginTop:'4px'}}>
+                        {(f.ambiente_nombre || f.ambiente) && `Ambiente ${f.ambiente_nombre || f.ambiente}`}
+                        {(f.ambiente_nombre || f.ambiente) && (f.ambiente_nave || f.nave) && ' • '}
+                        {(f.ambiente_nave || f.nave) && `Nave ${f.ambiente_nave || f.nave}`}
+                      </div>
+                    )}
                     <div className="ficha-card-footer">
                       <span><IconUser size={13}/> Cupo: {f.cupo_maximo}</span>
                       <span className="ficha-card-ver">Ver ficha →</span>
@@ -396,73 +421,6 @@ const FichasAdmin = () => {
             </div>
           )}
           <Pagination page={page} total={filtrados.length} perPage={PER_PAGE} onChange={p => setPage(p)}/>
-        </>)}
-
-        {tabPrincipal === 'ambientes' && (<>
-          <div className="filters-row" style={{gridTemplateColumns:'1fr auto'}}>
-            <input className="filter-input" placeholder="Buscar ambiente..." value={filtroAmb} onChange={e => setFiltroAmb(e.target.value)}/>
-            <button className="filter-clear" onClick={() => setFiltroAmb('')}>Limpiar</button>
-          </div>
-          {loadingAmb ? <div style={{textAlign:'center',padding:'48px',color:'#b8a8d8'}}>Cargando...</div> : (
-            <div className="amb-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:'14px',marginBottom:'16px'}}>
-              {ambFiltrados.length === 0
-                ? <div style={{gridColumn:'1/-1',textAlign:'center',padding:'32px',color:'#b8a8d8'}}>Sin ambientes</div>
-                : ambFiltrados.map((a, i) => (
-                  <div key={a.id_ambiente} style={{background:'#241545',border:`1px solid ${AMB_COLORS[i%AMB_COLORS.length]}33`,borderRadius:'14px',padding:'16px',display:'flex',flexDirection:'column',gap:'8px'}}>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                      <div style={{width:'36px',height:'36px',borderRadius:'10px',background:`${AMB_COLORS[i%AMB_COLORS.length]}18`,border:`1px solid ${AMB_COLORS[i%AMB_COLORS.length]}33`,color:AMB_COLORS[i%AMB_COLORS.length],display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:'15px'}}>
-                        {a.nombre?.[0]?.toUpperCase()}
-                      </div>
-                      <div style={{display:'flex',gap:'6px'}}>
-                        <button className="action-btn edit" onClick={() => { setSelAmb(a); setEditAmb({ nombre:a.nombre, direccion:a.direccion }); setShowEditAmb(true); setErrorAmb(''); }}><IconPencil size={13}/></button>
-                        <button className="action-btn delete" onClick={() => setConfirmAmbId(a.id_ambiente)}><IconTrash size={13}/></button>
-                      </div>
-                    </div>
-                    <div style={{fontWeight:700,fontSize:'14px',color:'#f0eaff'}}>{a.nombre}</div>
-                    <div style={{fontSize:'12px',color:'#b8a8d8'}}>{a.direccion}</div>
-                    <div style={{fontSize:'11px',color:'rgba(184,168,216,0.5)'}}>ID #{a.id_ambiente}</div>
-                  </div>
-                ))
-              }
-            </div>
-          )}
-          <button className="btn-add-equipment" onClick={() => { setShowModalAmb(true); setErrorAmb(''); setFormAmb({ nombre:'', direccion:'' }); }}>Nuevo Ambiente</button>
-        </>)}
-
-        {showModalAmb && (
-          <div className="modal-overlay" onClick={() => setShowModalAmb(false)}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <h2 className="modal-title">Nuevo Ambiente</h2>
-              {errorAmb && <p className="table-error">{errorAmb}</p>}
-              <form onSubmit={handleAmbSubmit}>
-                <div className="form-group"><label>Nombre</label><input value={formAmb.nombre} onChange={e => setFormAmb({...formAmb,nombre:e.target.value})} required/></div>
-                <div className="form-group"><label>Dirección</label><input value={formAmb.direccion} onChange={e => setFormAmb({...formAmb,direccion:e.target.value})} required/></div>
-                <div className="modal-actions">
-                  <button type="button" className="btn-cancel" onClick={() => setShowModalAmb(false)}>Cancelar</button>
-                  <button type="submit" className="btn-save">Guardar</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {confirmAmbId && <ConfirmModal mensaje="¿Eliminar este ambiente?" onConfirm={() => { doAmbEliminar(confirmAmbId); setConfirmAmbId(null); }} onCancel={() => setConfirmAmbId(null)} />}
-        {showEditAmb && selAmb && (
-          <div className="modal-overlay" onClick={() => setShowEditAmb(false)}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <h2 className="modal-title">Editar Ambiente</h2>
-              {errorAmb && <p className="table-error">{errorAmb}</p>}
-              <form onSubmit={handleAmbEditar}>
-                <div className="form-group"><label>Nombre</label><input value={editAmb.nombre} onChange={e => setEditAmb({...editAmb,nombre:e.target.value})} required/></div>
-                <div className="form-group"><label>Dirección</label><input value={editAmb.direccion} onChange={e => setEditAmb({...editAmb,direccion:e.target.value})} required/></div>
-                <div className="modal-actions">
-                  <button type="button" className="btn-cancel" onClick={() => setShowEditAmb(false)}>Cancelar</button>
-                  <button type="submit" className="btn-save">Guardar cambios</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
       </main>
     </div>
   );

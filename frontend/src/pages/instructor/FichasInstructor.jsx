@@ -54,7 +54,7 @@ const FichasInstructor = () => {
 
   const [formData, setFormData] = useState({ nombre: '', programa_formacion: '', jornada: 'manana', cupo_maximo: 30, ambiente: '', nave: '' });
 
-  const [editData, setEditData] = useState({ nombre: '', programa_formacion: '', jornada: 'manana', cupo_maximo: 30, estado: 'activa', ambiente: '', nave: '' });
+  const [editData, setEditData] = useState({ nombre: '', programa_formacion: '', jornada: 'manana', cupo_maximo: 30, estado: 'activa' });
 
   const [filtro, setFiltro] = useState('');
 
@@ -430,11 +430,7 @@ const FichasInstructor = () => {
 
                   cupo_maximo: fichaActiva.cupo_maximo,
 
-                  estado: fichaActiva.estado || 'activa',
-
-                  ambiente: fichaActiva.ambiente_nombre || fichaActiva.ambiente || '',
-
-                  nave: fichaActiva.ambiente_nave || fichaActiva.nave || ''
+                  estado: fichaActiva.estado || 'activa'
 
                 });
 
@@ -610,7 +606,7 @@ const FichasInstructor = () => {
 
                           <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{a.correo}</td>
 
-                          <td><span style={{color:estadoColor(a.estado),fontWeight:600,fontSize:'12px'}}>{a.estado}</span></td>
+                          <td><span style={{color:estadoColor(a.estado),fontWeight:600,fontSize:'12px',display:'inline-flex',alignItems:'center',gap:'5px'}}><span style={{width:'6px',height:'6px',borderRadius:'50%',background:estadoColor(a.estado)}} />{a.estado}</span></td>
 
                           <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{a.fecha_union?.split('T')[0] || a.fecha_union}</td>
 
@@ -644,7 +640,7 @@ const FichasInstructor = () => {
 
                           <td>{p.marca}</td><td>{p.modelo}</td>
 
-                          <td><span style={{color:estadoColor(p.estado),fontWeight:600,fontSize:'12px'}}>{p.estado}</span></td>
+                          <td><span style={{color:estadoColor(p.estado),fontWeight:600,fontSize:'12px',display:'inline-flex',alignItems:'center',gap:'5px'}}><span style={{width:'6px',height:'6px',borderRadius:'50%',background:estadoColor(p.estado)}} />{p.estado}</span></td>
 
                         </tr>
 
@@ -676,7 +672,7 @@ const FichasInstructor = () => {
 
                           <td style={{maxWidth:'220px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'var(--text-muted-dark)',fontSize:'13px'}}>{r.descripcion}</td>
 
-                          <td><span style={{color:estadoColor(r.estado_reporte),fontWeight:600,fontSize:'12px'}}>{r.estado_reporte}</span></td>
+                          <td><span style={{color:estadoColor(r.estado_reporte),fontWeight:600,fontSize:'12px',display:'inline-flex',alignItems:'center',gap:'5px'}}><span style={{width:'6px',height:'6px',borderRadius:'50%',background:estadoColor(r.estado_reporte)}} />{r.estado_reporte}</span></td>
 
                           <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{r.fecha_reporte?.split('T')[0] || r.fecha_reporte}</td>
 
@@ -741,40 +737,6 @@ const FichasInstructor = () => {
                   </div>
 
                   <div className="form-group"><label>Cupo máximo</label><input type="number" min="1" value={editData.cupo_maximo} onChange={e => setEditData({...editData, cupo_maximo: parseInt(e.target.value)})} required /></div>
-
-                  <div className="form-group">
-
-                    <label>Ambiente</label>
-
-                    <input 
-
-                      type="text"
-
-                      value={editData.ambiente || ''} 
-
-                      onChange={e => setEditData({...editData, ambiente: e.target.value})}
-
-                    />
-
-                  </div>
-
-
-
-                  <div className="form-group">
-
-                    <label>Nave</label>
-
-                    <input 
-
-                      type="text"
-
-                      value={editData.nave || ''} 
-
-                      onChange={e => setEditData({...editData, nave: e.target.value})}
-
-                    />
-
-                  </div>
 
                   <div className="form-group"><label>Estado</label>
 
@@ -999,6 +961,14 @@ const FichasInstructor = () => {
 
                 <div className="ficha-card-programa">{f.programa_formacion}</div>
 
+                {(f.ambiente_nombre || f.ambiente || f.ambiente_nave || f.nave) && (
+                  <div style={{fontSize:'11px',color:'#7a6a9a',marginTop:'4px'}}>
+                    {(f.ambiente_nombre || f.ambiente) && `Ambiente ${f.ambiente_nombre || f.ambiente}`}
+                    {(f.ambiente_nombre || f.ambiente) && (f.ambiente_nave || f.nave) && ' • '}
+                    {(f.ambiente_nave || f.nave) && `Nave ${f.ambiente_nave || f.nave}`}
+                  </div>
+                )}
+
                 <div className="ficha-card-footer">
 
                   <span><IconUser size={13}/> Cupo: {f.cupo_maximo}</span>
@@ -1025,7 +995,7 @@ const FichasInstructor = () => {
 
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
 
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth:'560px'}}>
 
               <h2 className="modal-title">Nueva Ficha</h2>
 
@@ -1033,59 +1003,57 @@ const FichasInstructor = () => {
 
               <form onSubmit={handleSubmit}>
 
-                <div className="form-group"><label>Número de ficha</label><input type="text" placeholder="ej: 3146013" value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} required /></div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
 
-                <div className="form-group"><label>Programa de formación</label><input type="text" value={formData.programa_formacion} onChange={e => setFormData({...formData, programa_formacion: e.target.value})} required /></div>
+                  <div className="form-group"><label>Número de ficha</label><input type="text" placeholder="ej: 3146013" value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} required /></div>
 
-                <div className="form-group"><label>Jornada</label>
+                  <div className="form-group"><label>Jornada</label>
 
-                  <select value={formData.jornada} onChange={e => setFormData({...formData, jornada: e.target.value})}>
+                    <select value={formData.jornada} onChange={e => setFormData({...formData, jornada: e.target.value})}>
 
-                    <option value="manana">Mañana</option><option value="tarde">Tarde</option>
+                      <option value="manana">Mañana</option><option value="tarde">Tarde</option>
 
-                    <option value="noche">Noche</option>
+                      <option value="noche">Noche</option>
 
-                  </select>
+                    </select>
 
-                </div>
+                  </div>
 
-                <div className="form-group"><label>Cupo máximo</label><input type="number" min="1" value={formData.cupo_maximo} onChange={e => setFormData({...formData, cupo_maximo: parseInt(e.target.value)})} required /></div>
+                  <div className="form-group" style={{gridColumn:'1/-1'}}><label>Programa de formación</label><input type="text" placeholder="ej: Análisis y Desarrollo de Software" value={formData.programa_formacion} onChange={e => setFormData({...formData, programa_formacion: e.target.value})} required /></div>
 
-                <div className="form-group">
+                  <div className="form-group"><label>Cupo máximo</label><input type="number" min="1" value={formData.cupo_maximo} onChange={e => setFormData({...formData, cupo_maximo: parseInt(e.target.value)})} required /></div>
 
-                <label>Ambiente</label>
+                  <div className="form-group"><label>Ambiente</label>
 
-                  <input 
+                    <input 
 
-                    type="text"
+                      type="text"
 
-                    placeholder="ej: 4110"
+                      placeholder="ej: 4110"
 
-                    value={formData.ambiente || ''} 
+                      value={formData.ambiente || ''} 
 
-                    onChange={e => setFormData({...formData, ambiente: e.target.value})}
+                      onChange={e => setFormData({...formData, ambiente: e.target.value})}
 
-                  />
+                    />
 
-                </div>
+                  </div>
 
+                  <div className="form-group" style={{gridColumn:'1/-1'}}><label>Nave</label>
 
+                    <input 
 
-                <div className="form-group">
+                      type="text"
 
-                  <label>Nave</label>
+                      placeholder="ej: Nave 4"
 
-                  <input 
+                      value={formData.nave || ''} 
 
-                    type="text"
+                      onChange={e => setFormData({...formData, nave: e.target.value})}
 
-                    placeholder="ej: 4"
+                    />
 
-                    value={formData.nave || ''} 
-
-                    onChange={e => setFormData({...formData, nave: e.target.value})}
-
-                  />
+                  </div>
 
                 </div>
 
