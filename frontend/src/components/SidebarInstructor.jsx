@@ -51,10 +51,6 @@ const SidebarInstructor = ({ onCollapse }) => {
           <span className="sidebar-icon"><IconHistory size={17} /></span>
           {!collapsed && <span className="sidebar-label">Historial</span>}
         </Link>
-        <Link to="/instructor/papelera" className={`sidebar-item ${isActive('/instructor/papelera') ? 'active' : ''}`} title={collapsed ? 'Papelera' : ''}>
-          <span className="sidebar-icon"><IconTrash size={17} /></span>
-          {!collapsed && <span className="sidebar-label">Papelera</span>}
-        </Link>
       </nav>
 
       <div className="sidebar-footer">

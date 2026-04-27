@@ -84,7 +84,7 @@ const importarExcel = async (e) => {
   const cargar = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/reportes', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch('/api/reportes', { headers: { Authorization: `Bearer ${token}` } });
       if (res.status === 401) { navigate('/login'); return; }
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) { setReportes(data); saveLocalR(data); }
@@ -97,7 +97,7 @@ const importarExcel = async (e) => {
     e.preventDefault();
     setError('');
     try {
-      const res = await fetch('/reportes', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(formData) });
+      const res = await fetch('/api/reportes', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(formData) });
       if (res.ok) { setShowModal(false); setFormData({ descripcion: '', estado_reporte: 'pendiente', fecha_reporte: new Date().toISOString().split('T')[0] }); cargar(); return; }
     } catch {}
     const local = getLocalR();
@@ -120,7 +120,7 @@ const importarExcel = async (e) => {
   const handleEliminar = async (id) => {
     if (!confirm('Eliminar este reporte?')) return;
     try {
-      const res = await fetch(`/reportes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`/api/reportes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) { cargar(); return; }
     } catch {}
     const local = getLocalR().filter(r => r.id_reporte !== id);
@@ -246,20 +246,22 @@ const importarExcel = async (e) => {
 
         {showVerModal && seleccionado && (
           <div className="modal-overlay" onClick={() => setShowVerModal(false)}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <h2 className="modal-title">Detalle del reporte</h2>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth:'520px'}}>
+              <h2 className="modal-title">Reporte #{seleccionado.id_reporte}</h2>
               <div className="detalle-grid">
-                <div className="detalle-item"><span className="detalle-label">ID</span><span className="detalle-valor">#{seleccionado.id_reporte}</span></div>
-                <div className="detalle-item"><span className="detalle-label">Descripción</span><span className="detalle-valor">{seleccionado.descripcion}</span></div>
+                <div className="detalle-item"><span className="detalle-label">Aprendiz</span><span className="detalle-valor">{seleccionado.nombre_aprendiz || '—'}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Estado</span><span className="detalle-valor" style={{color:estadoColor(seleccionado.estado_reporte),fontWeight:600}}>{seleccionado.estado_reporte}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Fecha</span><span className="detalle-valor">{seleccionado.fecha_reporte?.split('T')[0] || seleccionado.fecha_reporte}</span></div>
-                {seleccionado.nombre_aprendiz && <div className="detalle-item"><span className="detalle-label">Aprendiz</span><span className="detalle-valor">{seleccionado.nombre_aprendiz}</span></div>}
+                <div className="detalle-item" style={{gridColumn:'1/-1',flexDirection:'column',alignItems:'flex-start',gap:'8px'}}>
+                  <span className="detalle-label">Descripción</span>
+                  <span style={{fontSize:'14px',color:'#f0eaff',lineHeight:'1.6',whiteSpace:'pre-wrap'}}>{seleccionado.descripcion}</span>
+                </div>
                 {seleccionado.archivo && (
-                  <div className="detalle-item" style={{flexDirection:'column',alignItems:'flex-start',gap:'10px'}}>
+                  <div className="detalle-item" style={{gridColumn:'1/-1',flexDirection:'column',alignItems:'flex-start',gap:'10px'}}>
                     <span className="detalle-label">Evidencia adjunta</span>
-                    {/\.(jpg|jpeg|png)$/i.test(seleccionado.archivo) ? (
+                    {/\.(jpg|jpeg|png|gif|webp)$/i.test(seleccionado.archivo) ? (
                       <img src={`/uploads/${seleccionado.archivo}`} alt="evidencia"
-                        style={{maxWidth:'100%',borderRadius:'10px',border:'1px solid rgba(127,90,240,0.3)',cursor:'pointer'}}
+                        style={{maxWidth:'100%',maxHeight:'300px',objectFit:'contain',borderRadius:'10px',border:'1px solid rgba(127,90,240,0.3)',cursor:'pointer'}}
                         onClick={() => window.open(`/uploads/${seleccionado.archivo}`, '_blank')}
                       />
                     ) : (

@@ -25,7 +25,7 @@ const InicioAprendiz = () => {
       const h = { Authorization: `Bearer ${token}` };
       Promise.all([
         fetch('/api/fichas/mia',  { headers: h }).then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch('/api/portatiles',  { headers: h }).then(r => r.json()).catch(() => ({ data: [] })),
+        fetch('/api/portatiles?limit=500',  { headers: h }).then(r => r.json()).catch(() => ({ data: [] })),
         fetch('/api/reportes',    { headers: h }).then(r => r.json()).catch(() => []),
       ]).then(([f, portatilesRes, reps]) => {
         setFicha(f);

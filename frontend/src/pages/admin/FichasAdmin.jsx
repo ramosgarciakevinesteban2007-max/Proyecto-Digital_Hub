@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconBell, IconUser, IconMonitor, IconReport, IconPencil, IconTrash, JornadaIcon } from '../../components/Icons';
+import { IconBell, IconUser, IconMonitor, IconReport, IconPencil, IconTrash, IconEye, JornadaIcon } from '../../components/Icons';
 import NotificacionesBtn from '../../components/NotificacionesBtn';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import Pagination from '../../components/Pagination';
@@ -9,7 +9,7 @@ import '../../pages/admin/EquiposAdmin.css';
 import '../../pages/admin/FichasAdmin.css';
 import ConfirmModal from '../../components/ConfirmModal';
 
-const estadoColor = (e) => ({ activa:'#4ade80', inactiva:'#f87171', cerrada:'#facc15', disponible:'#4ade80', asignado:'#facc15', danado:'#f87171', mantenimiento:'#fb923c', pendiente:'#facc15', en_revision:'#fb923c', resuelto:'#4ade80' }[e] || '#c9a8ff');
+const estadoColor = (e) => ({ activa:'#4ade80', inactiva:'#f87171', cerrada:'#facc15', disponible:'#4ade80', asignado:'#facc15', 'dañado':'#f87171', mantenimiento:'#fb923c', pendiente:'#facc15', en_revision:'#fb923c', resuelto:'#4ade80' }[e] || '#c9a8ff');
 const jornadaIcon = (j) => ({ Mañana:'🌅', Tarde:'🌇', Noche:'🌙'}[j] || '📅');
 
 const FichasAdmin = () => {
@@ -23,6 +23,7 @@ const FichasAdmin = () => {
   const [portatiles, setPortatiles] = useState([]);
   const [reportes, setReportes] = useState([]);
   const [loadingDetalle, setLoadingDetalle] = useState(false);
+  const [reporteSeleccionado, setReporteSeleccionado] = useState(null);
   const [filtro, setFiltro] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('');
   const [filtroJornada, setFiltroJornada] = useState('');
@@ -190,16 +191,17 @@ const FichasAdmin = () => {
               )}
               {tab === 'reportes' && (
                 <table className="equipment-table">
-                  <thead><tr><th>Aprendiz</th><th>Descripción</th><th>Estado</th><th>Fecha</th></tr></thead>
+                  <thead><tr><th>Aprendiz</th><th>Descripción</th><th>Estado</th><th>Fecha</th><th>Ver</th></tr></thead>
                   <tbody>
                     {reportes.length === 0
-                      ? <tr><td colSpan="4" className="fd-empty-row">Sin reportes en esta ficha</td></tr>
+                      ? <tr><td colSpan="5" className="fd-empty-row">Sin reportes en esta ficha</td></tr>
                       : reportes.map(r => (
                         <tr key={r.id_reporte}>
                           <td>{r.aprendiz}</td>
                           <td style={{maxWidth:'260px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'var(--text-muted-dark)',fontSize:'13px'}}>{r.descripcion}</td>
                           <td><span style={{color:estadoColor(r.estado_reporte),fontWeight:600,fontSize:'12px'}}>{r.estado_reporte}</span></td>
                           <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{r.fecha_reporte?.split('T')[0] || r.fecha_reporte}</td>
+                          <td><button className="action-btn view" onClick={() => setReporteSeleccionado(r)}><IconEye size={15}/></button></td>
                         </tr>
                       ))}
                   </tbody>
@@ -207,6 +209,42 @@ const FichasAdmin = () => {
               )}
             </div>
           )}
+
+          {reporteSeleccionado && (
+            <div className="modal-overlay" onClick={() => setReporteSeleccionado(null)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth:'520px'}}>
+                <h2 className="modal-title">Reporte #{reporteSeleccionado.id_reporte}</h2>
+                <div className="detalle-grid">
+                  <div className="detalle-item"><span className="detalle-label">Aprendiz</span><span className="detalle-valor">{reporteSeleccionado.aprendiz}</span></div>
+                  <div className="detalle-item"><span className="detalle-label">Estado</span><span className="detalle-valor" style={{color:estadoColor(reporteSeleccionado.estado_reporte),fontWeight:600}}>{reporteSeleccionado.estado_reporte}</span></div>
+                  <div className="detalle-item"><span className="detalle-label">Fecha</span><span className="detalle-valor">{reporteSeleccionado.fecha_reporte?.split('T')[0]}</span></div>
+                  <div className="detalle-item" style={{gridColumn:'1/-1',flexDirection:'column',alignItems:'flex-start',gap:'8px'}}>
+                    <span className="detalle-label">Descripción</span>
+                    <span style={{fontSize:'14px',color:'#f0eaff',lineHeight:'1.6',whiteSpace:'pre-wrap'}}>{reporteSeleccionado.descripcion}</span>
+                  </div>
+                  {reporteSeleccionado.archivo && (
+                    <div className="detalle-item" style={{gridColumn:'1/-1',flexDirection:'column',alignItems:'flex-start',gap:'10px'}}>
+                      <span className="detalle-label">Evidencia adjunta</span>
+                      {/\.(jpg|jpeg|png|gif|webp)$/i.test(reporteSeleccionado.archivo) ? (
+                        <img src={`/uploads/${reporteSeleccionado.archivo}`} alt="evidencia"
+                          style={{maxWidth:'100%',maxHeight:'300px',objectFit:'contain',borderRadius:'10px',border:'1px solid rgba(127,90,240,0.3)',cursor:'pointer'}}
+                          onClick={() => window.open(`/uploads/${reporteSeleccionado.archivo}`, '_blank')}
+                        />
+                      ) : (
+                        <a href={`/uploads/${reporteSeleccionado.archivo}`} target="_blank" rel="noreferrer"
+                          style={{display:'inline-flex',alignItems:'center',gap:'8px',color:'#c9a8ff',fontSize:'13px',fontWeight:600,background:'rgba(127,90,240,0.1)',border:'1px solid rgba(127,90,240,0.3)',borderRadius:'8px',padding:'8px 14px',textDecoration:'none'}}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                          Ver archivo adjunto
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="modal-actions"><button className="btn-save" onClick={() => setReporteSeleccionado(null)}>Cerrar</button></div>
+              </div>
+            </div>
+          )}
+
         </main>
       </div>
     );

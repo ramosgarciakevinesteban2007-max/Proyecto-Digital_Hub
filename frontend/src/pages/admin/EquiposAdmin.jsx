@@ -24,8 +24,8 @@ const EquiposAdmin = () => {
   const [showVerModal, setShowVerModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [seleccionado, setSeleccionado] = useState(null);
-  const [formData, setFormData] = useState({ num_serie: '', marca: '', tipo: '', modelo: '', estado: 'Disponible' });
-  const [editData, setEditData] = useState({ marca: '', tipo: '', modelo: '', estado: 'Disponible' });
+  const [formData, setFormData] = useState({ num_serie: '', marca: '', tipo: '', modelo: '', estado: 'disponible', ubicacion: '', descripcion: '' });
+  const [editData, setEditData] = useState({ marca: '', tipo: '', modelo: '', estado: 'disponible', ubicacion: '', descripcion: '' });
   const [filtros, setFiltros] = useState({ buscar: '', estado: '', marca: '' });
   const [confirmId, setConfirmId] = useState(null);
   const [historial, setHistorial] = useState([]);
@@ -41,13 +41,13 @@ const EquiposAdmin = () => {
   const cargar = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/portatiles', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch('/api/portatiles?limit=500', { headers: { Authorization: `Bearer ${token}` } });
       if (res.status === 401) { navigate('/login'); return; }
       if (!res.ok) { setError('Error al cargar equipos'); setLoading(false); return; }
       const json = await res.json();
-      const data = Array.isArray(json) ? json : (json.data || []);
+      const data = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
       setPortatiles(data);
-    } catch { setError('Error de conexión'); }
+    } catch (e) { setError('Error de conexión: ' + e.message); }
     finally { setLoading(false); }
   };
 
@@ -60,8 +60,8 @@ const EquiposAdmin = () => {
         body: JSON.stringify(formData)
       });
       const d = await res.json().catch(() => ({}));
-      if (res.ok) { setShowModal(false); setFormData({ num_serie: '', marca: '', tipo: '', modelo: '', estado: 'Disponible' }); cargar(); return; }
-      setError(d.mensaje || 'Error al guardar');
+      if (res.ok) { setShowModal(false); setFormData({ num_serie: '', marca: '', tipo: '', modelo: '', estado: 'disponible' }); setFiltros({ buscar: '', estado: '', marca: '' }); setPage(1); cargar(); return; }
+      setError(d.mensaje || d.error || JSON.stringify(d) || 'Error al guardar');
     } catch { setError('Error de conexión'); }
   };
 
@@ -84,7 +84,7 @@ const EquiposAdmin = () => {
       const res = await fetch(`/api/portatiles/${id}/estado`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ estado: 'Dañado' })
+        body: JSON.stringify({ estado: 'dañado' })
       });
       if (res.ok) { setConfirmId(null); cargar(); }
     } catch {}
@@ -117,7 +117,7 @@ const EquiposAdmin = () => {
   const abrirVer = (p) => { setSeleccionado(p); setShowVerModal(true); };
   const abrirEditar = async (p) => {
   setSeleccionado(p);
-  setEditData({ marca: p.marca, tipo: p.tipo || '', modelo: p.modelo, estado: p.estado });
+  setEditData({ marca: p.marca, tipo: p.tipo || '', modelo: p.modelo, estado: p.estado, ubicacion: p.ubicacion || '', descripcion: p.descripcion || '' });
   setShowHistorial(false);
   setHistorial([]);
   setShowEditModal(true);
@@ -134,7 +134,7 @@ const EquiposAdmin = () => {
   finally { setLoadingHistorial(false); }
 };
 
-  const estadoColor = (e) => ({ Disponible: '#4ade80', Asignado: '#facc15', 'Dañado': '#f87171', Mantenimiento: '#fb923c' }[e] || '#c9a8ff');
+  const estadoColor = (e) => ({ disponible: '#4ade80', asignado: '#facc15', 'dañado': '#f87171', mantenimiento: '#fb923c' }[e] || '#c9a8ff');
 
   const filtrados = portatiles.filter(p => {
     const b = filtros.buscar.toLowerCase();
@@ -172,11 +172,11 @@ const EquiposAdmin = () => {
           </div>
           <div className="stat-card">
             <div className="stat-icon"><IconMonitor size={24} /></div>
-            <div className="stat-card-text"><div className="stat-label">Disponibles</div><div className="stat-value">{portatiles.filter(p => p.estado === 'Disponible').length}</div></div>
+            <div className="stat-card-text"><div className="stat-label">Disponibles</div><div className="stat-value">{portatiles.filter(p => p.estado === 'disponible').length}</div></div>
           </div>
           <div className="stat-card">
             <div className="stat-icon"><IconBarChart size={24} /></div>
-            <div className="stat-card-text"><div className="stat-label">Asignados</div><div className="stat-value">{portatiles.filter(p => p.estado === 'Asignado').length}</div></div>
+            <div className="stat-card-text"><div className="stat-label">Asignados</div><div className="stat-value">{portatiles.filter(p => p.estado === 'asignado').length}</div></div>
           </div>
         </div>
 
@@ -186,23 +186,25 @@ const EquiposAdmin = () => {
           <input className="filter-input" placeholder="Buscar por serie, marca o modelo..." value={filtros.buscar} onChange={e => { setFiltros({ ...filtros, buscar: e.target.value }); setPage(1); }} />
           <select className="filter-input" value={filtros.estado} onChange={e => { setFiltros({ ...filtros, estado: e.target.value }); setPage(1); }}>
             <option value="">Todos los estados</option>
-            <option value="Disponible">Disponible</option>
-            <option value="Asignado">Asignado</option>
-            <option value="Dañado">Dañado</option>
-            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="disponible">Disponible</option>
+            <option value="asignado">Asignado</option>
+            <option value="dañado">Dañado</option>
+            <option value="mantenimiento">Mantenimiento</option>
             </select>
           <button className="filter-clear" onClick={() => { setFiltros({ buscar: '', estado: '', marca: '' }); setPage(1); }}>Limpiar</button>
         </div>
 
         <div className="table-container">
           <table className="equipment-table">
-            <thead><tr><th>N Serie</th><th>Marca</th><th>Modelo</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>N Serie</th><th>Marca</th><th>Modelo</th><th>Ubicación</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody>
-              {loading ? <tr><td colSpan="5" style={{ textAlign: 'center', padding: '32px' }}>Cargando...</td></tr>
-              : filtrados.length === 0 ? <tr><td colSpan="5" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted-dark)' }}>Sin resultados</td></tr>
+              {loading ? <tr><td colSpan="7" style={{ textAlign: 'center', padding: '32px' }}>Cargando...</td></tr>
+              : filtrados.length === 0 ? <tr><td colSpan="7" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted-dark)' }}>Sin resultados</td></tr>
               : paginados.map(p => (
                 <tr key={p.id_portatil}>
                   <td>{p.num_serie}</td><td>{p.marca}</td><td>{p.modelo}</td>
+                  <td style={{color:'var(--text-muted-dark)',fontSize:'13px'}}>{p.ubicacion || '—'}</td>
+                  <td style={{color:'var(--text-muted-dark)',fontSize:'13px',maxWidth:'180px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={p.descripcion}>{p.descripcion || '—'}</td>
                   <td><span style={{ color: estadoColor(p.estado), fontWeight: 600, fontSize: '13px' }}>{p.estado}</span></td>
                   <td><div className="action-buttons">
                     <button className="action-btn view" onClick={() => abrirVer(p)}><IconEye size={16} /></button>
@@ -229,12 +231,14 @@ const EquiposAdmin = () => {
                 <div className="form-group"><label>Modelo</label><input type="text" value={formData.modelo} onChange={e => setFormData({ ...formData, modelo: e.target.value })} required /></div>
                 <div className="form-group"><label>Estado</label>
                   <select value={formData.estado} onChange={e => setFormData({ ...formData, estado: e.target.value })}>
-                    <option value="Disponible">Disponible</option>
-                    <option value="Asignado">Asignado</option>
-                    <option value="Dañado">Dañado</option>
-                    <option value="Mantenimiento">Mantenimiento</option>
+                    <option value="disponible">Disponible</option>
+                    <option value="asignado">Asignado</option>
+                    <option value="dañado">Dañado</option>
+                    <option value="mantenimiento">Mantenimiento</option>
                   </select>
                 </div>
+                <div className="form-group"><label>Ubicación</label><input type="text" placeholder="ej: Sala 3, Bloque B..." value={formData.ubicacion} onChange={e => setFormData({ ...formData, ubicacion: e.target.value })} /></div>
+                <div className="form-group"><label>Descripción</label><textarea rows="2" placeholder="Observaciones del equipo..." value={formData.descripcion} onChange={e => setFormData({ ...formData, descripcion: e.target.value })} /></div>
                 <div className="modal-actions">
                   <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>Cancelar</button>
                   <button type="submit" className="btn-save">Guardar</button>
@@ -255,6 +259,8 @@ const EquiposAdmin = () => {
                 <div className="detalle-item"><span className="detalle-label">Tipo</span><span className="detalle-valor">{seleccionado.tipo}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Modelo</span><span className="detalle-valor">{seleccionado.modelo}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Estado</span><span className="detalle-valor" style={{ color: estadoColor(seleccionado.estado), fontWeight: 600 }}>{seleccionado.estado}</span></div>
+                <div className="detalle-item"><span className="detalle-label">Ubicación</span><span className="detalle-valor">{seleccionado.ubicacion || '—'}</span></div>
+                <div className="detalle-item" style={{gridColumn:'1/-1'}}><span className="detalle-label">Descripción</span><span className="detalle-valor" style={{whiteSpace:'pre-wrap'}}>{seleccionado.descripcion || '—'}</span></div>
               </div>
               <div className="modal-actions"><button className="btn-save" onClick={() => setShowVerModal(false)}>Cerrar</button></div>
             </div>
@@ -307,11 +313,17 @@ const EquiposAdmin = () => {
             </div>
             <div className="form-group"><label>Estado</label>
               <select value={editData.estado} onChange={e => setEditData({...editData, estado: e.target.value})}>
-                <option value="Disponible">Disponible</option>
-                <option value="Asignado">Asignado</option>
-                <option value="Dañado">Dañado</option>
-                <option value="Mantenimiento">Mantenimiento</option>
+                <option value="disponible">Disponible</option>
+                <option value="asignado">Asignado</option>
+                <option value="dañado">Dañado</option>
+                <option value="mantenimiento">Mantenimiento</option>
               </select>
+            </div>
+            <div className="form-group"><label>Ubicación</label>
+              <input type="text" placeholder="ej: Sala 3, Bloque B..." value={editData.ubicacion} onChange={e => setEditData({...editData, ubicacion: e.target.value})} />
+            </div>
+            <div className="form-group"><label>Descripción</label>
+              <textarea rows="2" value={editData.descripcion} onChange={e => setEditData({...editData, descripcion: e.target.value})} />
             </div>
             <div className="modal-actions">
               <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancelar</button>

@@ -21,7 +21,7 @@ const RecuperarPassword = () => {
   try {
     setLoading(true);
 
-    const res = await fetch("http://localhost:3001/api/recuperacion/enviar-codigo", {
+    const res = await fetch("/api/recuperacion/enviar-codigo", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
