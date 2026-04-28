@@ -1011,17 +1011,9 @@ const FichasInstructor = () => {
 
                     <select value={formData.jornada} onChange={e => setFormData({...formData, jornada: e.target.value})}>
 
-<<<<<<< HEAD
-                    <option value="Mañana">Mañana</option>
-
-                    <option value="Tarde">Tarde</option>
-
-                    <option value="Noche">Noche</option>
-=======
                       <option value="manana">Mañana</option><option value="tarde">Tarde</option>
 
                       <option value="noche">Noche</option>
->>>>>>> main
 
                     </select>
 
