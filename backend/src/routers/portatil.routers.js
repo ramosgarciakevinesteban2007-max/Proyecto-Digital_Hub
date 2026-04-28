@@ -127,6 +127,10 @@ router.get(
         });
       }
 
+      if (req.usuario.rol === "instructor" && Number(rows[0].id_instructor) !== Number(req.usuario.id)) {
+        return res.status(403).json({ mensaje: "No tienes permiso para ver este portátil" });
+      }
+
       res.json(rows[0]);
 
     } catch (error) {
@@ -169,7 +173,7 @@ router.put(
       const viejo = anterior[0];
 
       // Instructor solo puede editar sus propios portátiles
-      if (req.usuario.rol === "instructor" && viejo.id_instructor !== req.usuario.id) {
+      if (req.usuario.rol === "instructor" && Number(viejo.id_instructor) !== Number(req.usuario.id)) {
         return res.status(403).json({ mensaje: "No tienes permiso para editar este portátil" });
       }
 
@@ -180,12 +184,19 @@ router.put(
       for (const [campo, valorNuevo] of Object.entries(campos)) {
         const valorAnterior = viejo[campo];
         if (String(valorAnterior) !== String(valorNuevo)) {
-          await pool.query(
-            `INSERT INTO historial_portatil 
-             (id_portatil, campo_modificado, valor_anterior, valor_nuevo, modificado_por)
-             VALUES (?, ?, ?, ?, ?)`,
-            [id, campo, valorAnterior, valorNuevo, modificadoPor]
-          );
+          try {
+            await pool.query(
+              `INSERT INTO historial_portatil 
+               (id_portatil, campo_modificado, valor_anterior, valor_nuevo, modificado_por)
+               VALUES (?, ?, ?, ?, ?)`,
+              [id, campo, valorAnterior, valorNuevo, modificadoPor]
+            );
+          } catch (histError) {
+            if (histError.code !== 'ER_NO_SUCH_TABLE') {
+              throw histError;
+            }
+            console.warn(`Tabla historial_portatil no encontrada. Se omite registro de historial para el portátil ${id}.`);
+          }
         }
       }
 
@@ -201,7 +212,7 @@ router.put(
       if (resultado.affectedRows === 0)
         return res.status(404).json({ mensaje: "Portátil no encontrado" });
 
-      if (estado !== 'asignado') {
+      if ((estado || '').toLowerCase() !== 'asignado') {
         await pool.query(
           "UPDATE portatil_aprendiz SET estado = 'inactivo' WHERE id_portatil = ?", [id]
         );
@@ -210,7 +221,7 @@ router.put(
       res.json({ mensaje: "Portátil actualizado correctamente" });
 
     } catch (error) {
-      console.error("ERROR EDITAR:", error.message);
+      console.error("ERROR EDITAR:", error);
       res.status(500).json({ mensaje: "Error al actualizar el portátil" });
     }
   }
@@ -262,7 +273,7 @@ router.patch(
       const [rows] = await pool.query("SELECT * FROM portatil WHERE id_portatil = ?", [id]);
       if (rows.length === 0) return res.status(404).json({ mensaje: "Portátil no encontrado" });
 
-      if (req.usuario.rol === "instructor" && rows[0].id_instructor !== req.usuario.id) {
+      if (req.usuario.rol === "instructor" && Number(rows[0].id_instructor) !== Number(req.usuario.id)) {
         return res.status(403).json({ mensaje: "No tienes permiso sobre este portátil" });
       }
 
@@ -299,7 +310,7 @@ router.delete(
       const [rows] = await pool.query("SELECT * FROM portatil WHERE id_portatil = ?", [id]);
       if (rows.length === 0) return res.status(404).json({ mensaje: "Portátil no encontrado" });
 
-      if (req.usuario.rol === "instructor" && rows[0].id_instructor !== req.usuario.id) {
+      if (req.usuario.rol === "instructor" && Number(rows[0].id_instructor) !== Number(req.usuario.id)) {
         return res.status(403).json({ mensaje: "No puedes eliminar un portátil que no registraste" });
       }
 

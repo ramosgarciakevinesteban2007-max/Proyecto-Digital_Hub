@@ -55,7 +55,7 @@ router.get("/reportes/ficha/:id", verificarToken, verificarRol([ROLES.ADMIN, ROL
       [id]
     );
 
-    const [fichaRows] = await db.query("SELECT nombre FROM ficha WHERE id_ficha = ?", [id]);
+    const [fichaRows] = await db.query("SELECT nombre FROM ficha WHERE id = ?", [id]);
     const nombreFicha = fichaRows[0]?.nombre || `Ficha ${id}`;
 
     const columnas = [

@@ -159,10 +159,10 @@ const exportarPortatilesExcel = async (req, res) => {
     const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
     const { estado } = req.query;
     const [rows] = await db.query(queryPortatiles(idInstructor, estado || null));
-    generarExcelDiseño(res, rows, "Portátiles", "portatiles", COLS_PORTATILES);
+    await generarExcelDiseño(res, rows, "Portátiles", "portatiles", COLS_PORTATILES);
   } catch (error) {
     console.error("Error exportar portatiles excel:", error);
-    res.status(500).json({ mensaje: "Error al exportar portátiles", detalle: error.message });
+    if (!res.headersSent) res.status(500).json({ mensaje: "Error al exportar portátiles", detalle: error.message });
   }
 };
 
@@ -171,10 +171,10 @@ const exportarPortatilesCSV = async (req, res) => {
     const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
     const { estado } = req.query;
     const [rows] = await db.query(queryPortatiles(idInstructor, estado || null));
-    exportarCSVGenerico(res, rows, "portatiles", COLS_PORTATILES);
+    await exportarCSVGenerico(res, rows, "portatiles", COLS_PORTATILES);
   } catch (error) {
     console.error("Error exportar portatiles csv:", error);
-    res.status(500).json({ mensaje: "Error al exportar portátiles", detalle: error.message });
+    if (!res.headersSent) res.status(500).json({ mensaje: "Error al exportar portátiles", detalle: error.message });
   }
 };
 
@@ -188,27 +188,41 @@ const COLS_USUARIOS = [
 ];
 
 const exportarUsuariosExcel = async (req, res) => {
-  const { rol, estado } = req.query;
-  const conditions = [];
-  if (rol) conditions.push(`rol = '${rol}'`);
-  if (estado) conditions.push(`estado = '${estado}'`);
-  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-  const [rows] = await db.query(
-    `SELECT id_usuario, nombre, correo, rol, estado FROM usuario ${where} ORDER BY id_usuario DESC`
-  );
-  generarExcelDiseño(res, rows, "Usuarios", "usuarios", COLS_USUARIOS);
+  try {
+    const { rol, estado } = req.query;
+    const conditions = [];
+    const params = [];
+    if (rol)    { conditions.push(`rol = ?`);    params.push(rol); }
+    if (estado) { conditions.push(`estado = ?`); params.push(estado); }
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+    const [rows] = await db.query(
+      `SELECT id_usuario, nombre, correo, rol, estado FROM usuario ${where} ORDER BY id_usuario DESC`,
+      params
+    );
+    await generarExcelDiseño(res, rows, "Usuarios", "usuarios", COLS_USUARIOS);
+  } catch (error) {
+    console.error("Error exportar usuarios excel:", error);
+    if (!res.headersSent) res.status(500).json({ mensaje: "Error al exportar usuarios", detalle: error.message });
+  }
 };
 
 const exportarUsuariosCSV = async (req, res) => {
-  const { rol, estado } = req.query;
-  const conditions = [];
-  if (rol) conditions.push(`rol = '${rol}'`);
-  if (estado) conditions.push(`estado = '${estado}'`);
-  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-  const [rows] = await db.query(
-    `SELECT id_usuario, nombre, correo, rol, estado FROM usuario ${where} ORDER BY id_usuario DESC`
-  );
-  exportarCSVGenerico(res, rows, "usuarios", COLS_USUARIOS);
+  try {
+    const { rol, estado } = req.query;
+    const conditions = [];
+    const params = [];
+    if (rol)    { conditions.push(`rol = ?`);    params.push(rol); }
+    if (estado) { conditions.push(`estado = ?`); params.push(estado); }
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+    const [rows] = await db.query(
+      `SELECT id_usuario, nombre, correo, rol, estado FROM usuario ${where} ORDER BY id_usuario DESC`,
+      params
+    );
+    await exportarCSVGenerico(res, rows, "usuarios", COLS_USUARIOS);
+  } catch (error) {
+    console.error("Error exportar usuarios csv:", error);
+    if (!res.headersSent) res.status(500).json({ mensaje: "Error al exportar usuarios", detalle: error.message });
+  }
 };
 
 // ── Ambientes ───────────────────────────────────────────
@@ -220,13 +234,23 @@ const COLS_AMBIENTES = [
 ];
 
 const exportarAmbientesExcel = async (req, res) => {
-  const [rows] = await db.query("SELECT id_ambiente, nombre, nave, direccion FROM ambiente ORDER BY id_ambiente DESC");
-  generarExcelDiseño(res, rows, "Ambientes", "ambientes", COLS_AMBIENTES);
+  try {
+    const [rows] = await db.query("SELECT id_ambiente, nombre, nave, direccion FROM ambiente ORDER BY id_ambiente DESC");
+    await generarExcelDiseño(res, rows, "Ambientes", "ambientes", COLS_AMBIENTES);
+  } catch (error) {
+    console.error("Error exportar ambientes excel:", error);
+    if (!res.headersSent) res.status(500).json({ mensaje: "Error al exportar ambientes", detalle: error.message });
+  }
 };
 
 const exportarAmbientesCSV = async (req, res) => {
-  const [rows] = await db.query("SELECT id_ambiente, nombre, nave, direccion FROM ambiente ORDER BY id_ambiente DESC");
-  exportarCSVGenerico(res, rows, "ambientes", COLS_AMBIENTES);
+  try {
+    const [rows] = await db.query("SELECT id_ambiente, nombre, nave, direccion FROM ambiente ORDER BY id_ambiente DESC");
+    await exportarCSVGenerico(res, rows, "ambientes", COLS_AMBIENTES);
+  } catch (error) {
+    console.error("Error exportar ambientes csv:", error);
+    if (!res.headersSent) res.status(500).json({ mensaje: "Error al exportar ambientes", detalle: error.message });
+  }
 };
 
 // ── Fichas ──────────────────────────────────────────────
@@ -244,13 +268,12 @@ const COLS_FICHAS = [
   { header:"Fecha Creación",     key:"fecha_creacion",     width:20 },
 ];
 
-const exportarFichasExcel = async (req, res) => {
-  const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
-  const { estado, jornada } = req.query;
+const buildFichasQuery = (idInstructor, estado, jornada) => {
   const conditions = [];
-  if (idInstructor) conditions.push(`f.id_instructor = ${idInstructor}`);
-  if (estado) conditions.push(`f.estado = '${estado}'`);
-  if (jornada) conditions.push(`f.jornada = '${jornada}'`);
+  const params = [];
+  if (idInstructor) { conditions.push(`f.id_instructor = ?`); params.push(idInstructor); }
+  if (estado)       { conditions.push(`f.estado = ?`);        params.push(estado); }
+  if (jornada)      { conditions.push(`f.jornada = ?`);       params.push(jornada); }
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const q = `
     SELECT f.id, f.nombre, f.programa_formacion, f.jornada, f.estado, f.cupo_maximo,
@@ -259,112 +282,132 @@ const exportarFichasExcel = async (req, res) => {
     FROM ficha f
     LEFT JOIN usuario u ON f.id_instructor = u.id_usuario
     LEFT JOIN ficha_aprendiz fa ON fa.id_ficha = f.id
-    ${where} GROUP BY f.id ORDER BY f.id DESC`;
-  const [rows] = await db.query(q);
-  generarExcelDiseño(res, rows, "Fichas", "fichas", COLS_FICHAS);
+    ${where}
+    GROUP BY f.id, f.nombre, f.programa_formacion, f.jornada, f.estado, f.cupo_maximo,
+      u.nombre, f.ambiente_nombre, f.ambiente_nave, f.fecha_creacion
+    ORDER BY f.id DESC`;
+  return { q, params };
+};
+
+const exportarFichasExcel = async (req, res) => {
+  try {
+    const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
+    const { estado, jornada } = req.query;
+    const { q, params } = buildFichasQuery(idInstructor, estado || null, jornada || null);
+    const [rows] = await db.query(q, params);
+    await generarExcelDiseño(res, rows, "Fichas", "fichas", COLS_FICHAS);
+  } catch (error) {
+    console.error("Error exportar fichas excel:", error);
+    if (!res.headersSent) res.status(500).json({ mensaje: "Error al exportar fichas", detalle: error.message });
+  }
 };
 
 const exportarFichasCSV = async (req, res) => {
-  const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
-  const { estado, jornada } = req.query;
-  const conditions = [];
-  if (idInstructor) conditions.push(`f.id_instructor = ${idInstructor}`);
-  if (estado) conditions.push(`f.estado = '${estado}'`);
-  if (jornada) conditions.push(`f.jornada = '${jornada}'`);
-  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-  const q = `
-    SELECT f.id, f.nombre, f.programa_formacion, f.jornada, f.estado, f.cupo_maximo,
-      u.nombre AS instructor_nombre, f.ambiente_nombre, f.ambiente_nave,
-      COUNT(fa.id_aprendiz) AS total_aprendices, f.fecha_creacion
-    FROM ficha f
-    LEFT JOIN usuario u ON f.id_instructor = u.id_usuario
-    LEFT JOIN ficha_aprendiz fa ON fa.id_ficha = f.id
-    ${where} GROUP BY f.id ORDER BY f.id DESC`;
-  const [rows] = await db.query(q);
-  exportarCSVGenerico(res, rows, "fichas", COLS_FICHAS);
+  try {
+    const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
+    const { estado, jornada } = req.query;
+    const { q, params } = buildFichasQuery(idInstructor, estado || null, jornada || null);
+    const [rows] = await db.query(q, params);
+    await exportarCSVGenerico(res, rows, "fichas", COLS_FICHAS);
+  } catch (error) {
+    console.error("Error exportar fichas csv:", error);
+    if (!res.headersSent) res.status(500).json({ mensaje: "Error al exportar fichas", detalle: error.message });
+  }
 };
 const exportarReportesExcel = async (req, res) => {
-  const { rol, id } = req.usuario;
-  const { estado_reporte } = req.query;
-  const conditions = [];
-  if (rol === "instructor") conditions.push(`r.id_instructor = ${id}`);
-  if (estado_reporte) conditions.push(`r.estado_reporte = '${estado_reporte}'`);
-  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  try {
+    const { rol, id } = req.usuario;
+    const { estado_reporte } = req.query;
+    const conditions = [];
+    const params = [];
+    if (rol === "instructor") { conditions.push(`r.id_instructor = ?`); params.push(id); }
+    if (estado_reporte)       { conditions.push(`r.estado_reporte = ?`); params.push(estado_reporte); }
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
-  const esInstructor = rol === "instructor";
-  const query = esInstructor
-    ? `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
-              r.descripcion, r.estado_reporte, r.fecha_reporte
-       FROM reportes r JOIN usuario u ON r.id_aprendiz = u.id_usuario
-       ${where} ORDER BY r.fecha_reporte DESC`
-    : `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
-              ui.nombre AS instructor, r.descripcion, r.estado_reporte, r.fecha_reporte
-       FROM reportes r JOIN usuario u ON r.id_aprendiz = u.id_usuario
-       LEFT JOIN usuario ui ON r.id_instructor = ui.id_usuario
-       ${where} ORDER BY r.fecha_reporte DESC`;
+    const esInstructor = rol === "instructor";
+    const query = esInstructor
+      ? `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
+                r.descripcion, r.estado_reporte, r.fecha_reporte
+         FROM reportes r JOIN usuario u ON r.id_aprendiz = u.id_usuario
+         ${where} ORDER BY r.fecha_reporte DESC`
+      : `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
+                ui.nombre AS instructor, r.descripcion, r.estado_reporte, r.fecha_reporte
+         FROM reportes r JOIN usuario u ON r.id_aprendiz = u.id_usuario
+         LEFT JOIN usuario ui ON r.id_instructor = ui.id_usuario
+         ${where} ORDER BY r.fecha_reporte DESC`;
 
-  const [rows] = await db.query(query);
+    const [rows] = await db.query(query, params);
 
-  const columnas = esInstructor ? [
-    { header:"ID",          key:"id_reporte",      width:8  },
-    { header:"Aprendiz",    key:"aprendiz",        width:24 },
-    { header:"Correo",      key:"correo_aprendiz", width:30 },
-    { header:"Descripción", key:"descripcion",     width:40 },
-    { header:"Estado",      key:"estado_reporte",  width:16 },
-    { header:"Fecha",       key:"fecha_reporte",   width:20 },
-  ] : [
-    { header:"ID",          key:"id_reporte",      width:8  },
-    { header:"Aprendiz",    key:"aprendiz",        width:24 },
-    { header:"Correo",      key:"correo_aprendiz", width:30 },
-    { header:"Instructor",  key:"instructor",      width:24 },
-    { header:"Descripción", key:"descripcion",     width:40 },
-    { header:"Estado",      key:"estado_reporte",  width:16 },
-    { header:"Fecha",       key:"fecha_reporte",   width:20 },
-  ];
+    const columnas = esInstructor ? [
+      { header:"ID",          key:"id_reporte",      width:8  },
+      { header:"Aprendiz",    key:"aprendiz",        width:24 },
+      { header:"Correo",      key:"correo_aprendiz", width:30 },
+      { header:"Descripción", key:"descripcion",     width:40 },
+      { header:"Estado",      key:"estado_reporte",  width:16 },
+      { header:"Fecha",       key:"fecha_reporte",   width:20 },
+    ] : [
+      { header:"ID",          key:"id_reporte",      width:8  },
+      { header:"Aprendiz",    key:"aprendiz",        width:24 },
+      { header:"Correo",      key:"correo_aprendiz", width:30 },
+      { header:"Instructor",  key:"instructor",      width:24 },
+      { header:"Descripción", key:"descripcion",     width:40 },
+      { header:"Estado",      key:"estado_reporte",  width:16 },
+      { header:"Fecha",       key:"fecha_reporte",   width:20 },
+    ];
 
-  generarExcelDiseño(res, rows, "Reportes", "reportes", columnas);
+    await generarExcelDiseño(res, rows, "Reportes", "reportes", columnas);
+  } catch (error) {
+    console.error("Error exportar reportes excel:", error);
+    if (!res.headersSent) res.status(500).json({ mensaje: "Error al exportar reportes", detalle: error.message });
+  }
 };
 
 const exportarReportesCSV = async (req, res) => {
-  const { rol, id } = req.usuario;
-  const { estado_reporte } = req.query;
-  const conditions = [];
-  if (rol === "instructor") conditions.push(`r.id_instructor = ${id}`);
-  if (estado_reporte) conditions.push(`r.estado_reporte = '${estado_reporte}'`);
-  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  try {
+    const { rol, id } = req.usuario;
+    const { estado_reporte } = req.query;
+    const conditions = [];
+    const params = [];
+    if (rol === "instructor") { conditions.push(`r.id_instructor = ?`); params.push(id); }
+    if (estado_reporte)       { conditions.push(`r.estado_reporte = ?`); params.push(estado_reporte); }
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
-  const esInstructor = rol === "instructor";
-  const query = esInstructor
-    ? `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
-              r.descripcion, r.estado_reporte, r.fecha_reporte
-       FROM reportes r JOIN usuario u ON r.id_aprendiz = u.id_usuario
-       ${where} ORDER BY r.fecha_reporte DESC`
-    : `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
-              ui.nombre AS instructor, r.descripcion, r.estado_reporte, r.fecha_reporte
-       FROM reportes r JOIN usuario u ON r.id_aprendiz = u.id_usuario
-       LEFT JOIN usuario ui ON r.id_instructor = ui.id_usuario
-       ${where} ORDER BY r.fecha_reporte DESC`;
+    const esInstructor = rol === "instructor";
+    const query = esInstructor
+      ? `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
+                r.descripcion, r.estado_reporte, r.fecha_reporte
+         FROM reportes r JOIN usuario u ON r.id_aprendiz = u.id_usuario
+         ${where} ORDER BY r.fecha_reporte DESC`
+      : `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
+                ui.nombre AS instructor, r.descripcion, r.estado_reporte, r.fecha_reporte
+         FROM reportes r JOIN usuario u ON r.id_aprendiz = u.id_usuario
+         LEFT JOIN usuario ui ON r.id_instructor = ui.id_usuario
+         ${where} ORDER BY r.fecha_reporte DESC`;
 
-  const [rows] = await db.query(query);
+    const [rows] = await db.query(query, params);
 
-  const columnas = esInstructor ? [
-    { header:"ID",          key:"id_reporte",      width:8  },
-    { header:"Aprendiz",    key:"aprendiz",        width:24 },
-    { header:"Correo",      key:"correo_aprendiz", width:30 },
-    { header:"Descripción", key:"descripcion",     width:40 },
-    { header:"Estado",      key:"estado_reporte",  width:16 },
-    { header:"Fecha",       key:"fecha_reporte",   width:20 },
-  ] : [
-    { header:"ID",          key:"id_reporte",      width:8  },
-    { header:"Aprendiz",    key:"aprendiz",        width:24 },
-    { header:"Correo",      key:"correo_aprendiz", width:30 },
-    { header:"Instructor",  key:"instructor",      width:24 },
-    { header:"Descripción", key:"descripcion",     width:40 },
-    { header:"Estado",      key:"estado_reporte",  width:16 },
-    { header:"Fecha",       key:"fecha_reporte",   width:20 },
-  ];
+    const columnas = esInstructor ? [
+      { header:"ID",          key:"id_reporte",      width:8  },
+      { header:"Aprendiz",    key:"aprendiz",        width:24 },
+      { header:"Correo",      key:"correo_aprendiz", width:30 },
+      { header:"Descripción", key:"descripcion",     width:40 },
+      { header:"Estado",      key:"estado_reporte",  width:16 },
+      { header:"Fecha",       key:"fecha_reporte",   width:20 },
+    ] : [
+      { header:"ID",          key:"id_reporte",      width:8  },
+      { header:"Aprendiz",    key:"aprendiz",        width:24 },
+      { header:"Correo",      key:"correo_aprendiz", width:30 },
+      { header:"Instructor",  key:"instructor",      width:24 },
+      { header:"Descripción", key:"descripcion",     width:40 },
+      { header:"Estado",      key:"estado_reporte",  width:16 },
+      { header:"Fecha",       key:"fecha_reporte",   width:20 },
+    ];
 
-  exportarCSVGenerico(res, rows, "reportes", columnas);
+    await exportarCSVGenerico(res, rows, "reportes", columnas);
+  } catch (error) {
+    console.error("Error exportar reportes csv:", error);
+    if (!res.headersSent) res.status(500).json({ mensaje: "Error al exportar reportes", detalle: error.message });
+  }
 };
 
 module.exports = {
