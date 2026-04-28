@@ -167,6 +167,12 @@ router.put(
         return res.status(404).json({ mensaje: "Portátil no encontrado" });
 
       const viejo = anterior[0];
+
+      // Instructor solo puede editar sus propios portátiles
+      if (req.usuario.rol === "instructor" && viejo.id_instructor !== req.usuario.id) {
+        return res.status(403).json({ mensaje: "No tienes permiso para editar este portátil" });
+      }
+
       const modificadoPor = req.usuario?.correo || req.usuario?.nombre || `usuario #${req.usuario?.id}`;
 
       // Detectar cambios y registrarlos
@@ -422,6 +428,39 @@ router.get("/:id/aprendices", verificarToken, verificarRol(["administrador", "in
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error al obtener aprendices del portátil" });
+  }
+});
+
+/*
+=========================================
+8. DESASIGNAR APRENDIZ DE UN PORTÁTIL
+=========================================
+*/
+router.delete("/:id/aprendices/:idAprendiz", verificarToken, verificarRol(["administrador", "instructor"]), async (req, res) => {
+  try {
+    const { id, idAprendiz } = req.params;
+
+    const [rows] = await pool.query(
+      "SELECT * FROM portatil_aprendiz WHERE id_portatil = ? AND id_aprendiz = ? AND estado = 'activo'",
+      [id, idAprendiz]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ mensaje: "Asignación activa no encontrada" });
+    }
+
+    await pool.query(
+      "UPDATE portatil_aprendiz SET estado = 'inactivo' WHERE id_portatil = ? AND id_aprendiz = ?",
+      [id, idAprendiz]
+    );
+    await pool.query(
+      "UPDATE portatil SET estado = 'disponible', id_aprendiz = NULL WHERE id_portatil = ?",
+      [id]
+    );
+
+    res.json({ mensaje: "Aprendiz desasignado correctamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error al desasignar el aprendiz" });
   }
 });
 

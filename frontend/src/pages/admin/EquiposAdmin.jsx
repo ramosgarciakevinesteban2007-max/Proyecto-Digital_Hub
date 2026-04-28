@@ -7,6 +7,7 @@ import './EquiposAdmin.css';
 import Pagination from '../../components/Pagination';
 import '../../components/Pagination.css';
 import ConfirmModal from '../../components/ConfirmModal';
+import ExportModal from '../../components/ExportModal';
 
 const LS_KEY = 'portatiles_local';
 const getLocal = () => { try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; } };
@@ -28,9 +29,12 @@ const EquiposAdmin = () => {
   const [editData, setEditData] = useState({ marca: '', tipo: '', modelo: '', estado: 'disponible', ubicacion: '', descripcion: '' });
   const [filtros, setFiltros] = useState({ buscar: '', estado: '', marca: '' });
   const [confirmId, setConfirmId] = useState(null);
+  const [aprendicesPortatil, setAprendicesPortatil] = useState([]);
+  const [loadingAprendices, setLoadingAprendices] = useState(false);
   const [historial, setHistorial] = useState([]);
   const [loadingHistorial, setLoadingHistorial] = useState(false);
   const [showHistorial, setShowHistorial] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const token = localStorage.getItem('token');
 
   useEffect(() => {
@@ -53,6 +57,12 @@ const EquiposAdmin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setError('');
+    // Validaciones frontend
+    if (!formData.num_serie.trim()) { setError('El número de serie es obligatorio'); return; }
+    if (formData.num_serie.trim().length < 3) { setError('El número de serie debe tener al menos 3 caracteres'); return; }
+    if (!formData.marca.trim()) { setError('La marca es obligatoria'); return; }
+    if (!formData.tipo.trim()) { setError('El tipo es obligatorio'); return; }
+    if (!formData.modelo.trim()) { setError('El modelo es obligatorio'); return; }
     try {
       const res = await fetch('/api/portatiles', {
         method: 'POST',
@@ -114,7 +124,27 @@ const EquiposAdmin = () => {
     }
   };
 
-  const abrirVer = (p) => { setSeleccionado(p); setShowVerModal(true); };
+  const abrirVer = async (p) => {
+    setSeleccionado(p); setShowVerModal(true);
+    setAprendicesPortatil([]); setLoadingAprendices(true);
+    try {
+      const res = await fetch(`/api/portatiles/${p.id_portatil}/aprendices`, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) setAprendicesPortatil(await res.json());
+    } catch {}
+    finally { setLoadingAprendices(false); }
+  };
+
+  const desasignarAprendiz = async (idAprendiz) => {
+    try {
+      const res = await fetch(`/api/portatiles/${seleccionado.id_portatil}/aprendices/${idAprendiz}`, {
+        method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setAprendicesPortatil(prev => prev.filter(a => a.id_usuario !== idAprendiz));
+        cargar();
+      }
+    } catch {}
+  };
   const abrirEditar = async (p) => {
   setSeleccionado(p);
   setEditData({ marca: p.marca, tipo: p.tipo || '', modelo: p.modelo, estado: p.estado, ubicacion: p.ubicacion || '', descripcion: p.descripcion || '' });
@@ -157,13 +187,13 @@ const EquiposAdmin = () => {
             <p className="equipment-subtitle">Total: <span>{portatiles.length}</span></p>
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <button onClick={() => exportar('excel')} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Excel
-            </button>
-            <button onClick={() => exportar('csv')} style={{ background: '#6366f1', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              CSV
+            <button onClick={() => setShowExport(true)} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#000', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Exportar
             </button>
             <NotificacionesBtn />
           </div>
@@ -266,6 +296,23 @@ const EquiposAdmin = () => {
                 <div className="detalle-item"><span className="detalle-label">Estado</span><span className="detalle-valor" style={{ color: estadoColor(seleccionado.estado), fontWeight: 600 }}>{seleccionado.estado}</span></div>
                 <div className="detalle-item"><span className="detalle-label">Ubicación</span><span className="detalle-valor">{seleccionado.ubicacion || '—'}</span></div>
                 <div className="detalle-item" style={{gridColumn:'1/-1'}}><span className="detalle-label">Descripción</span><span className="detalle-valor" style={{whiteSpace:'pre-wrap'}}>{seleccionado.descripcion || '—'}</span></div>
+                {(loadingAprendices || aprendicesPortatil.length > 0) && (
+                  <div className="detalle-item" style={{gridColumn:'1/-1',flexDirection:'column',alignItems:'flex-start',gap:'8px'}}>
+                    <span className="detalle-label">Aprendices asignados</span>
+                    {loadingAprendices ? <span style={{color:'#b8a8d8',fontSize:'13px'}}>Cargando...</span>
+                    : aprendicesPortatil.filter(a => a.estado_asignacion === 'activo').map(a => (
+                      <div key={a.id_usuario} style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',background:'rgba(127,90,240,0.08)',borderRadius:'8px',padding:'8px 12px'}}>
+                        <div>
+                          <div style={{fontSize:'13px',fontWeight:600,color:'#f0eaff'}}>{a.nombre}</div>
+                          <div style={{fontSize:'12px',color:'#b8a8d8'}}>{a.correo}</div>
+                        </div>
+                        <button onClick={() => desasignarAprendiz(a.id_usuario)} style={{background:'rgba(248,113,113,0.15)',border:'1px solid rgba(248,113,113,0.3)',borderRadius:'8px',padding:'5px 10px',color:'#f87171',fontSize:'12px',fontWeight:600,cursor:'pointer'}}>
+                          Desasignar
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="modal-actions"><button className="btn-save" onClick={() => setShowVerModal(false)}>Cerrar</button></div>
             </div>
@@ -388,6 +435,7 @@ const EquiposAdmin = () => {
 
         <Pagination page={page} total={filtrados.length} perPage={PER_PAGE} onChange={p => setPage(p)} />
         {confirmId && <ConfirmModal mensaje="Esta acción no se puede deshacer." onConfirm={() => handleEliminar(confirmId)} onCancel={() => setConfirmId(null)} />}
+        {showExport && <ExportModal tipo="equipos" datos={filtrados} onClose={() => setShowExport(false)} />}
       </main>
     </div>
   );

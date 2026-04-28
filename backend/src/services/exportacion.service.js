@@ -17,13 +17,12 @@ const fechaHoy = () => new Date().toLocaleDateString("es-CO", { year:"numeric", 
 const limpiar  = v => {
   if (v instanceof Date) return v.toISOString().split("T")[0];
   if (v === null || v === undefined) return "";
-  return v;
+  return String(v);
 };
 
 // ── Generador genérico con diseño oscuro ────────────────
-const generarExcelDiseño = async (res, query, titulo, nombreArchivo, columnas) => {
+const generarExcelDiseño = async (res, rows, titulo, nombreArchivo, columnas) => {
   try {
-    const [rows] = await db.query(query);
     const COLS = columnas.length;
     const lastCol = String.fromCharCode(64 + COLS);
     const fecha = fechaHoy();
@@ -82,7 +81,7 @@ const generarExcelDiseño = async (res, query, titulo, nombreArchivo, columnas) 
       const row = ws.addRow(valores);
       row.height = 22;
       const rowBg = idx % 2 === 0 ? C.bg3 : C.bg2;
-      row.eachCell((cell, colNum) => {
+      row.eachCell((cell) => {
         cell.fill      = fill(rowBg);
         cell.font      = { size:10, color:{ argb:C.text } };
         cell.alignment = aln("center");
@@ -104,92 +103,156 @@ const generarExcelDiseño = async (res, query, titulo, nombreArchivo, columnas) 
 };
 
 // ── CSV genérico ────────────────────────────────────────
-const exportarCSVGenerico = async (res, query, nombreArchivo, columnas, encabezados) => {
+const exportarCSVGenerico = async (res, rows, nombreArchivo, columnas) => {
   try {
-    const [rows] = await db.query(query);
-    let csv = "\uFEFF" + encabezados.join(",") + "\n";
-    rows.forEach(row => {
-      const fila = columnas.map(col => {
-        let valor = row[col] != null ? row[col].toString() : "";
-        valor = valor.replace(/"/g, '""');
-        return (valor.includes(",") || valor.includes("\n")) ? `"${valor}"` : valor;
-      }).join(",");
-      csv += fila + "\n";
-    });
+    const header = columnas.map(c => c.header).join(",");
+    const csv = [header, ...rows.map(row =>
+      columnas.map(col => {
+        let v = row[col.key] != null ? String(row[col.key]) : "";
+        v = v.replace(/"/g, '""');
+        return (v.includes(",") || v.includes("\n")) ? `"${v}"` : v;
+      }).join(",")
+    )].join("\n");
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader("Content-Disposition", `attachment; filename="${nombreArchivo}.csv"`);
-    res.send(csv);
+    res.send("\uFEFF" + csv);
   } catch (error) {
     res.status(500).json({ error:"Error al exportar CSV" });
   }
 };
 
-// ── Exportadores específicos ────────────────────────────
-const exportarPortatilesExcel = (req, res) => generarExcelDiseño(res,
-  "SELECT * FROM portatil", "Portátiles", "portatiles", [
-    { header:"ID",          key:"id_portatil", width:8  },
-    { header:"Serial",      key:"num_serie",   width:22 },
-    { header:"Marca",       key:"marca",       width:18 },
-    { header:"Tipo",        key:"tipo",        width:16 },
-    { header:"Modelo",      key:"modelo",      width:20 },
-    { header:"Estado",      key:"estado",      width:16 },
-    { header:"Ubicación",   key:"ubicacion",   width:20 },
-    { header:"Descripción", key:"descripcion", width:30 },
-  ]
-);
+// ── Portátiles ──────────────────────────────────────────
+const COLS_PORTATILES = [
+  { header:"ID",            key:"id_portatil",      width:8  },
+  { header:"Serial",        key:"num_serie",         width:22 },
+  { header:"Marca",         key:"marca",             width:18 },
+  { header:"Tipo",          key:"tipo",              width:16 },
+  { header:"Modelo",        key:"modelo",            width:20 },
+  { header:"Estado",        key:"estado",            width:16 },
+  { header:"Ubicación",     key:"ubicacion",         width:20 },
+  { header:"Descripción",   key:"descripcion",       width:30 },
+  { header:"Instructor",    key:"instructor_nombre", width:24 },
+  { header:"Aprendiz",      key:"aprendiz_nombre",   width:24 },
+  { header:"Fecha Registro",key:"fecha_registro",    width:20 },
+];
 
-const exportarPortatilesCSV = (req, res) => exportarCSVGenerico(res,
-  "SELECT * FROM portatil", "portatiles",
-  ["id_portatil","marca","tipo","modelo","estado","num_serie","ubicacion","descripcion"],
-  ["ID","Marca","Tipo","Modelo","Estado","Serial","Ubicación","Descripción"]
-);
+const queryPortatiles = (idInstructor = null) => {
+  const where = idInstructor ? `WHERE p.id_instructor = ${idInstructor}` : "";
+  return `
+    SELECT
+      p.id_portatil, p.num_serie, p.marca, p.tipo, p.modelo,
+      p.estado, p.ubicacion, p.descripcion,
+      ui.nombre AS instructor_nombre,
+      ua.nombre AS aprendiz_nombre,
+      p.fecha_registro
+    FROM portatil p
+    LEFT JOIN usuario ui ON p.id_instructor = ui.id_usuario
+    LEFT JOIN usuario ua ON p.id_aprendiz   = ua.id_usuario
+    ${where}
+    ORDER BY p.id_portatil DESC
+  `;
+};
 
-const exportarUsuariosExcel = (req, res) => generarExcelDiseño(res,
-  "SELECT id_usuario, nombre, correo, rol, estado FROM usuario", "Usuarios", "usuarios", [
-    { header:"ID",      key:"id_usuario", width:8  },
-    { header:"Nombre",  key:"nombre",     width:24 },
-    { header:"Correo",  key:"correo",     width:30 },
-    { header:"Rol",     key:"rol",        width:16 },
-    { header:"Estado",  key:"estado",     width:16 },
-  ]
-);
+const exportarPortatilesExcel = async (req, res) => {
+  const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
+  const [rows] = await db.query(queryPortatiles(idInstructor));
+  generarExcelDiseño(res, rows, "Portátiles", "portatiles", COLS_PORTATILES);
+};
 
-const exportarUsuariosCSV = (req, res) => exportarCSVGenerico(res,
-  "SELECT id_usuario, nombre, correo, rol, estado FROM usuario", "usuarios",
-  ["id_usuario","nombre","correo","rol","estado"],
-  ["ID","Nombre","Correo","Rol","Estado"]
-);
+const exportarPortatilesCSV = async (req, res) => {
+  const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
+  const [rows] = await db.query(queryPortatiles(idInstructor));
+  exportarCSVGenerico(res, rows, "portatiles", COLS_PORTATILES);
+};
 
-const exportarAmbientesExcel = (req, res) => generarExcelDiseño(res,
-  "SELECT * FROM ambiente", "Ambientes", "ambientes", [
-    { header:"ID",        key:"id_ambiente", width:8  },
-    { header:"Nombre",    key:"nombre",      width:24 },
-    { header:"Dirección", key:"direccion",   width:30 },
-  ]
-);
+// ── Usuarios ────────────────────────────────────────────
+const COLS_USUARIOS = [
+  { header:"ID",             key:"id_usuario",  width:8  },
+  { header:"Nombre",         key:"nombre",      width:24 },
+  { header:"Correo",         key:"correo",      width:30 },
+  { header:"Rol",            key:"rol",         width:16 },
+  { header:"Estado",         key:"estado",      width:16 },
+  { header:"Fecha Registro", key:"fecha_registro", width:20 },
+];
 
-const exportarAmbientesCSV = (req, res) => exportarCSVGenerico(res,
-  "SELECT * FROM ambiente", "ambientes",
-  ["id_ambiente","nombre","direccion"],
-  ["ID","Nombre","Dirección"]
-);
+const exportarUsuariosExcel = async (req, res) => {
+  const [rows] = await db.query(
+    "SELECT id_usuario, nombre, correo, rol, estado, fecha_registro FROM usuario ORDER BY id_usuario DESC"
+  );
+  generarExcelDiseño(res, rows, "Usuarios", "usuarios", COLS_USUARIOS);
+};
 
-const exportarFichasExcel = (req, res) => generarExcelDiseño(res,
-  "SELECT * FROM ficha", "Fichas", "fichas", [
-    { header:"ID",                  key:"id_ficha",            width:8  },
-    { header:"Nombre",              key:"nombre",              width:24 },
-    { header:"Programa Formación",  key:"programa_formacion",  width:28 },
-    { header:"Jornada",             key:"jornada",             width:14 },
-    { header:"ID Instructor",       key:"id_instructor",       width:14 },
-    { header:"Cupo Máximo",         key:"cupo_maximo",         width:14 },
-    { header:"Estado",              key:"estado",              width:14 },
-    { header:"Fecha Creación",      key:"fecha_creacion",      width:20 },
-  ]
-);
+const exportarUsuariosCSV = async (req, res) => {
+  const [rows] = await db.query(
+    "SELECT id_usuario, nombre, correo, rol, estado, fecha_registro FROM usuario ORDER BY id_usuario DESC"
+  );
+  exportarCSVGenerico(res, rows, "usuarios", COLS_USUARIOS);
+};
+
+// ── Ambientes ───────────────────────────────────────────
+const COLS_AMBIENTES = [
+  { header:"ID",        key:"id_ambiente", width:8  },
+  { header:"Nombre",    key:"nombre",      width:24 },
+  { header:"Nave",      key:"nave",        width:16 },
+  { header:"Dirección", key:"direccion",   width:30 },
+];
+
+const exportarAmbientesExcel = async (req, res) => {
+  const [rows] = await db.query("SELECT id_ambiente, nombre, nave, direccion FROM ambiente ORDER BY id_ambiente DESC");
+  generarExcelDiseño(res, rows, "Ambientes", "ambientes", COLS_AMBIENTES);
+};
+
+const exportarAmbientesCSV = async (req, res) => {
+  const [rows] = await db.query("SELECT id_ambiente, nombre, nave, direccion FROM ambiente ORDER BY id_ambiente DESC");
+  exportarCSVGenerico(res, rows, "ambientes", COLS_AMBIENTES);
+};
+
+// ── Fichas ──────────────────────────────────────────────
+const COLS_FICHAS = [
+  { header:"ID",                 key:"id_ficha",           width:8  },
+  { header:"Nombre/Número",      key:"nombre",             width:20 },
+  { header:"Programa Formación", key:"programa_formacion", width:30 },
+  { header:"Jornada",            key:"jornada",            width:14 },
+  { header:"Estado",             key:"estado",             width:14 },
+  { header:"Cupo Máximo",        key:"cupo_maximo",        width:14 },
+  { header:"Instructor",         key:"instructor_nombre",  width:24 },
+  { header:"Ambiente",           key:"ambiente_nombre",    width:20 },
+  { header:"Nave",               key:"ambiente_nave",      width:14 },
+  { header:"Aprendices",         key:"total_aprendices",   width:14 },
+  { header:"Fecha Creación",     key:"fecha_creacion",     width:20 },
+];
+
+const queryFichas = (idInstructor = null) => {
+  const where = idInstructor ? `WHERE f.id_instructor = ${idInstructor}` : "";
+  return `
+    SELECT
+      f.id_ficha, f.nombre, f.programa_formacion, f.jornada,
+      f.estado, f.cupo_maximo,
+      u.nombre  AS instructor_nombre,
+      a.nombre  AS ambiente_nombre,
+      a.nave    AS ambiente_nave,
+      COUNT(fa.id_aprendiz) AS total_aprendices,
+      f.fecha_creacion
+    FROM ficha f
+    LEFT JOIN usuario u  ON f.id_instructor = u.id_usuario
+    LEFT JOIN ambiente a ON f.id_ambiente   = a.id_ambiente
+    LEFT JOIN ficha_aprendiz fa ON fa.id_ficha = f.id_ficha
+    ${where}
+    GROUP BY f.id_ficha
+    ORDER BY f.id_ficha DESC
+  `;
+};
+
+const exportarFichasExcel = async (req, res) => {
+  const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
+  const [rows] = await db.query(queryFichas(idInstructor));
+  generarExcelDiseño(res, rows, "Fichas", "fichas", COLS_FICHAS);
+};
 
 module.exports = {
   exportarPortatilesExcel, exportarPortatilesCSV,
   exportarUsuariosExcel,   exportarUsuariosCSV,
   exportarAmbientesExcel,  exportarAmbientesCSV,
   exportarFichasExcel,
+  generarExcelDiseño,
 };
