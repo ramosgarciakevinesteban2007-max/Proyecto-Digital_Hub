@@ -136,8 +136,11 @@ const COLS_PORTATILES = [
   { header:"Fecha Registro",key:"fecha_registro",    width:20 },
 ];
 
-const queryPortatiles = (idInstructor = null) => {
-  const where = idInstructor ? `WHERE p.id_instructor = ${idInstructor}` : "";
+const queryPortatiles = (idInstructor = null, estado = null) => {
+  const conditions = [];
+  if (idInstructor) conditions.push(`p.id_instructor = ${idInstructor}`);
+  if (estado) conditions.push(`p.estado = '${estado}'`);
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   return `
     SELECT
       p.id_portatil, p.num_serie, p.marca, p.tipo, p.modelo,
@@ -156,24 +159,14 @@ const queryPortatiles = (idInstructor = null) => {
 const exportarPortatilesExcel = async (req, res) => {
   const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
   const { estado } = req.query;
-  let q = queryPortatiles(idInstructor);
-  if (estado) {
-    const where = idInstructor ? `AND p.estado = '${estado}'` : `WHERE p.estado = '${estado}'`;
-    q = q.replace(/ORDER BY/, `${where} ORDER BY`);
-  }
-  const [rows] = await db.query(q);
+  const [rows] = await db.query(queryPortatiles(idInstructor, estado || null));
   generarExcelDiseño(res, rows, "Portátiles", "portatiles", COLS_PORTATILES);
 };
 
 const exportarPortatilesCSV = async (req, res) => {
   const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
   const { estado } = req.query;
-  let q = queryPortatiles(idInstructor);
-  if (estado) {
-    const where = idInstructor ? `AND p.estado = '${estado}'` : `WHERE p.estado = '${estado}'`;
-    q = q.replace(/ORDER BY/, `${where} ORDER BY`);
-  }
-  const [rows] = await db.query(q);
+  const [rows] = await db.query(queryPortatiles(idInstructor, estado || null));
   exportarCSVGenerico(res, rows, "portatiles", COLS_PORTATILES);
 };
 

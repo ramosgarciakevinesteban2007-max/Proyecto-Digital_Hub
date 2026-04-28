@@ -5,6 +5,7 @@ import SidebarInstructor from "../../components/SidebarInstructor";
 import NotificacionesBtn from "../../components/NotificacionesBtn";
 import ExportModal from "../../components/ExportModal";
 import "../../pages/instructor/EquiposInstructor.css";
+import "../../pages/admin/EquiposAdmin.css";
 import Pagination from "../../components/Pagination";
 import "../../components/Pagination.css";
 import ConfirmModal from "../../components/ConfirmModal";
@@ -362,7 +363,7 @@ return (
         )}
 
         {showAsignarModal && (<div className="modal-overlay" onClick={() => setShowAsignarModal(false)}><div className="modal-content" onClick={e => e.stopPropagation()}><h2 className="modal-title">Asignar equipo a aprendiz</h2><p style={{fontSize:"13px",color:"var(--text-muted-dark)",marginBottom:"16px"}}>Ingresa el correo del aprendiz. Se le notificar¡ por email.</p>{asignarError && <p className="table-error">{asignarError}</p>}<form onSubmit={handleAsignar}><div className="form-group"><label>Correo del aprendiz</label><input type="email" placeholder="correo@ejemplo.com" value={asignarData.correo} onChange={e => setAsignarData({...asignarData, correo: e.target.value})} required /></div><div className="modal-actions"><button type="button" className="btn-cancel" onClick={() => setShowAsignarModal(false)}>Cancelar</button><button type="submit" className="btn-save">Asignar y notificar</button></div></form></div></div>)}
-        {showExport && <ExportModal tipo="equipos" datos={filtrados} onClose={() => setShowExport(false)} />}
+        {showExport && <ExportModal tipo="equipos" datos={portatiles} onClose={() => setShowExport(false)} />}
       </main>
     </div>
   );
