@@ -148,7 +148,7 @@ router.get("/:id/reportes", verificarToken, verificarRol([ROLES.INSTRUCTOR, ROLE
     const pool = require("../db/database");
     const { id } = req.params;
     const [rows] = await pool.query(
-      `SELECT r.id_reporte, r.descripcion, r.estado_reporte, r.fecha_reporte, u.nombre AS aprendiz
+      `SELECT r.id_reporte, r.descripcion, r.estado_reporte, r.fecha_reporte, r.archivo, u.nombre AS aprendiz
        FROM reportes r
        JOIN usuario u ON r.id_aprendiz = u.id_usuario
        JOIN ficha_aprendiz fa ON fa.id_aprendiz = u.id_usuario

@@ -392,7 +392,7 @@ const FichasAdmin = () => {
             </select>
             <select className="filter-input" value={filtroJornada} onChange={e => { setFiltroJornada(e.target.value); setPage(1); }}>
               <option value="">Todas las jornadas</option>
-              <option value="mañana">Mañana</option>
+              <option value="Mañana">Mañana</option>
               <option value="tarde">Tarde</option>
               <option value="noche">Noche</option>
             </select>

@@ -202,9 +202,16 @@ const importarExcel = async (e) => {
                   <td><span style={{color:estadoColor(r.estado_reporte),fontWeight:600,fontSize:'13px',display:'inline-flex',alignItems:'center',gap:'5px'}}><span style={{width:'6px',height:'6px',borderRadius:'50%',background:estadoColor(r.estado_reporte)}} />{r.estado_reporte}</span></td>
                   <td style={{color:'#b8a8d8',fontSize:'13px'}}>{r.fecha_reporte?.split('T')[0] || r.fecha_reporte}</td>
                   <td>
-                    {r.archivo
-                      ? <a href={archivoUrl(r.archivo)} target="_blank" rel="noreferrer" style={{color:'#c9a8ff',fontSize:'12px',fontWeight:600}}>Ver</a>
-                      : <span style={{color:'#6a5a8a',fontSize:'12px'}}>—</span>
+                    {r.archivo && /\.(jpg|jpeg|png|gif|webp)$/i.test(r.archivo)
+                      ? <img
+                          src={archivoUrl(r.archivo)}
+                          alt="evidencia"
+                          onClick={() => abrirVer(r)}
+                          style={{width:'52px',height:'38px',objectFit:'cover',borderRadius:'7px',border:'1px solid rgba(127,90,240,0.35)',cursor:'pointer',display:'block'}}
+                        />
+                      : r.archivo
+                        ? <a href={archivoUrl(r.archivo)} target="_blank" rel="noreferrer" style={{color:'#c9a8ff',fontSize:'12px',fontWeight:600}}>Ver</a>
+                        : <span style={{color:'#6a5a8a',fontSize:'12px'}}>—</span>
                     }
                   </td>
                   <td><div className="action-buttons">
@@ -259,8 +266,9 @@ const importarExcel = async (e) => {
                     <span className="detalle-label">Evidencia adjunta</span>
                     {/\.(jpg|jpeg|png|gif|webp)$/i.test(seleccionado.archivo) ? (
                       <img src={archivoUrl(seleccionado.archivo)} alt="evidencia"
-                        style={{maxWidth:'100%',maxHeight:'300px',objectFit:'contain',borderRadius:'10px',border:'1px solid rgba(127,90,240,0.3)',cursor:'pointer'}}
+                        style={{width:'100%',maxHeight:'320px',objectFit:'contain',borderRadius:'10px',border:'1px solid rgba(127,90,240,0.3)',background:'#080810',display:'block',cursor:'pointer'}}
                         onClick={() => window.open(archivoUrl(seleccionado.archivo), '_blank')}
+                        onError={e => { e.target.onerror=null; e.target.style.display='none'; }}
                       />
                     ) : (
                       <a href={archivoUrl(seleccionado.archivo)} target="_blank" rel="noreferrer"
