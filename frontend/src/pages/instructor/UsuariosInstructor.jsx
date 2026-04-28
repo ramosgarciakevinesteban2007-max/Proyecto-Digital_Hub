@@ -4,6 +4,7 @@ import { IconEye, IconPencil, IconTrash, IconBell, IconUser } from '../../compon
 import NotificacionesBtn from '../../components/NotificacionesBtn';
 import SidebarInstructor from '../../components/SidebarInstructor';
 import '../../pages/instructor/UsuariosInstructor.css';
+import '../../pages/admin/EquiposAdmin.css';
 import ConfirmModal from '../../components/ConfirmModal';
 import Pagination from '../../components/Pagination';
 import '../../components/Pagination.css';

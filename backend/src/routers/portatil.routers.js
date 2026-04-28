@@ -70,7 +70,7 @@ router.get(
           `SELECT p.*, pa.fecha_asignacion, pa.estado AS estado_asignacion
            FROM portatil_aprendiz pa
            JOIN portatil p ON pa.id_portatil = p.id_portatil
-           WHERE pa.id_aprendiz = ? AND pa.estado = 'activo'`,
+           WHERE pa.id_aprendiz = ? AND pa.estado = 'activo' AND p.estado = 'asignado'`,
           [id]
         );
         return res.json({ total: rows.length, pagina: 1, totalPaginas: 1, data: rows });
@@ -127,6 +127,10 @@ router.get(
         });
       }
 
+      if (req.usuario.rol === "instructor" && Number(rows[0].id_instructor) !== Number(req.usuario.id)) {
+        return res.status(403).json({ mensaje: "No tienes permiso para ver este portátil" });
+      }
+
       res.json(rows[0]);
 
     } catch (error) {
@@ -167,6 +171,12 @@ router.put(
         return res.status(404).json({ mensaje: "Portátil no encontrado" });
 
       const viejo = anterior[0];
+
+      // Instructor solo puede editar sus propios portátiles
+      if (req.usuario.rol === "instructor" && Number(viejo.id_instructor) !== Number(req.usuario.id)) {
+        return res.status(403).json({ mensaje: "No tienes permiso para editar este portátil" });
+      }
+
       const modificadoPor = req.usuario?.correo || req.usuario?.nombre || `usuario #${req.usuario?.id}`;
 
       // Detectar cambios y registrarlos
@@ -174,12 +184,19 @@ router.put(
       for (const [campo, valorNuevo] of Object.entries(campos)) {
         const valorAnterior = viejo[campo];
         if (String(valorAnterior) !== String(valorNuevo)) {
-          await pool.query(
-            `INSERT INTO historial_portatil 
-             (id_portatil, campo_modificado, valor_anterior, valor_nuevo, modificado_por)
-             VALUES (?, ?, ?, ?, ?)`,
-            [id, campo, valorAnterior, valorNuevo, modificadoPor]
-          );
+          try {
+            await pool.query(
+              `INSERT INTO historial_portatil 
+               (id_portatil, campo_modificado, valor_anterior, valor_nuevo, modificado_por)
+               VALUES (?, ?, ?, ?, ?)`,
+              [id, campo, valorAnterior, valorNuevo, modificadoPor]
+            );
+          } catch (histError) {
+            if (histError.code !== 'ER_NO_SUCH_TABLE') {
+              throw histError;
+            }
+            console.warn(`Tabla historial_portatil no encontrada. Se omite registro de historial para el portátil ${id}.`);
+          }
         }
       }
 
@@ -195,7 +212,7 @@ router.put(
       if (resultado.affectedRows === 0)
         return res.status(404).json({ mensaje: "Portátil no encontrado" });
 
-      if (estado !== 'asignado') {
+      if ((estado || '').toLowerCase() !== 'asignado') {
         await pool.query(
           "UPDATE portatil_aprendiz SET estado = 'inactivo' WHERE id_portatil = ?", [id]
         );
@@ -204,7 +221,7 @@ router.put(
       res.json({ mensaje: "Portátil actualizado correctamente" });
 
     } catch (error) {
-      console.error("ERROR EDITAR:", error.message);
+      console.error("ERROR EDITAR:", error);
       res.status(500).json({ mensaje: "Error al actualizar el portátil" });
     }
   }
@@ -256,7 +273,7 @@ router.patch(
       const [rows] = await pool.query("SELECT * FROM portatil WHERE id_portatil = ?", [id]);
       if (rows.length === 0) return res.status(404).json({ mensaje: "Portátil no encontrado" });
 
-      if (req.usuario.rol === "instructor" && rows[0].id_instructor !== req.usuario.id) {
+      if (req.usuario.rol === "instructor" && Number(rows[0].id_instructor) !== Number(req.usuario.id)) {
         return res.status(403).json({ mensaje: "No tienes permiso sobre este portátil" });
       }
 
@@ -293,7 +310,7 @@ router.delete(
       const [rows] = await pool.query("SELECT * FROM portatil WHERE id_portatil = ?", [id]);
       if (rows.length === 0) return res.status(404).json({ mensaje: "Portátil no encontrado" });
 
-      if (req.usuario.rol === "instructor" && rows[0].id_instructor !== req.usuario.id) {
+      if (req.usuario.rol === "instructor" && Number(rows[0].id_instructor) !== Number(req.usuario.id)) {
         return res.status(403).json({ mensaje: "No puedes eliminar un portátil que no registraste" });
       }
 
@@ -359,11 +376,24 @@ router.post(
 
       // Validar que el aprendiz no tenga ya un equipo asignado activo
       const [equipoActual] = await pool.query(
-        "SELECT id FROM portatil_aprendiz WHERE id_aprendiz = ? AND estado = 'activo' LIMIT 1",
+        `SELECT pa.id, pa.id_portatil, p.estado AS estado_portatil
+         FROM portatil_aprendiz pa
+         JOIN portatil p ON pa.id_portatil = p.id_portatil
+         WHERE pa.id_aprendiz = ? AND pa.estado = 'activo' LIMIT 1`,
         [aprendiz.id_usuario]
       );
+
       if (equipoActual.length > 0) {
-        return res.status(400).json({ mensaje: "Este aprendiz ya tiene un equipo asignado" });
+        const eq = equipoActual[0];
+        // Si el portátil ya no está en estado 'asignado', la asignación es huérfana — limpiarla
+        if (eq.estado_portatil !== 'asignado') {
+          await pool.query(
+            "UPDATE portatil_aprendiz SET estado = 'inactivo' WHERE id_aprendiz = ? AND estado = 'activo'",
+            [aprendiz.id_usuario]
+          );
+        } else {
+          return res.status(400).json({ mensaje: "Este aprendiz ya tiene un equipo asignado activo" });
+        }
       }
 
       // Validar que el aprendiz esté en una ficha
@@ -422,6 +452,71 @@ router.get("/:id/aprendices", verificarToken, verificarRol(["administrador", "in
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error al obtener aprendices del portátil" });
+  }
+});
+
+/*
+=========================================
+8. DESASIGNAR APRENDIZ DE UN PORTÁTIL
+=========================================
+*/
+router.delete("/:id/aprendices/:idAprendiz", verificarToken, verificarRol(["administrador", "instructor"]), async (req, res) => {  try {
+    const { id, idAprendiz } = req.params;
+
+    const [rows] = await pool.query(
+      "SELECT * FROM portatil_aprendiz WHERE id_portatil = ? AND id_aprendiz = ? AND estado = 'activo'",
+      [id, idAprendiz]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ mensaje: "Asignación activa no encontrada" });
+    }
+
+    await pool.query(
+      "UPDATE portatil_aprendiz SET estado = 'inactivo' WHERE id_portatil = ? AND id_aprendiz = ?",
+      [id, idAprendiz]
+    );
+    await pool.query(
+      "UPDATE portatil SET estado = 'disponible', id_aprendiz = NULL WHERE id_portatil = ?",
+      [id]
+    );
+
+    res.json({ mensaje: "Aprendiz desasignado correctamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error al desasignar el aprendiz" });
+  }
+});
+
+/*
+=========================================
+9. LIMPIAR INCONSISTENCIAS DE ASIGNACIÓN
+   Desactiva registros huérfanos en portatil_aprendiz
+   (activos pero el portátil ya no está en estado 'asignado')
+=========================================
+*/
+router.post("/limpiar-asignaciones", verificarToken, verificarRol(["administrador"]), async (req, res) => {
+  try {
+    // Desactivar registros activos cuyo portátil ya no está asignado
+    const [r1] = await pool.query(
+      `UPDATE portatil_aprendiz pa
+       JOIN portatil p ON pa.id_portatil = p.id_portatil
+       SET pa.estado = 'inactivo'
+       WHERE pa.estado = 'activo' AND p.estado != 'asignado'`
+    );
+    // Poner NULL en id_aprendiz de portátiles que no tienen asignación activa
+    const [r2] = await pool.query(
+      `UPDATE portatil p
+       SET p.id_aprendiz = NULL
+       WHERE p.estado != 'asignado' AND p.id_aprendiz IS NOT NULL`
+    );
+    res.json({
+      mensaje: "Limpieza completada",
+      asignaciones_corregidas: r1.affectedRows,
+      portatiles_corregidos: r2.affectedRows
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error al limpiar asignaciones" });
   }
 });
 

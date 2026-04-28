@@ -4,6 +4,7 @@ import SidebarInstructor from '../../components/SidebarInstructor';
 import { IconBell, IconHistory, IconMonitor, IconCheck } from '../../components/Icons';
 import NotificacionesBtn from '../../components/NotificacionesBtn';
 import './HistorialInstructor.css';
+import '../../pages/admin/EquiposAdmin.css';
 import Pagination from '../../components/Pagination';
 import '../../components/Pagination.css';
 

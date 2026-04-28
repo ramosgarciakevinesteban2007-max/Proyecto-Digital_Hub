@@ -27,7 +27,13 @@ const AjustesAdmin = () => {
   useEffect(() => { localStorage.setItem('notif_sistema', notifSistema); }, [notifSistema]);
 
   const cerrarSesion = () => {
+    const tema = localStorage.getItem('tema');
+    const notif = localStorage.getItem('notif_sistema');
+    const idioma = localStorage.getItem('idioma');
     localStorage.clear();
+    if (tema) localStorage.setItem('tema', tema);
+    if (notif) localStorage.setItem('notif_sistema', notif);
+    if (idioma) localStorage.setItem('idioma', idioma);
     navigate('/login');
   };
 

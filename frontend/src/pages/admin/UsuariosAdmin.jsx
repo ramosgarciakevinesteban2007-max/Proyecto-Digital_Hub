@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { IconEye, IconPencil, IconTrash, IconBell, IconUser } from '../../components/Icons';
 import NotificacionesBtn from '../../components/NotificacionesBtn';
 import ConfirmModal from '../../components/ConfirmModal';
+import ExportModal from '../../components/ExportModal';
 import SidebarAdmin from '../../components/SidebarAdmin';
 import '../../pages/admin/UsuariosAdmin.css';
+import '../../pages/admin/EquiposAdmin.css';
 import Pagination from '../../components/Pagination';
 import '../../components/Pagination.css';
 
@@ -65,6 +67,7 @@ const UsuariosAdmin = () => {
 
   // Estado para confirmación de eliminación
   const [confirmId, setConfirmId] = useState(null);
+  const [showExport, setShowExport] = useState(false);
 
   const exportarExcel = async () => {
   try {
@@ -198,8 +201,12 @@ const importarExcel = async (e) => {
             <p className="equipment-subtitle">Total: <span>{usuarios.length}</span></p>
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <button onClick={exportarExcel} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+            <button onClick={() => setShowExport(true)} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#000', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
               Exportar
             </button>
             <input type="file" accept=".xlsx" style={{ display: 'none' }} id="import-usuarios" onChange={importarExcel} />
@@ -367,6 +374,7 @@ const importarExcel = async (e) => {
         )}
         <Pagination page={page} total={filtrados.length} perPage={PER_PAGE} onChange={p => setPage(p)} />
         {confirmId && <ConfirmModal mensaje="Esta acción no se puede deshacer." onConfirm={() => handleEliminar(confirmId)} onCancel={() => setConfirmId(null)} />}
+        {showExport && <ExportModal tipo="usuarios" datos={usuarios} onClose={() => setShowExport(false)} />}
 
         {showVerModal && verUsuario && (
           <div className="modal-overlay" onClick={() => setShowVerModal(false)}>
