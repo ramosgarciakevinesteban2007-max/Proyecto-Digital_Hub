@@ -155,13 +155,25 @@ const queryPortatiles = (idInstructor = null) => {
 
 const exportarPortatilesExcel = async (req, res) => {
   const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
-  const [rows] = await db.query(queryPortatiles(idInstructor));
+  const { estado } = req.query;
+  let q = queryPortatiles(idInstructor);
+  if (estado) {
+    const where = idInstructor ? `AND p.estado = '${estado}'` : `WHERE p.estado = '${estado}'`;
+    q = q.replace(/ORDER BY/, `${where} ORDER BY`);
+  }
+  const [rows] = await db.query(q);
   generarExcelDiseño(res, rows, "Portátiles", "portatiles", COLS_PORTATILES);
 };
 
 const exportarPortatilesCSV = async (req, res) => {
   const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
-  const [rows] = await db.query(queryPortatiles(idInstructor));
+  const { estado } = req.query;
+  let q = queryPortatiles(idInstructor);
+  if (estado) {
+    const where = idInstructor ? `AND p.estado = '${estado}'` : `WHERE p.estado = '${estado}'`;
+    q = q.replace(/ORDER BY/, `${where} ORDER BY`);
+  }
+  const [rows] = await db.query(q);
   exportarCSVGenerico(res, rows, "portatiles", COLS_PORTATILES);
 };
 
@@ -176,15 +188,25 @@ const COLS_USUARIOS = [
 ];
 
 const exportarUsuariosExcel = async (req, res) => {
+  const { rol, estado } = req.query;
+  const conditions = [];
+  if (rol) conditions.push(`rol = '${rol}'`);
+  if (estado) conditions.push(`estado = '${estado}'`);
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const [rows] = await db.query(
-    "SELECT id_usuario, nombre, correo, rol, estado, fecha_registro FROM usuario ORDER BY id_usuario DESC"
+    `SELECT id_usuario, nombre, correo, rol, estado, fecha_registro FROM usuario ${where} ORDER BY id_usuario DESC`
   );
   generarExcelDiseño(res, rows, "Usuarios", "usuarios", COLS_USUARIOS);
 };
 
 const exportarUsuariosCSV = async (req, res) => {
+  const { rol, estado } = req.query;
+  const conditions = [];
+  if (rol) conditions.push(`rol = '${rol}'`);
+  if (estado) conditions.push(`estado = '${estado}'`);
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const [rows] = await db.query(
-    "SELECT id_usuario, nombre, correo, rol, estado, fecha_registro FROM usuario ORDER BY id_usuario DESC"
+    `SELECT id_usuario, nombre, correo, rol, estado, fecha_registro FROM usuario ${where} ORDER BY id_usuario DESC`
   );
   exportarCSVGenerico(res, rows, "usuarios", COLS_USUARIOS);
 };
@@ -245,33 +267,48 @@ const queryFichas = (idInstructor = null) => {
 
 const exportarFichasExcel = async (req, res) => {
   const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
-  const [rows] = await db.query(queryFichas(idInstructor));
+  const { estado, jornada } = req.query;
+  const conditions = [];
+  if (idInstructor) conditions.push(`f.id_instructor = ${idInstructor}`);
+  if (estado) conditions.push(`f.estado = '${estado}'`);
+  if (jornada) conditions.push(`f.jornada = '${jornada}'`);
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  const q = `
+    SELECT f.id_ficha, f.nombre, f.programa_formacion, f.jornada, f.estado, f.cupo_maximo,
+      u.nombre AS instructor_nombre, a.nombre AS ambiente_nombre, a.nave AS ambiente_nave,
+      COUNT(fa.id_aprendiz) AS total_aprendices, f.fecha_creacion
+    FROM ficha f
+    LEFT JOIN usuario u ON f.id_instructor = u.id_usuario
+    LEFT JOIN ambiente a ON f.id_ambiente = a.id_ambiente
+    LEFT JOIN ficha_aprendiz fa ON fa.id_ficha = f.id_ficha
+    ${where} GROUP BY f.id_ficha ORDER BY f.id_ficha DESC`;
+  const [rows] = await db.query(q);
   generarExcelDiseño(res, rows, "Fichas", "fichas", COLS_FICHAS);
 };
 
 const exportarReportesExcel = async (req, res) => {
   const { rol, id } = req.usuario;
+  const { estado_reporte } = req.query;
+  const conditions = [];
+  if (rol === "instructor") conditions.push(`r.id_instructor = ${id}`);
+  if (estado_reporte) conditions.push(`r.estado_reporte = '${estado_reporte}'`);
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
-  let query;
-  if (rol === "instructor") {
-    query = `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
+  const esInstructor = rol === "instructor";
+  const query = esInstructor
+    ? `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
               r.descripcion, r.estado_reporte, r.fecha_reporte
-       FROM reportes r
-       JOIN usuario u ON r.id_aprendiz = u.id_usuario
-       WHERE r.id_instructor = ${id}
-       ORDER BY r.fecha_reporte DESC`;
-  } else {
-    query = `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
+       FROM reportes r JOIN usuario u ON r.id_aprendiz = u.id_usuario
+       ${where} ORDER BY r.fecha_reporte DESC`
+    : `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
               ui.nombre AS instructor, r.descripcion, r.estado_reporte, r.fecha_reporte
-       FROM reportes r
-       JOIN usuario u  ON r.id_aprendiz  = u.id_usuario
+       FROM reportes r JOIN usuario u ON r.id_aprendiz = u.id_usuario
        LEFT JOIN usuario ui ON r.id_instructor = ui.id_usuario
-       ORDER BY r.fecha_reporte DESC`;
-  }
+       ${where} ORDER BY r.fecha_reporte DESC`;
 
   const [rows] = await db.query(query);
 
-  const columnas = rol === "instructor" ? [
+  const columnas = esInstructor ? [
     { header:"ID",          key:"id_reporte",      width:8  },
     { header:"Aprendiz",    key:"aprendiz",        width:24 },
     { header:"Correo",      key:"correo_aprendiz", width:30 },

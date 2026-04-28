@@ -44,41 +44,34 @@ const ExportModal = ({ tipo, datos = [], onClose }) => {
 
   const exportarDesdeBackend = async () => {
     const endpoints = BACKEND_ENDPOINTS[tipo];
-    if (!endpoints) {
-      alert('Tipo de exportación no soportado: ' + tipo);
-      return false;
-    }
+    if (!endpoints) { alert('Tipo no soportado: ' + tipo); return false; }
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const url = formato === 'csv' ? endpoints.csv : endpoints.excel;
+      const base = formato === 'csv' ? endpoints.csv : endpoints.excel;
+      // Pasar filtros como query params
+      const params = new URLSearchParams();
+      Object.entries(filtros).forEach(([k, v]) => { if (v) params.append(k, v); });
+      const url = params.toString() ? base + '?' + params.toString() : base;
       const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
       if (!res.ok) {
         let msg = 'Error al exportar';
         try { const j = await res.json(); msg = j.error || j.mensaje || msg; } catch {}
-        alert(msg);
-        setLoading(false);
-        return false;
+        alert(msg); setLoading(false); return false;
       }
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
       a.download = tipo + '_' + new Date().toISOString().split('T')[0] + (formato === 'csv' ? '.csv' : '.xlsx');
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
-    } catch (e) {
-      alert('Error de conexión: ' + e.message);
-      setLoading(false);
-      return false;
-    }
+    } catch (e) { alert('Error de conexión: ' + e.message); setLoading(false); return false; }
     setLoading(false);
     return true;
   };
 
-  const exportarLocal = () => {}; // ya no se usa, todo va por backend
+  const exportarLocal = () => {};
 
   const exportar = async () => {
     const ok = await exportarDesdeBackend();
@@ -86,6 +79,19 @@ const ExportModal = ({ tipo, datos = [], onClose }) => {
   };
 
   const setFiltro = (key, val) => setFiltros(prev => ({ ...prev, [key]: val }));
+
+  // Cuenta registros filtrados localmente para preview
+  const preview = (() => {
+    const lista = Array.isArray(datos) ? datos : [];
+    let r = [...lista];
+    Object.entries(filtros).forEach(([key, val]) => {
+      if (val) r = r.filter(item => {
+        const campo = item[key];
+        return campo && campo.toString().toLowerCase() === val.toLowerCase();
+      });
+    });
+    return r.length;
+  })();
 
   const selectStyle = {
     background:c.inputBg,border:'1px solid '+c.inputBorder,borderRadius:'10px',
@@ -98,14 +104,74 @@ const ExportModal = ({ tipo, datos = [], onClose }) => {
   };
 
   const renderFiltros = () => {
-    // Todos van al backend — solo info
-    const msgs = {
-      equipos:  'Se exportan todos los equipos. El instructor solo verá los suyos.',
-      fichas:   'Se exportan todas las fichas. El instructor solo verá las suyas.',
-      usuarios: 'Se exportan todos los usuarios del sistema.',
-      reportes: 'Se exportan todos los reportes. El instructor solo verá los suyos.',
-    };
-    return <p style={{fontSize:'12px',color:c.text,margin:0,lineHeight:'1.6'}}>{msgs[tipo] || 'Exportación desde el servidor.'}</p>;
+    if (tipo === 'equipos') return (
+      <div style={{marginBottom:'14px'}}>
+        <label style={labelStyle}>Estado</label>
+        <select style={selectStyle} value={filtros.estado||''} onChange={e=>setFiltro('estado',e.target.value)}>
+          <option value="">Todos los estados</option>
+          <option value="disponible">Disponible</option>
+          <option value="asignado">Asignado</option>
+          <option value="dañado">Dañado</option>
+          <option value="mantenimiento">Mantenimiento</option>
+        </select>
+      </div>
+    );
+    if (tipo === 'usuarios') return (
+      <>
+        <div style={{marginBottom:'14px'}}>
+          <label style={labelStyle}>Rol</label>
+          <select style={selectStyle} value={filtros.rol||''} onChange={e=>setFiltro('rol',e.target.value)}>
+            <option value="">Todos los roles</option>
+            <option value="administrador">Administrador</option>
+            <option value="instructor">Instructor</option>
+            <option value="aprendiz">Aprendiz</option>
+          </select>
+        </div>
+        <div style={{marginBottom:'14px'}}>
+          <label style={labelStyle}>Estado</label>
+          <select style={selectStyle} value={filtros.estado||''} onChange={e=>setFiltro('estado',e.target.value)}>
+            <option value="">Todos los estados</option>
+            <option value="activo">Activo</option>
+            <option value="inhabilitado">Inhabilitado</option>
+          </select>
+        </div>
+      </>
+    );
+    if (tipo === 'reportes') return (
+      <div style={{marginBottom:'14px'}}>
+        <label style={labelStyle}>Estado del reporte</label>
+        <select style={selectStyle} value={filtros.estado_reporte||''} onChange={e=>setFiltro('estado_reporte',e.target.value)}>
+          <option value="">Todos</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="en_revision">En revisión</option>
+          <option value="resuelto">Resuelto</option>
+        </select>
+      </div>
+    );
+    if (tipo === 'fichas') return (
+      <>
+        <div style={{marginBottom:'14px'}}>
+          <label style={labelStyle}>Estado</label>
+          <select style={selectStyle} value={filtros.estado||''} onChange={e=>setFiltro('estado',e.target.value)}>
+            <option value="">Todos los estados</option>
+            <option value="activa">Activa</option>
+            <option value="inactiva">Inactiva</option>
+            <option value="cerrada">Cerrada</option>
+            <option value="finalizada">Finalizada</option>
+          </select>
+        </div>
+        <div style={{marginBottom:'14px'}}>
+          <label style={labelStyle}>Jornada</label>
+          <select style={selectStyle} value={filtros.jornada||''} onChange={e=>setFiltro('jornada',e.target.value)}>
+            <option value="">Todas las jornadas</option>
+            <option value="manana">Mañana</option>
+            <option value="tarde">Tarde</option>
+            <option value="noche">Noche</option>
+          </select>
+        </div>
+      </>
+    );
+    return null;
   };
 
   const titulos = { equipos:'Equipos', usuarios:'Usuarios', reportes:'Reportes', fichas:'Fichas' };
@@ -117,7 +183,7 @@ const ExportModal = ({ tipo, datos = [], onClose }) => {
           Exportar {titulos[tipo] || tipo}
         </h2>
         <p style={{fontSize:'13px',color:c.text,marginBottom:'24px'}}>
-          Exportación con diseño Digital Hub — archivo .xlsx o .csv
+          {preview} registro{preview !== 1 ? 's' : ''} con los filtros actuales
         </p>
 
         <div style={{marginBottom:'20px'}}>
@@ -138,7 +204,7 @@ const ExportModal = ({ tipo, datos = [], onClose }) => {
         </div>
 
         <div style={{marginBottom:'24px'}}>
-          <label style={{...labelStyle,marginBottom:'10px'}}>Información</label>
+          <label style={{...labelStyle,marginBottom:'10px'}}>Filtros</label>
           {renderFiltros()}
         </div>
 
@@ -157,7 +223,7 @@ const ExportModal = ({ tipo, datos = [], onClose }) => {
             cursor:loading?'not-allowed':'pointer',
             boxShadow:'0 4px 16px rgba(127,90,240,0.4)'
           }}>
-            {loading ? 'Exportando...' : 'Exportar'}
+            {loading ? 'Exportando...' : `Exportar ${preview} registros`}
           </button>
         </div>
       </div>
