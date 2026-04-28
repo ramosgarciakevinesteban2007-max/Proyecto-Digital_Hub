@@ -9,8 +9,8 @@ import '../../pages/admin/EquiposAdmin.css';
 import '../../pages/admin/FichasAdmin.css';
 import ConfirmModal from '../../components/ConfirmModal';
 
-const estadoColor = (e) => ({ activa:'#4ade80', inactiva:'#f87171', cerrada:'#facc15', disponible:'#4ade80', asignado:'#facc15', 'dañado':'#f87171', mantenimiento:'#fb923c', pendiente:'#facc15', en_revision:'#fb923c', resuelto:'#4ade80' }[e] || '#c9a8ff');
-const jornadaIcon = (j) => ({ Mañana:'🌅', Tarde:'🌇', Noche:'🌙'}[j] || '📅');
+const estadoColor = (e) => ({ activa:'#4ade80', inactiva:'#f87171', cerrada:'#facc15', disponible:'#4ade80', asignado:'#facc15', danado:'#f87171', mantenimiento:'#fb923c', pendiente:'#facc15', en_revision:'#fb923c', resuelto:'#4ade80' }[e] || '#c9a8ff');
+const jornadaIcon = (j) => ({ Mañana:'🌅', tarde:'🌇', noche:'🌙'}[j] || '📅');
 
 const FichasAdmin = () => {
   const navigate = useNavigate();
@@ -385,7 +385,7 @@ const FichasAdmin = () => {
             </select>
             <select className="filter-input" value={filtroJornada} onChange={e => { setFiltroJornada(e.target.value); setPage(1); }}>
               <option value="">Todas las jornadas</option>
-              <option value="mañana">Mañana</option>
+              <option value="Mañana">Mañana</option>
               <option value="tarde">Tarde</option>
               <option value="noche">Noche</option>
             </select>

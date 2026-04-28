@@ -161,6 +161,32 @@ const HistorialAprendiz = () => {
                     <span className="rp-meta-label">ID</span>
                     <span className="rp-meta-val">#{seleccionado.id_reporte}</span>
                   </div>
+                  {seleccionado.archivo && (
+                    <div className="rp-meta-item" style={{flexDirection:'column',alignItems:'flex-start',gap:'10px'}}>
+                      <span className="rp-meta-label">Evidencia</span>
+                      {/\.(jpg|jpeg|png|gif|webp)$/i.test(seleccionado.archivo) ? (
+                        <>
+                          <img
+                            src={`/uploads/${seleccionado.archivo.replace(/^.*[\\\/]/, '')}`}
+                            alt="evidencia del reporte"
+                            style={{width:'100%',maxHeight:'320px',objectFit:'contain',borderRadius:'10px',border:'1px solid rgba(127,90,240,0.3)',background:'#080810',display:'block',cursor:'pointer'}}
+                            onClick={() => window.open(`/uploads/${seleccionado.archivo.replace(/^.*[\\\/]/, '')}`, '_blank')}
+                            onError={e => { e.target.onerror=null; e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }}
+                          />
+                          <div style={{display:'none',flexDirection:'column',alignItems:'center',gap:'8px',padding:'16px',background:'rgba(127,90,240,0.06)',borderRadius:'10px',border:'1px dashed rgba(127,90,240,0.3)'}}>
+                            <span style={{fontSize:'13px',color:'#b8a8d8'}}>No se pudo cargar la imagen</span>
+                            <a href={`/uploads/${seleccionado.archivo.replace(/^.*[\\\/]/, '')}`} target="_blank" rel="noreferrer" style={{color:'#c9a8ff',fontSize:'13px',fontWeight:600}}>Abrir directamente →</a>
+                          </div>
+                          <a href={`/uploads/${seleccionado.archivo.replace(/^.*[\\\/]/, '')}`} target="_blank" rel="noreferrer" style={{color:'#b8a8d8',fontSize:'11px'}}>Abrir en nueva pestaña ↗</a>
+                        </>
+                      ) : (
+                        <a href={`/uploads/${seleccionado.archivo.replace(/^.*[\\\/]/, '')}`} target="_blank" rel="noreferrer"
+                          style={{display:'inline-flex',alignItems:'center',gap:'8px',color:'#c9a8ff',fontSize:'13px',fontWeight:600,background:'rgba(127,90,240,0.1)',border:'1px solid rgba(127,90,240,0.3)',borderRadius:'8px',padding:'8px 14px',textDecoration:'none'}}>
+                          Ver archivo adjunto
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="modal-actions">
@@ -177,4 +203,3 @@ const HistorialAprendiz = () => {
 };
 
 export default HistorialAprendiz;
-
