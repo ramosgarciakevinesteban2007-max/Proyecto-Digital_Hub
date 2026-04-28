@@ -302,7 +302,7 @@ const importarExcel = async (e) => {
               <h2 className="modal-title">Editar reporte</h2>
               {error && <p className="table-error">{error}</p>}
               <form onSubmit={handleEditar}>
-                <div className="form-group"><label>Estado del reporte</label>
+                <div className="form-group"><label>Estado del Reporte</label>
                   <select value={editData.estado_reporte} onChange={e => setEditData({...editData, estado_reporte: e.target.value})}>
                     <option value="pendiente">Pendiente</option>
                     <option value="en_revision">En revisión</option>
