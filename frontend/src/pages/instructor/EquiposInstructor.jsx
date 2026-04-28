@@ -1,13 +1,19 @@
 import { useState, useEffect } from "react";
+
 import { useNavigate } from "react-router-dom";
+
 import { IconEye, IconPencil, IconTrash, IconBell, IconMonitor, IconBarChart } from "../../components/Icons";
+
 import SidebarInstructor from "../../components/SidebarInstructor";
+
 import NotificacionesBtn from "../../components/NotificacionesBtn";
-import ExportModal from "../../components/ExportModal";
+
 import "../../pages/instructor/EquiposInstructor.css";
-import "../../pages/admin/EquiposAdmin.css";
+
 import Pagination from "../../components/Pagination";
+
 import "../../components/Pagination.css";
+
 import ConfirmModal from "../../components/ConfirmModal";
 
 const EquiposInstructor = () => {
@@ -43,8 +49,9 @@ const EquiposInstructor = () => {
   const [filtros, setFiltros] = useState({ buscar: "", estado: "", marca: "" });
 
   const [page, setPage] = useState(1);
+
   const PER_PAGE = 10;
-  const [showExport, setShowExport] = useState(false);
+
   const token = localStorage.getItem("token");
 
 useEffect(() => {
@@ -78,12 +85,9 @@ const cargar = async () => {
   };
 
 const handleSubmit = async (e) => {
+
     e.preventDefault(); setError("");
-    if (!formData.num_serie.trim()) { setError("El número de serie es obligatorio"); return; }
-    if (formData.num_serie.trim().length < 3) { setError("El número de serie debe tener al menos 3 caracteres"); return; }
-    if (!formData.marca.trim()) { setError("La marca es obligatoria"); return; }
-    if (!formData.tipo.trim()) { setError("El tipo es obligatorio"); return; }
-    if (!formData.modelo.trim()) { setError("El modelo es obligatorio"); return; }
+
     try {
 
       const res = await fetch("/api/portatiles", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(formData) });
@@ -199,17 +203,8 @@ return (
         <div className="equipment-header">
 
           <div><h1 className="equipment-title">Gestión de equipos</h1><p className="equipment-subtitle">Total: <span>{portatiles.length}</span></p></div>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <button onClick={() => setShowExport(true)} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#000', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              Exportar
-            </button>
-            <NotificacionesBtn />
-          </div>
+
+          <NotificacionesBtn />
 
         </div>
 
@@ -363,10 +358,13 @@ return (
         )}
 
         {showAsignarModal && (<div className="modal-overlay" onClick={() => setShowAsignarModal(false)}><div className="modal-content" onClick={e => e.stopPropagation()}><h2 className="modal-title">Asignar equipo a aprendiz</h2><p style={{fontSize:"13px",color:"var(--text-muted-dark)",marginBottom:"16px"}}>Ingresa el correo del aprendiz. Se le notificar¡ por email.</p>{asignarError && <p className="table-error">{asignarError}</p>}<form onSubmit={handleAsignar}><div className="form-group"><label>Correo del aprendiz</label><input type="email" placeholder="correo@ejemplo.com" value={asignarData.correo} onChange={e => setAsignarData({...asignarData, correo: e.target.value})} required /></div><div className="modal-actions"><button type="button" className="btn-cancel" onClick={() => setShowAsignarModal(false)}>Cancelar</button><button type="submit" className="btn-save">Asignar y notificar</button></div></form></div></div>)}
-        {showExport && <ExportModal tipo="equipos" datos={portatiles} onClose={() => setShowExport(false)} />}
+
       </main>
+
     </div>
+
   );
+
 };
 
 export default EquiposInstructor;

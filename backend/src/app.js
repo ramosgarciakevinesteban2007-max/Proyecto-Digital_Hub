@@ -14,10 +14,9 @@ app.use(cors());
 app.use(express.json());
 
 // ===============================
-// ARCHIVOS ESTÁTICOS
+// ARCHIVOS ESTÁTICOS (imágenes de reportes)
 // ===============================
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ===============================
 // ROUTERS

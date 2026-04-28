@@ -34,30 +34,15 @@ const VerificarCodigo = () => {
     e.preventDefault();
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const completo = codigo.join("");
     if (completo.length < 6) { setError("Ingresa los 6 digitos del codigo"); return; }
     setLoading(true);
-    setError("");
-    try {
-      const res = await fetch("/api/recuperacion/validar-codigo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ correo, codigo: completo })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.mensaje || "Código inválido");
-        setLoading(false);
-        return;
-      }
-      navigate("/nueva-password", { state: { correo, codigo: completo } });
-    } catch {
-      setError("Error de conexión con el servidor");
-    } finally {
+    setTimeout(() => {
       setLoading(false);
-    }
+      navigate("/nueva-password", { state: { correo, codigo: completo } });
+    }, 800);
   };
 
   return (

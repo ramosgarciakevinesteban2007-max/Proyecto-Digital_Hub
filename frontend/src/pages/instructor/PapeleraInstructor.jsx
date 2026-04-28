@@ -4,7 +4,6 @@ import SidebarInstructor from '../../components/SidebarInstructor';
 import { IconBell, IconTrash, IconEye, IconPencil } from '../../components/Icons';
 import NotificacionesBtn from '../../components/NotificacionesBtn';
 import '../../pages/instructor/PapeleraInstructor.css';
-import '../../pages/admin/EquiposAdmin.css';
 import Pagination from '../../components/Pagination';
 import '../../components/Pagination.css';
 
