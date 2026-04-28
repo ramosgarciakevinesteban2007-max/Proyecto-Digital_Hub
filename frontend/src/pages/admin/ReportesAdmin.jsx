@@ -232,7 +232,9 @@ const importarExcel = async (e) => {
                       <td style={{ color: '#b8a8d8', fontSize: '13px' }}>{r.fecha_reporte?.split('T')[0] || r.fecha_reporte}</td>
                       <td>
                         {r.archivo
-                          ? <a href={archivoUrl(r.archivo)} target="_blank" rel="noreferrer" style={{ color: '#c9a8ff', fontSize: '12px', fontWeight: 600 }}>Ver</a>
+                          ? <a href={archivoUrl(r.archivo)} target="_blank" rel="noreferrer" style={{ color: '#c9a8ff', fontSize: '12px', fontWeight: 600 }}>
+                              {/(jpg|jpeg|png|gif|webp)$/i.test(r.archivo) ? 'Ver imagen' : 'Ver archivo'}
+                            </a>
                           : <span style={{ color: '#6a5a8a', fontSize: '12px' }}>—</span>
                         }
                       </td>

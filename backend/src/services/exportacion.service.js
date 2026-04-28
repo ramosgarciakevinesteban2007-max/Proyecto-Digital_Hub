@@ -133,7 +133,6 @@ const COLS_PORTATILES = [
   { header:"Descripción",   key:"descripcion",       width:30 },
   { header:"Instructor",    key:"instructor_nombre", width:24 },
   { header:"Aprendiz",      key:"aprendiz_nombre",   width:24 },
-  { header:"Fecha Registro",key:"fecha_registro",    width:20 },
 ];
 
 const queryPortatiles = (idInstructor = null, estado = null) => {
@@ -146,8 +145,7 @@ const queryPortatiles = (idInstructor = null, estado = null) => {
       p.id_portatil, p.num_serie, p.marca, p.tipo, p.modelo,
       p.estado, p.ubicacion, p.descripcion,
       ui.nombre AS instructor_nombre,
-      ua.nombre AS aprendiz_nombre,
-      p.fecha_registro
+      ua.nombre AS aprendiz_nombre
     FROM portatil p
     LEFT JOIN usuario ui ON p.id_instructor = ui.id_usuario
     LEFT JOIN usuario ua ON p.id_aprendiz   = ua.id_usuario
@@ -157,27 +155,36 @@ const queryPortatiles = (idInstructor = null, estado = null) => {
 };
 
 const exportarPortatilesExcel = async (req, res) => {
-  const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
-  const { estado } = req.query;
-  const [rows] = await db.query(queryPortatiles(idInstructor, estado || null));
-  generarExcelDiseño(res, rows, "Portátiles", "portatiles", COLS_PORTATILES);
+  try {
+    const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
+    const { estado } = req.query;
+    const [rows] = await db.query(queryPortatiles(idInstructor, estado || null));
+    generarExcelDiseño(res, rows, "Portátiles", "portatiles", COLS_PORTATILES);
+  } catch (error) {
+    console.error("Error exportar portatiles excel:", error);
+    res.status(500).json({ mensaje: "Error al exportar portátiles", detalle: error.message });
+  }
 };
 
 const exportarPortatilesCSV = async (req, res) => {
-  const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
-  const { estado } = req.query;
-  const [rows] = await db.query(queryPortatiles(idInstructor, estado || null));
-  exportarCSVGenerico(res, rows, "portatiles", COLS_PORTATILES);
+  try {
+    const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
+    const { estado } = req.query;
+    const [rows] = await db.query(queryPortatiles(idInstructor, estado || null));
+    exportarCSVGenerico(res, rows, "portatiles", COLS_PORTATILES);
+  } catch (error) {
+    console.error("Error exportar portatiles csv:", error);
+    res.status(500).json({ mensaje: "Error al exportar portátiles", detalle: error.message });
+  }
 };
 
 // ── Usuarios ────────────────────────────────────────────
 const COLS_USUARIOS = [
-  { header:"ID",             key:"id_usuario",  width:8  },
-  { header:"Nombre",         key:"nombre",      width:24 },
-  { header:"Correo",         key:"correo",      width:30 },
-  { header:"Rol",            key:"rol",         width:16 },
-  { header:"Estado",         key:"estado",      width:16 },
-  { header:"Fecha Registro", key:"fecha_registro", width:20 },
+  { header:"ID",      key:"id_usuario", width:8  },
+  { header:"Nombre",  key:"nombre",     width:24 },
+  { header:"Correo",  key:"correo",     width:30 },
+  { header:"Rol",     key:"rol",        width:16 },
+  { header:"Estado",  key:"estado",     width:16 },
 ];
 
 const exportarUsuariosExcel = async (req, res) => {
@@ -187,7 +194,7 @@ const exportarUsuariosExcel = async (req, res) => {
   if (estado) conditions.push(`estado = '${estado}'`);
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const [rows] = await db.query(
-    `SELECT id_usuario, nombre, correo, rol, estado, fecha_registro FROM usuario ${where} ORDER BY id_usuario DESC`
+    `SELECT id_usuario, nombre, correo, rol, estado FROM usuario ${where} ORDER BY id_usuario DESC`
   );
   generarExcelDiseño(res, rows, "Usuarios", "usuarios", COLS_USUARIOS);
 };
@@ -199,7 +206,7 @@ const exportarUsuariosCSV = async (req, res) => {
   if (estado) conditions.push(`estado = '${estado}'`);
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const [rows] = await db.query(
-    `SELECT id_usuario, nombre, correo, rol, estado, fecha_registro FROM usuario ${where} ORDER BY id_usuario DESC`
+    `SELECT id_usuario, nombre, correo, rol, estado FROM usuario ${where} ORDER BY id_usuario DESC`
   );
   exportarCSVGenerico(res, rows, "usuarios", COLS_USUARIOS);
 };
@@ -224,7 +231,7 @@ const exportarAmbientesCSV = async (req, res) => {
 
 // ── Fichas ──────────────────────────────────────────────
 const COLS_FICHAS = [
-  { header:"ID",                 key:"id_ficha",           width:8  },
+  { header:"ID",                 key:"id",                 width:8  },
   { header:"Nombre/Número",      key:"nombre",             width:20 },
   { header:"Programa Formación", key:"programa_formacion", width:30 },
   { header:"Jornada",            key:"jornada",            width:14 },
@@ -237,27 +244,6 @@ const COLS_FICHAS = [
   { header:"Fecha Creación",     key:"fecha_creacion",     width:20 },
 ];
 
-const queryFichas = (idInstructor = null) => {
-  const where = idInstructor ? `WHERE f.id_instructor = ${idInstructor}` : "";
-  return `
-    SELECT
-      f.id_ficha, f.nombre, f.programa_formacion, f.jornada,
-      f.estado, f.cupo_maximo,
-      u.nombre  AS instructor_nombre,
-      a.nombre  AS ambiente_nombre,
-      a.nave    AS ambiente_nave,
-      COUNT(fa.id_aprendiz) AS total_aprendices,
-      f.fecha_creacion
-    FROM ficha f
-    LEFT JOIN usuario u  ON f.id_instructor = u.id_usuario
-    LEFT JOIN ambiente a ON f.id_ambiente   = a.id_ambiente
-    LEFT JOIN ficha_aprendiz fa ON fa.id_ficha = f.id_ficha
-    ${where}
-    GROUP BY f.id_ficha
-    ORDER BY f.id_ficha DESC
-  `;
-};
-
 const exportarFichasExcel = async (req, res) => {
   const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
   const { estado, jornada } = req.query;
@@ -267,18 +253,36 @@ const exportarFichasExcel = async (req, res) => {
   if (jornada) conditions.push(`f.jornada = '${jornada}'`);
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const q = `
-    SELECT f.id_ficha, f.nombre, f.programa_formacion, f.jornada, f.estado, f.cupo_maximo,
-      u.nombre AS instructor_nombre, a.nombre AS ambiente_nombre, a.nave AS ambiente_nave,
+    SELECT f.id, f.nombre, f.programa_formacion, f.jornada, f.estado, f.cupo_maximo,
+      u.nombre AS instructor_nombre, f.ambiente_nombre, f.ambiente_nave,
       COUNT(fa.id_aprendiz) AS total_aprendices, f.fecha_creacion
     FROM ficha f
     LEFT JOIN usuario u ON f.id_instructor = u.id_usuario
-    LEFT JOIN ambiente a ON f.id_ambiente = a.id_ambiente
-    LEFT JOIN ficha_aprendiz fa ON fa.id_ficha = f.id_ficha
-    ${where} GROUP BY f.id_ficha ORDER BY f.id_ficha DESC`;
+    LEFT JOIN ficha_aprendiz fa ON fa.id_ficha = f.id
+    ${where} GROUP BY f.id ORDER BY f.id DESC`;
   const [rows] = await db.query(q);
   generarExcelDiseño(res, rows, "Fichas", "fichas", COLS_FICHAS);
 };
 
+const exportarFichasCSV = async (req, res) => {
+  const idInstructor = req.usuario.rol === "instructor" ? req.usuario.id : null;
+  const { estado, jornada } = req.query;
+  const conditions = [];
+  if (idInstructor) conditions.push(`f.id_instructor = ${idInstructor}`);
+  if (estado) conditions.push(`f.estado = '${estado}'`);
+  if (jornada) conditions.push(`f.jornada = '${jornada}'`);
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  const q = `
+    SELECT f.id, f.nombre, f.programa_formacion, f.jornada, f.estado, f.cupo_maximo,
+      u.nombre AS instructor_nombre, f.ambiente_nombre, f.ambiente_nave,
+      COUNT(fa.id_aprendiz) AS total_aprendices, f.fecha_creacion
+    FROM ficha f
+    LEFT JOIN usuario u ON f.id_instructor = u.id_usuario
+    LEFT JOIN ficha_aprendiz fa ON fa.id_ficha = f.id
+    ${where} GROUP BY f.id ORDER BY f.id DESC`;
+  const [rows] = await db.query(q);
+  exportarCSVGenerico(res, rows, "fichas", COLS_FICHAS);
+};
 const exportarReportesExcel = async (req, res) => {
   const { rol, id } = req.usuario;
   const { estado_reporte } = req.query;
@@ -321,11 +325,53 @@ const exportarReportesExcel = async (req, res) => {
   generarExcelDiseño(res, rows, "Reportes", "reportes", columnas);
 };
 
+const exportarReportesCSV = async (req, res) => {
+  const { rol, id } = req.usuario;
+  const { estado_reporte } = req.query;
+  const conditions = [];
+  if (rol === "instructor") conditions.push(`r.id_instructor = ${id}`);
+  if (estado_reporte) conditions.push(`r.estado_reporte = '${estado_reporte}'`);
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+  const esInstructor = rol === "instructor";
+  const query = esInstructor
+    ? `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
+              r.descripcion, r.estado_reporte, r.fecha_reporte
+       FROM reportes r JOIN usuario u ON r.id_aprendiz = u.id_usuario
+       ${where} ORDER BY r.fecha_reporte DESC`
+    : `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
+              ui.nombre AS instructor, r.descripcion, r.estado_reporte, r.fecha_reporte
+       FROM reportes r JOIN usuario u ON r.id_aprendiz = u.id_usuario
+       LEFT JOIN usuario ui ON r.id_instructor = ui.id_usuario
+       ${where} ORDER BY r.fecha_reporte DESC`;
+
+  const [rows] = await db.query(query);
+
+  const columnas = esInstructor ? [
+    { header:"ID",          key:"id_reporte",      width:8  },
+    { header:"Aprendiz",    key:"aprendiz",        width:24 },
+    { header:"Correo",      key:"correo_aprendiz", width:30 },
+    { header:"Descripción", key:"descripcion",     width:40 },
+    { header:"Estado",      key:"estado_reporte",  width:16 },
+    { header:"Fecha",       key:"fecha_reporte",   width:20 },
+  ] : [
+    { header:"ID",          key:"id_reporte",      width:8  },
+    { header:"Aprendiz",    key:"aprendiz",        width:24 },
+    { header:"Correo",      key:"correo_aprendiz", width:30 },
+    { header:"Instructor",  key:"instructor",      width:24 },
+    { header:"Descripción", key:"descripcion",     width:40 },
+    { header:"Estado",      key:"estado_reporte",  width:16 },
+    { header:"Fecha",       key:"fecha_reporte",   width:20 },
+  ];
+
+  exportarCSVGenerico(res, rows, "reportes", columnas);
+};
+
 module.exports = {
   exportarPortatilesExcel, exportarPortatilesCSV,
   exportarUsuariosExcel,   exportarUsuariosCSV,
   exportarAmbientesExcel,  exportarAmbientesCSV,
-  exportarFichasExcel,
-  exportarReportesExcel,
+  exportarFichasExcel,     exportarFichasCSV,
+  exportarReportesExcel,   exportarReportesCSV,
   generarExcelDiseño,
 };

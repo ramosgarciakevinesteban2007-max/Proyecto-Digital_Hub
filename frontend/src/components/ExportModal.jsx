@@ -3,9 +3,9 @@ import { useState } from 'react';
 // Todos los tipos usan el backend — diseño oscuro Digital Hub con ExcelJS
 const BACKEND_ENDPOINTS = {
   equipos:  { excel: '/exportar/portatiles/excel', csv: '/exportar/portatiles/csv' },
-  fichas:   { excel: '/exportar/fichas/excel',     csv: '/exportar/fichas/excel'   },
+  fichas:   { excel: '/exportar/fichas/excel',     csv: '/exportar/fichas/csv'   },
   usuarios: { excel: '/exportar/usuarios/excel',   csv: '/exportar/usuarios/csv'   },
-  reportes: { excel: '/exportar/reportes/excel',   csv: '/exportar/reportes/excel' },
+  reportes: { excel: '/exportar/reportes/excel',   csv: '/exportar/reportes/csv'   },
 };
 
 const ExportModal = ({ tipo, datos = [], onClose }) => {

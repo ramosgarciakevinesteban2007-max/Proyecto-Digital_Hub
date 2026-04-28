@@ -7,8 +7,8 @@ const {
   exportarPortatilesExcel, exportarPortatilesCSV,
   exportarUsuariosExcel,   exportarUsuariosCSV,
   exportarAmbientesExcel,  exportarAmbientesCSV,
-  exportarFichasExcel,
-  exportarReportesExcel,
+  exportarFichasExcel,     exportarFichasCSV,
+  exportarReportesExcel,   exportarReportesCSV,
   generarExcelDiseño,
 } = require("../services/exportacion.service");
 
@@ -26,9 +26,11 @@ router.get("/ambientes/csv",   verificarToken, verificarRol([ROLES.ADMIN, ROLES.
 
 // FICHAS — instructor solo ve las suyas (filtrado en el service)
 router.get("/fichas/excel", verificarToken, verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR]), exportarFichasExcel);
+router.get("/fichas/csv",   verificarToken, verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR]), exportarFichasCSV);
 
 // REPORTES — admin ve todos, instructor solo los suyos
 router.get("/reportes/excel", verificarToken, verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR]), exportarReportesExcel);
+router.get("/reportes/csv",   verificarToken, verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR]), exportarReportesCSV);
 
 // REPORTES POR FICHA
 router.get("/reportes/ficha/:id", verificarToken, verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR]), async (req, res) => {
