@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import * as XLSX from 'xlsx';
 
+// Todos los tipos usan el backend — diseño oscuro Digital Hub con ExcelJS
 const BACKEND_ENDPOINTS = {
-  equipos: { excel: '/exportar/portatiles/excel', csv: '/exportar/portatiles/csv' },
-  fichas:  { excel: '/exportar/fichas/excel',     csv: '/exportar/fichas/excel'   },
-  usuarios:{ excel: '/exportar/usuarios/excel',   csv: '/exportar/usuarios/csv'   },
+  equipos:  { excel: '/exportar/portatiles/excel', csv: '/exportar/portatiles/csv' },
+  fichas:   { excel: '/exportar/fichas/excel',     csv: '/exportar/fichas/excel'   },
+  usuarios: { excel: '/exportar/usuarios/excel',   csv: '/exportar/usuarios/csv'   },
+  reportes: { excel: '/exportar/reportes/excel',   csv: '/exportar/reportes/excel' },
 };
 
 const ExportModal = ({ tipo, datos = [], onClose }) => {
@@ -71,37 +72,11 @@ const ExportModal = ({ tipo, datos = [], onClose }) => {
     return true;
   };
 
-  const exportarLocal = (filas) => {
-    if (!filas.length) return;
-    const fileName = tipo + '_' + new Date().toISOString().split('T')[0];
-    if (formato === 'csv') {
-      const cols = Object.keys(filas[0]);
-      const csv = [cols.join(','), ...filas.map(r =>
-        cols.map(col => '"' + (r[col] ?? '').toString().replace(/"/g, '""') + '"').join(',')
-      )].join('\n');
-      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = fileName + '.csv'; a.click();
-      URL.revokeObjectURL(url);
-    } else {
-      const ws = XLSX.utils.json_to_sheet(filas);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, tipo);
-      XLSX.writeFile(wb, fileName + '.xlsx');
-    }
-  };
+  const exportarLocal = () => {}; // ya no se usa, todo va por backend
 
   const exportar = async () => {
-    if (BACKEND_ENDPOINTS[tipo]) {
-      const ok = await exportarDesdeBackend();
-      if (ok) onClose();
-      return;
-    }
-    const filtrados = aplicarFiltros();
-    if (filtrados.length === 0) { alert('No hay datos para exportar'); return; }
-    exportarLocal(filtrados);
-    onClose();
+    const ok = await exportarDesdeBackend();
+    if (ok) onClose();
   };
 
   const setFiltro = (key, val) => setFiltros(prev => ({ ...prev, [key]: val }));
@@ -117,28 +92,17 @@ const ExportModal = ({ tipo, datos = [], onClose }) => {
   };
 
   const renderFiltros = () => {
-    if (tipo === 'equipos' || tipo === 'fichas' || tipo === 'usuarios') return (
-      <p style={{fontSize:'12px',color:c.text,margin:0,lineHeight:'1.6'}}>
-        La exportacion se genera desde el servidor con todos los datos y el diseno Digital Hub.
-        {tipo !== 'usuarios' && ' El instructor solo vera sus propios registros.'}
-      </p>
-    );
-    if (tipo === 'reportes') return (
-      <div style={{marginBottom:'14px'}}>
-        <label style={labelStyle}>Estado del reporte</label>
-        <select style={selectStyle} value={filtros.estado_reporte || ''} onChange={e => setFiltro('estado_reporte', e.target.value)}>
-          <option value="">Todos</option>
-          <option value="pendiente">Pendiente</option>
-          <option value="en_revision">En revision</option>
-          <option value="resuelto">Resuelto</option>
-        </select>
-      </div>
-    );
+    // Todos van al backend — solo info
+    const msgs = {
+      equipos:  'Se exportan todos los equipos. El instructor solo verá los suyos.',
+      fichas:   'Se exportan todas las fichas. El instructor solo verá las suyas.',
+      usuarios: 'Se exportan todos los usuarios del sistema.',
+      reportes: 'Se exportan todos los reportes. El instructor solo verá los suyos.',
+    };
+    return <p style={{fontSize:'12px',color:c.text,margin:0,lineHeight:'1.6'}}>{msgs[tipo] || 'Exportación desde el servidor.'}</p>;
   };
 
   const titulos = { equipos:'Equipos', usuarios:'Usuarios', reportes:'Reportes', fichas:'Fichas' };
-  const usaBackend = !!BACKEND_ENDPOINTS[tipo];
-  const preview = usaBackend ? null : aplicarFiltros().length;
 
   return (
     <div style={{position:'fixed',inset:0,background:c.overlay,backdropFilter:'blur(4px)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:3000}} onClick={onClose}>
@@ -147,7 +111,7 @@ const ExportModal = ({ tipo, datos = [], onClose }) => {
           Exportar {titulos[tipo] || tipo}
         </h2>
         <p style={{fontSize:'13px',color:c.text,marginBottom:'24px'}}>
-          {usaBackend ? 'Exportacion con diseno Digital Hub desde el servidor' : (preview + ' registro' + (preview !== 1 ? 's' : '') + ' con los filtros actuales')}
+          Exportación con diseño Digital Hub — archivo .xlsx o .csv
         </p>
 
         <div style={{marginBottom:'20px'}}>
@@ -161,14 +125,14 @@ const ExportModal = ({ tipo, datos = [], onClose }) => {
                 color: formato===f ? '#fff' : c.btnSecColor,
                 transition:'all 0.2s'
               }}>
-                {f === 'excel' ? 'Excel' : 'CSV'}
+                {f === 'excel' ? '📊 Excel' : '📄 CSV'}
               </button>
             ))}
           </div>
         </div>
 
         <div style={{marginBottom:'24px'}}>
-          <label style={{...labelStyle,marginBottom:'10px'}}>{usaBackend ? 'Informacion' : 'Filtros'}</label>
+          <label style={{...labelStyle,marginBottom:'10px'}}>Información</label>
           {renderFiltros()}
         </div>
 
@@ -187,7 +151,7 @@ const ExportModal = ({ tipo, datos = [], onClose }) => {
             cursor:loading?'not-allowed':'pointer',
             boxShadow:'0 4px 16px rgba(127,90,240,0.4)'
           }}>
-            {loading ? 'Exportando...' : ('Exportar' + (usaBackend ? '' : ' ' + preview + ' registros'))}
+            {loading ? 'Exportando...' : 'Exportar'}
           </button>
         </div>
       </div>

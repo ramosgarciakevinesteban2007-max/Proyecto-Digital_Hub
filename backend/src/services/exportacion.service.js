@@ -249,10 +249,58 @@ const exportarFichasExcel = async (req, res) => {
   generarExcelDiseño(res, rows, "Fichas", "fichas", COLS_FICHAS);
 };
 
+const exportarReportesExcel = async (req, res) => {
+  const db = require("../db/database");
+  const { rol, id } = req.usuario;
+
+  let query;
+  if (rol === "instructor") {
+    query = [
+      `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
+              r.descripcion, r.estado_reporte, r.fecha_reporte, r.archivo
+       FROM reportes r
+       JOIN usuario u ON r.id_aprendiz = u.id_usuario
+       WHERE r.id_instructor = ${id}
+       ORDER BY r.fecha_reporte DESC`
+    ];
+  } else {
+    query = [
+      `SELECT r.id_reporte, u.nombre AS aprendiz, u.correo AS correo_aprendiz,
+              ui.nombre AS instructor, r.descripcion, r.estado_reporte, r.fecha_reporte, r.archivo
+       FROM reportes r
+       JOIN usuario u  ON r.id_aprendiz  = u.id_usuario
+       LEFT JOIN usuario ui ON r.id_instructor = ui.id_usuario
+       ORDER BY r.fecha_reporte DESC`
+    ];
+  }
+
+  const [rows] = await db.query(query[0]);
+
+  const columnas = rol === "instructor" ? [
+    { header:"ID",          key:"id_reporte",       width:8  },
+    { header:"Aprendiz",    key:"aprendiz",         width:24 },
+    { header:"Correo",      key:"correo_aprendiz",  width:30 },
+    { header:"Descripción", key:"descripcion",      width:40 },
+    { header:"Estado",      key:"estado_reporte",   width:16 },
+    { header:"Fecha",       key:"fecha_reporte",    width:20 },
+  ] : [
+    { header:"ID",          key:"id_reporte",       width:8  },
+    { header:"Aprendiz",    key:"aprendiz",         width:24 },
+    { header:"Correo",      key:"correo_aprendiz",  width:30 },
+    { header:"Instructor",  key:"instructor",       width:24 },
+    { header:"Descripción", key:"descripcion",      width:40 },
+    { header:"Estado",      key:"estado_reporte",   width:16 },
+    { header:"Fecha",       key:"fecha_reporte",    width:20 },
+  ];
+
+  generarExcelDiseño(res, rows, "Reportes", "reportes", columnas);
+};
+
 module.exports = {
   exportarPortatilesExcel, exportarPortatilesCSV,
   exportarUsuariosExcel,   exportarUsuariosCSV,
   exportarAmbientesExcel,  exportarAmbientesCSV,
   exportarFichasExcel,
+  exportarReportesExcel,
   generarExcelDiseño,
 };
