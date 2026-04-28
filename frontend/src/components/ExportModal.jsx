@@ -44,15 +44,19 @@ const ExportModal = ({ tipo, datos = [], onClose }) => {
 
   const exportarDesdeBackend = async () => {
     const endpoints = BACKEND_ENDPOINTS[tipo];
-    if (!endpoints) return false;
+    if (!endpoints) {
+      alert('Tipo de exportación no soportado: ' + tipo);
+      return false;
+    }
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       const url = formato === 'csv' ? endpoints.csv : endpoints.excel;
       const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
       if (!res.ok) {
-        const msg = await res.json().catch(() => ({}));
-        alert(msg.error || msg.mensaje || 'Error al exportar');
+        let msg = 'Error al exportar';
+        try { const j = await res.json(); msg = j.error || j.mensaje || msg; } catch {}
+        alert(msg);
         setLoading(false);
         return false;
       }
@@ -61,10 +65,12 @@ const ExportModal = ({ tipo, datos = [], onClose }) => {
       const a = document.createElement('a');
       a.href = blobUrl;
       a.download = tipo + '_' + new Date().toISOString().split('T')[0] + (formato === 'csv' ? '.csv' : '.xlsx');
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
     } catch (e) {
-      alert('Error de conexion: ' + e.message);
+      alert('Error de conexión: ' + e.message);
       setLoading(false);
       return false;
     }
