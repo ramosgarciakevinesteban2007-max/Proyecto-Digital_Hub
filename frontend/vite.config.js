@@ -7,6 +7,7 @@ export default defineConfig({
     port: 3000,
     strictPort: true,
     open: true,
+    host: true,
     proxy: {
       '/api':       { target: 'http://127.0.0.1:3001', changeOrigin: true },
       '/portatil':  { target: 'http://127.0.0.1:3001', changeOrigin: true },
