@@ -3,6 +3,8 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import "./Login.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+
 const VerificarCodigo = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,15 +36,30 @@ const VerificarCodigo = () => {
     e.preventDefault();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const completo = codigo.join("");
-    if (completo.length < 6) { setError("Ingresa los 6 digitos del codigo"); return; }
+    if (completo.length < 6) { setError("Ingresa los 6 dígitos del código"); return; }
     setLoading(true);
-    setTimeout(() => {
+    setError("");
+    try {
+      const resp = await fetch(`${API_URL}/recuperacion/validar-codigo`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ correo, codigo: completo })
+      });
+      const data = await resp.json();
+      if (resp.ok) {
+        setLoading(false);
+        navigate("/nueva-password", { state: { correo, codigo: completo } });
+      } else {
+        setLoading(false);
+        setError(data.mensaje || "PIN incorrecto");
+      }
+    } catch (err) {
       setLoading(false);
-      navigate("/nueva-password", { state: { correo, codigo: completo } });
-    }, 800);
+      setError("Error de conexión. Intenta de nuevo.");
+    }
   };
 
   return (
