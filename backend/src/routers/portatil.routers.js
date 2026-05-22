@@ -153,15 +153,17 @@ router.put(
   "/:id",
   verificarToken,
   verificarRol(["administrador", "instructor"]),
-  validarCamposObligatorios(["marca", "tipo", "modelo", "estado"]),
+  validarCamposObligatorios(["marca", "modelo", "estado"]),
   async (req, res) => {
     try {
-      const { id } = req.params;
+        const { id } = req.params;
+        const idNum = parseInt(id);
+        if (isNaN(idNum)) return res.status(400).json({ mensaje: 'ID inválido' });
       const { marca, tipo, modelo, estado, ubicacion, descripcion } = req.body;
 
       // Obtener valores anteriores
       const [anterior] = await pool.query(
-        "SELECT * FROM portatil WHERE id_portatil = ?", [id]
+        "SELECT * FROM portatil WHERE id_portatil = ?", [idNum]
       );
       if (anterior.length === 0)
         return res.status(404).json({ mensaje: "Portátil no encontrado" });
@@ -170,15 +172,15 @@ router.put(
       const modificadoPor = req.usuario?.correo || req.usuario?.nombre || `usuario #${req.usuario?.id}`;
 
       // Detectar cambios y registrarlos
-      const campos = { marca, tipo, modelo, estado };
+      const campos = { marca, tipo: tipo || null, modelo, estado };
       for (const [campo, valorNuevo] of Object.entries(campos)) {
-        const valorAnterior = viejo[campo];
-        if (String(valorAnterior) !== String(valorNuevo)) {
+        const valorAnterior = viejo[campo] ?? null;
+        if (String(valorAnterior ?? '') !== String(valorNuevo ?? '')) {
           await pool.query(
             `INSERT INTO historial_portatil 
              (id_portatil, campo_modificado, valor_anterior, valor_nuevo, modificado_por)
              VALUES (?, ?, ?, ?, ?)`,
-            [id, campo, valorAnterior, valorNuevo, modificadoPor]
+            [idNum, campo, valorAnterior, valorNuevo, modificadoPor]
           );
         }
       }
@@ -189,7 +191,7 @@ router.put(
          SET marca = ?, tipo = ?, modelo = ?, estado = ?, ubicacion = ?, descripcion = ?,
              id_aprendiz = CASE WHEN ? != 'asignado' THEN NULL ELSE id_aprendiz END
          WHERE id_portatil = ?`,
-        [marca, tipo, modelo, estado, ubicacion || '', descripcion || '', estado, id]
+        [marca, tipo || null, modelo, estado, ubicacion || '', descripcion || '', estado, idNum]
       );
 
       if (resultado.affectedRows === 0)
@@ -197,7 +199,7 @@ router.put(
 
       if (estado !== 'asignado') {
         await pool.query(
-          "UPDATE portatil_aprendiz SET estado = 'inactivo' WHERE id_portatil = ?", [id]
+          "UPDATE portatil_aprendiz SET estado = 'inactivo' WHERE id_portatil = ?", [idNum]
         );
       }
 
@@ -223,11 +225,13 @@ router.get(
   async (req, res) => {
     try {
       const { id } = req.params;
+      const idNum = parseInt(id);
+      if (isNaN(idNum)) return res.status(400).json({ mensaje: 'ID inválido' });
       const [rows] = await pool.query(
         `SELECT * FROM historial_portatil 
          WHERE id_portatil = ? 
          ORDER BY fecha DESC`,
-        [id]
+        [idNum]
       );
       res.json(rows);
     } catch (error) {

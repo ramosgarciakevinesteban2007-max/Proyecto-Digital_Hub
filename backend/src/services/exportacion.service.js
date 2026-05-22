@@ -21,9 +21,30 @@ const limpiar  = v => {
 };
 
 // ── Generador genérico con diseño oscuro ────────────────
-const generarExcelDiseño = async (res, query, titulo, nombreArchivo, columnas) => {
+const capitalizeWords = (s) => typeof s === 'string' ? s.split(/\s+/).map(w => w ? (w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()) : '').join(' ') : s;
+
+const normalizeRowsForOutput = (rows) => rows.map(r => {
+  const copy = { ...r };
+  Object.keys(copy).forEach(k => {
+    if (typeof copy[k] === 'string') copy[k] = capitalizeWords(copy[k]);
+  });
+  return copy;
+});
+
+const generarExcelDiseño = async (res, queryOrRows, titulo, nombreArchivo, columnas) => {
   try {
-    const [rows] = await db.query(query);
+    let rows;
+    if (Array.isArray(queryOrRows)) {
+      rows = queryOrRows;
+    } else if (typeof queryOrRows === 'object' && queryOrRows.sql) {
+      const [r] = await db.query(queryOrRows.sql, queryOrRows.params || []);
+      rows = r;
+    } else {
+      const [r] = await db.query(queryOrRows);
+      rows = r;
+    }
+    // No modificamos la paleta ni el formato — solo normalizamos cadenas para exportación
+    rows = normalizeRowsForOutput(rows);
     const COLS = columnas.length;
     const lastCol = String.fromCharCode(64 + COLS);
     const fecha = fechaHoy();
@@ -106,7 +127,17 @@ const generarExcelDiseño = async (res, query, titulo, nombreArchivo, columnas) 
 // ── CSV genérico ────────────────────────────────────────
 const exportarCSVGenerico = async (res, query, nombreArchivo, columnas, encabezados) => {
   try {
-    const [rows] = await db.query(query);
+    let rows;
+    if (Array.isArray(query)) rows = query;
+    else if (typeof query === 'object' && query.sql) {
+      const [r] = await db.query(query.sql, query.params || []);
+      rows = r;
+    } else {
+      const [r] = await db.query(query);
+      rows = r;
+    }
+    // Normalizar cadenas antes de serializar
+    rows = normalizeRowsForOutput(rows);
     let csv = "\uFEFF" + encabezados.join(",") + "\n";
     rows.forEach(row => {
       const fila = columnas.map(col => {
@@ -125,8 +156,28 @@ const exportarCSVGenerico = async (res, query, nombreArchivo, columnas, encabeza
 };
 
 // ── Exportadores específicos ────────────────────────────
-const exportarPortatilesExcel = (req, res) => generarExcelDiseño(res,
-  "SELECT * FROM portatil", "Portátiles", "portatiles", [
+const exportarPortatilesExcel = (req, res) => {
+  const { buscar = '', estado = '', marca = '' } = req.query || {};
+  const usuario = req.usuario || {};
+  let sql = "SELECT * FROM portatil WHERE 1=1";
+  const params = [];
+  // Instructor solo ve los suyos
+  if (usuario.rol === 'instructor') {
+    sql += " AND id_instructor = ?";
+    params.push(usuario.id);
+  }
+  if (buscar && buscar.toString().trim() !== '') {
+    const b = `%${buscar.toString().toLowerCase()}%`;
+    sql += " AND (LOWER(marca) LIKE ? OR LOWER(modelo) LIKE ? OR LOWER(num_serie) LIKE ?)";
+    params.push(b, b, b);
+  }
+  if (marca && marca.toString().trim() !== '') {
+    const m = `%${marca.toString().toLowerCase()}%`;
+    sql += " AND LOWER(marca) LIKE ?";
+    params.push(m);
+  }
+  if (estado && estado.toString().trim() !== '') { sql += " AND LOWER(estado) = ?"; params.push(estado.toString().toLowerCase()); }
+  return generarExcelDiseño(res, { sql, params }, "Portátiles", "portatiles", [
     { header:"ID",          key:"id_portatil", width:8  },
     { header:"Serial",      key:"num_serie",   width:22 },
     { header:"Marca",       key:"marca",       width:18 },
@@ -135,17 +186,48 @@ const exportarPortatilesExcel = (req, res) => generarExcelDiseño(res,
     { header:"Estado",      key:"estado",      width:16 },
     { header:"Ubicación",   key:"ubicacion",   width:20 },
     { header:"Descripción", key:"descripcion", width:30 },
-  ]
-);
+  ]);
+};
 
-const exportarPortatilesCSV = (req, res) => exportarCSVGenerico(res,
-  "SELECT * FROM portatil", "portatiles",
-  ["id_portatil","marca","tipo","modelo","estado","num_serie","ubicacion","descripcion"],
-  ["ID","Marca","Tipo","Modelo","Estado","Serial","Ubicación","Descripción"]
-);
+const exportarPortatilesCSV = (req, res) => {
+  const { buscar = '', estado = '', marca = '' } = req.query || {};
+  const usuario = req.usuario || {};
+  let sql = "SELECT * FROM portatil WHERE 1=1";
+  const params = [];
+  // Instructor solo ve los suyos
+  if (usuario.rol === 'instructor') {
+    sql += " AND id_instructor = ?";
+    params.push(usuario.id);
+  }
+  if (buscar && buscar.toString().trim() !== '') {
+    const b = `%${buscar.toString().toLowerCase()}%`;
+    sql += " AND (LOWER(marca) LIKE ? OR LOWER(modelo) LIKE ? OR LOWER(num_serie) LIKE ?)";
+    params.push(b, b, b);
+  }
+  if (marca && marca.toString().trim() !== '') {
+    const m = `%${marca.toString().toLowerCase()}%`;
+    sql += " AND LOWER(marca) LIKE ?";
+    params.push(m);
+  }
+  if (estado && estado.toString().trim() !== '') { sql += " AND LOWER(estado) = ?"; params.push(estado.toString().toLowerCase()); }
+  return exportarCSVGenerico(res, { sql, params }, "portatiles",
+    ["id_portatil","marca","tipo","modelo","estado","num_serie","ubicacion","descripcion"],
+    ["ID","Marca","Tipo","Modelo","Estado","Serial","Ubicación","Descripción"]
+  );
+};
 
-const exportarUsuariosExcel = (req, res) => generarExcelDiseño(res,
-  "SELECT id_usuario, nombre, correo, rol, estado FROM usuario", "Usuarios", "usuarios", [
+const exportarUsuariosExcel = (req, res) => {
+  const { buscar = '', rol = '', estado = '' } = req.query || {};
+  let sql = "SELECT id_usuario, nombre, correo, rol, estado FROM usuario WHERE 1=1";
+  const params = [];
+  if (buscar && buscar.toString().trim() !== '') {
+    const b = `%${buscar.toString().toLowerCase()}%`;
+    sql += " AND (LOWER(nombre) LIKE ? OR LOWER(correo) LIKE ? OR CAST(id_usuario AS CHAR) LIKE ?)";
+    params.push(b, b, `%${buscar}%`);
+  }
+  if (rol && rol.toString().trim() !== '') { sql += " AND LOWER(rol) = ?"; params.push(rol.toString().toLowerCase()); }
+  if (estado && estado.toString().trim() !== '') { sql += " AND LOWER(estado) = ?"; params.push(estado.toString().toLowerCase()); }
+  return generarExcelDiseño(res, { sql, params }, "Usuarios", "usuarios", [
     { header:"ID",      key:"id_usuario", width:8  },
     { header:"Nombre",  key:"nombre",     width:24 },
     { header:"Correo",  key:"correo",     width:30 },
@@ -153,12 +235,24 @@ const exportarUsuariosExcel = (req, res) => generarExcelDiseño(res,
     { header:"Estado",  key:"estado",     width:16 },
   ]
 );
+};
 
-const exportarUsuariosCSV = (req, res) => exportarCSVGenerico(res,
-  "SELECT id_usuario, nombre, correo, rol, estado FROM usuario", "usuarios",
-  ["id_usuario","nombre","correo","rol","estado"],
-  ["ID","Nombre","Correo","Rol","Estado"]
-);
+const exportarUsuariosCSV = (req, res) => {
+  const { buscar = '', rol = '', estado = '' } = req.query || {};
+  let sql = "SELECT id_usuario, nombre, correo, rol, estado FROM usuario WHERE 1=1";
+  const params = [];
+  if (buscar && buscar.toString().trim() !== '') {
+    const b = `%${buscar.toString().toLowerCase()}%`;
+    sql += " AND (LOWER(nombre) LIKE ? OR LOWER(correo) LIKE ? OR CAST(id_usuario AS CHAR) LIKE ?)";
+    params.push(b, b, `%${buscar}%`);
+  }
+  if (rol && rol.toString().trim() !== '') { sql += " AND LOWER(rol) = ?"; params.push(rol.toString().toLowerCase()); }
+  if (estado && estado.toString().trim() !== '') { sql += " AND LOWER(estado) = ?"; params.push(estado.toString().toLowerCase()); }
+  return exportarCSVGenerico(res, { sql, params }, "usuarios",
+    ["id_usuario","nombre","correo","rol","estado"],
+    ["ID","Nombre","Correo","Rol","Estado"]
+  );
+};
 
 const exportarAmbientesExcel = (req, res) => generarExcelDiseño(res,
   "SELECT * FROM ambiente", "Ambientes", "ambientes", [
@@ -174,8 +268,19 @@ const exportarAmbientesCSV = (req, res) => exportarCSVGenerico(res,
   ["ID","Nombre","Dirección"]
 );
 
-const exportarFichasExcel = (req, res) => generarExcelDiseño(res,
-  "SELECT * FROM ficha", "Fichas", "fichas", [
+const exportarFichasExcel = (req, res) => {
+  const { buscar = '', estado = '', jornada = '', ambiente = '' } = req.query || {};
+  let sql = "SELECT * FROM ficha WHERE 1=1";
+  const params = [];
+  if (buscar && buscar.toString().trim() !== '') {
+    const b = `%${buscar.toString().toLowerCase()}%`;
+    sql += " AND (LOWER(nombre) LIKE ? OR LOWER(programa_formacion) LIKE ?)";
+    params.push(b, b);
+  }
+  if (estado && estado.toString().trim() !== '') { sql += " AND LOWER(estado) = ?"; params.push(estado.toString().toLowerCase()); }
+  if (jornada && jornada.toString().trim() !== '') { sql += " AND LOWER(jornada) = ?"; params.push(jornada.toString().toLowerCase()); }
+  if (ambiente && ambiente.toString().trim() !== '') { sql += " AND (LOWER(ambiente_nombre) LIKE ? OR LOWER(ambiente) LIKE ?)"; params.push(`%${ambiente.toString().toLowerCase()}%`, `%${ambiente.toString().toLowerCase()}%`); }
+  return generarExcelDiseño(res, { sql, params }, "Fichas", "fichas", [
     { header:"ID",                  key:"id_ficha",            width:8  },
     { header:"Nombre",              key:"nombre",              width:24 },
     { header:"Programa Formación",  key:"programa_formacion",  width:28 },
@@ -187,9 +292,29 @@ const exportarFichasExcel = (req, res) => generarExcelDiseño(res,
   ]
 );
 
+};
+
+const exportarFichasCSV = (req, res) => {
+  const { buscar = '', estado = '', jornada = '', ambiente = '' } = req.query || {};
+  let sql = "SELECT * FROM ficha WHERE 1=1";
+  const params = [];
+  if (buscar && buscar.toString().trim() !== '') {
+    const b = `%${buscar.toString().toLowerCase()}%`;
+    sql += " AND (LOWER(nombre) LIKE ? OR LOWER(programa_formacion) LIKE ?)";
+    params.push(b, b);
+  }
+  if (estado && estado.toString().trim() !== '') { sql += " AND LOWER(estado) = ?"; params.push(estado.toString().toLowerCase()); }
+  if (jornada && jornada.toString().trim() !== '') { sql += " AND LOWER(jornada) = ?"; params.push(jornada.toString().toLowerCase()); }
+  if (ambiente && ambiente.toString().trim() !== '') { sql += " AND (LOWER(ambiente_nombre) LIKE ? OR LOWER(ambiente) LIKE ?)"; params.push(`%${ambiente.toString().toLowerCase()}%`, `%${ambiente.toString().toLowerCase()}%`); }
+  return exportarCSVGenerico(res, { sql, params }, "fichas",
+    ["id_ficha","nombre","programa_formacion","jornada","id_instructor","cupo_maximo","estado","fecha_creacion"],
+    ["ID","Nombre","Programa Formación","Jornada","Instructor ID","Cupo Máximo","Estado","Fecha Creación"]
+  );
+};
+
 module.exports = {
   exportarPortatilesExcel, exportarPortatilesCSV,
   exportarUsuariosExcel,   exportarUsuariosCSV,
   exportarAmbientesExcel,  exportarAmbientesCSV,
-  exportarFichasExcel,
+  exportarFichasExcel, exportarFichasCSV,
 };
