@@ -27,6 +27,7 @@ const EquiposAdmin = () => {
   const [formData, setFormData] = useState({ num_serie: '', marca: '', tipo: '', modelo: '', estado: 'disponible', ubicacion: '', descripcion: '' });
   const [editData, setEditData] = useState({ marca: '', tipo: '', modelo: '', estado: 'disponible', ubicacion: '', descripcion: '' });
   const [filtros, setFiltros] = useState({ buscar: '', estado: '', marca: '' });
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const [confirmId, setConfirmId] = useState(null);
   const [historial, setHistorial] = useState([]);
   const [loadingHistorial, setLoadingHistorial] = useState(false);
@@ -93,7 +94,12 @@ const EquiposAdmin = () => {
 
   const exportar = async (formato) => {
     try {
-      const url = `/exportar/portatiles/${formato}`;
+      const q = new URLSearchParams();
+      if (filtros.buscar) q.set('buscar', filtros.buscar);
+      if (filtros.estado) q.set('estado', filtros.estado);
+      if (filtros.marca) q.set('marca', filtros.marca);
+      const query = q.toString();
+      const url = `/exportar/portatiles/${formato}${query ? `?${query}` : ''}`;
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) {
         const msg = await res.json().catch(() => ({}));
@@ -117,7 +123,7 @@ const EquiposAdmin = () => {
   const abrirVer = (p) => { setSeleccionado(p); setShowVerModal(true); };
   const abrirEditar = async (p) => {
   setSeleccionado(p);
-  setEditData({ marca: p.marca, tipo: p.tipo || '', modelo: p.modelo, estado: p.estado, ubicacion: p.ubicacion || '', descripcion: p.descripcion || '' });
+  setEditData({ marca: p.marca, tipo: p.tipo || '', modelo: p.modelo, estado: (p.estado || '').toString().toLowerCase(), ubicacion: p.ubicacion || '', descripcion: p.descripcion || '' });
   setShowHistorial(false);
   setHistorial([]);
   setShowEditModal(true);
@@ -140,10 +146,14 @@ const EquiposAdmin = () => {
   };
 
   const filtrados = portatiles.filter(p => {
-    const b = filtros.buscar.toLowerCase();
-    return (!b || p.num_serie?.toLowerCase().includes(b) || p.marca?.toLowerCase().includes(b) || p.modelo?.toLowerCase().includes(b))
-      && (!filtros.estado || p.estado === filtros.estado)
-      && (!filtros.marca || p.marca?.toLowerCase().includes(filtros.marca.toLowerCase()));
+    const b = (filtros.buscar || '').toLowerCase();
+    const estadoFiltro = (filtros.estado || '').toLowerCase();
+    const marcaFiltro = (filtros.marca || '').toLowerCase();
+    const pEstado = (p.estado || '').toLowerCase();
+    const pMarca = (p.marca || '').toLowerCase();
+    return (!b || (p.num_serie||'').toLowerCase().includes(b) || pMarca.includes(b) || (p.modelo||'').toLowerCase().includes(b))
+      && (!estadoFiltro || pEstado === estadoFiltro)
+      && (!marcaFiltro || pMarca.includes(marcaFiltro));
   });
   const paginados = filtrados.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
@@ -157,15 +167,19 @@ const EquiposAdmin = () => {
             <p className="equipment-subtitle">Total: <span>{portatiles.length}</span></p>
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <button onClick={() => exportar('excel')} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Excel
-            </button>
-            <button onClick={() => exportar('csv')} style={{ background: '#6366f1', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              CSV
-            </button>
-            <NotificacionesBtn />
+              <div style={{ position: 'relative' }}>
+                <button onClick={() => setShowExportMenu(v => !v)} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Exportar
+                </button>
+                {showExportMenu && (
+                  <div style={{ position: 'absolute', right: 0, top: '46px', background: '#1a0f35', border: '1px solid rgba(127,90,240,0.25)', borderRadius: '8px', padding: '6px', zIndex: 40 }}>
+                    <button onClick={() => { exportar('excel'); setShowExportMenu(false); }} style={{ display: 'block', background: '#039b5b', border: 'none', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', marginBottom: '6px' }}>Excel</button>
+                    <button onClick={() => { exportar('csv'); setShowExportMenu(false); }} style={{ display: 'block', background: '#039b5b', border: 'none', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>CSV</button>
+                  </div>
+                )}
+              </div>
+              <NotificacionesBtn />
           </div>
         </div>
 
@@ -187,6 +201,7 @@ const EquiposAdmin = () => {
 
         <div className="filters-row">
           <input className="filter-input" placeholder="Buscar por serie, marca o modelo..." value={filtros.buscar} onChange={e => { setFiltros({ ...filtros, buscar: e.target.value }); setPage(1); }} />
+          <input className="filter-input" placeholder="Marca" value={filtros.marca} onChange={e => { setFiltros({ ...filtros, marca: e.target.value }); setPage(1); }} />
           <select className="filter-input" value={filtros.estado} onChange={e => { setFiltros({ ...filtros, estado: e.target.value }); setPage(1); }}>
             <option value="">Todos los estados</option>
             <option value="disponible">Disponible</option>

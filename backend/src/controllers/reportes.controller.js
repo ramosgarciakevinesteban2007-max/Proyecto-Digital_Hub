@@ -4,9 +4,34 @@ const ExcelJS = require("exceljs");
 
 const exportarReportesExcel = async (req, res) => {
     try {
-        const [rows] = await db.query("SELECT * FROM reportes");
+        // Permitir filtros: buscar (texto) y estado
+        const { buscar = '', estado = '' } = req.query;
+        let sql = `SELECT r.*, u.nombre AS nombre_aprendiz, u.correo AS correo_aprendiz
+                   FROM reportes r
+                   LEFT JOIN usuario u ON r.id_aprendiz = u.id_usuario
+                   WHERE 1=1`;
+        const params = [];
+        if (buscar && buscar.toString().trim() !== '') {
+            const b = `%${buscar.toString().toLowerCase()}%`;
+            sql += ` AND (LOWER(r.descripcion) LIKE ? OR LOWER(u.nombre) LIKE ? OR CAST(r.id_reporte AS CHAR) LIKE ?)`;
+            params.push(b, b, `%${buscar}%`);
+        }
+        if (estado && estado.toString().trim() !== '') {
+            sql += ` AND r.estado_reporte = ?`;
+            params.push(estado);
+        }
 
-        const workbook = await generarExcelReportes(rows);
+        const [rows] = await db.query(sql, params);
+
+        // Capitalizar cadenas en la salida (no modificar la BD)
+        const capitalize = s => typeof s === 'string' ? s.split(/\s+/).map(w => w ? (w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()) : '').join(' ') : s;
+        const normalized = rows.map(r => {
+            const copy = { ...r };
+            Object.keys(copy).forEach(k => { if (typeof copy[k] === 'string') copy[k] = capitalize(copy[k]); });
+            return copy;
+        });
+
+        const workbook = await generarExcelReportes(normalized);
 
         res.setHeader(
             "Content-Type",
@@ -78,4 +103,44 @@ const importarReportesExcel = async (req, res) => {
     }
 };
 
-module.exports = { exportarReportesExcel, importarReportesExcel };
+const exportarReportesCSV = async (req, res) => {
+    try {
+        const { buscar = '', estado = '' } = req.query;
+        let sql = `SELECT r.*, u.nombre AS nombre_aprendiz, u.correo AS correo_aprendiz
+                   FROM reportes r
+                   LEFT JOIN usuario u ON r.id_aprendiz = u.id_usuario
+                   WHERE 1=1`;
+        const params = [];
+        if (buscar && buscar.toString().trim() !== '') {
+            const b = `%${buscar.toString().toLowerCase()}%`;
+            sql += ` AND (LOWER(r.descripcion) LIKE ? OR LOWER(u.nombre) LIKE ? OR CAST(r.id_reporte AS CHAR) LIKE ?)`;
+            params.push(b, b, `%${buscar}%`);
+        }
+        if (estado && estado.toString().trim() !== '') {
+            sql += ` AND r.estado_reporte = ?`;
+            params.push(estado);
+        }
+
+        const [rows] = await db.query(sql, params);
+        const capitalize = s => typeof s === 'string' ? s.split(/\s+/).map(w => w ? (w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()) : '').join(' ') : s;
+        const normalized = rows.map(r => { const copy = { ...r }; Object.keys(copy).forEach(k => { if (typeof copy[k] === 'string') copy[k] = capitalize(copy[k]); }); return copy; });
+
+        const headers = ["ID","Aprendiz","Descripción","Estado","Fecha","Evidencia"];
+        let csv = "\uFEFF" + headers.join(',') + '\n';
+        normalized.forEach(row => {
+            const fecha = row.fecha_reporte && !isNaN(new Date(row.fecha_reporte)) ? (new Date(row.fecha_reporte)).toISOString().split('T')[0] : (row.fecha_reporte || '');
+            const cols = [row.id_reporte ?? '', row.nombre_aprendiz ?? '', (row.descripcion||'').replace(/"/g,'""'), row.estado_reporte ?? '', fecha, row.archivo || ''];
+            const line = cols.map(c => (c||'').toString().includes(',') || (c||'').toString().includes('\n') ? '"'+(c||'').toString().replace(/"/g,'""')+'"' : (c||'').toString()).join(',');
+            csv += line + '\n';
+        });
+
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="reportes.csv"`);
+        res.send(csv);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error al exportar reportes CSV', error });
+    }
+};
+
+module.exports = { exportarReportesExcel, importarReportesExcel, exportarReportesCSV };
