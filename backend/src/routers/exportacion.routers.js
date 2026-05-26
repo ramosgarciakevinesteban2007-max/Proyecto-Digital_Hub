@@ -7,7 +7,7 @@ const {
     exportarPortatilesExcel, exportarPortatilesCSV,
     exportarUsuariosExcel, exportarUsuariosCSV,
     exportarAmbientesExcel, exportarAmbientesCSV,
-    exportarFichasExcel
+    exportarFichasExcel, exportarFichasCSV
 } = require("../services/exportacion.service");
 
 // PORTATILES
@@ -15,15 +15,16 @@ router.get("/portatiles/excel", verificarToken, verificarRol([ROLES.ADMIN, ROLES
 router.get("/portatiles/csv", verificarToken, verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR]), exportarPortatilesCSV);
 
 // USUARIOS (Solo Admin y instructor)
-router.get("/usuarios/excel", verificarToken, verificarRol([ROLES.ADMIN,ROLES.INSTRUCTOR]), exportarUsuariosExcel);
-router.get("/usuarios/csv", verificarToken, verificarRol([ROLES.ADMIN,ROLES.INSTRUCTOR]), exportarUsuariosCSV);
+router.get("/usuarios/excel", verificarToken, verificarRol([ROLES.ADMIN]), exportarUsuariosExcel);
+router.get("/usuarios/csv", verificarToken, verificarRol([ROLES.ADMIN]), exportarUsuariosCSV);
 
 // AMBIENTES
-router.get("/ambientes/excel", verificarToken, verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR]), exportarAmbientesExcel);
-router.get("/ambientes/csv", verificarToken, verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR]), exportarAmbientesCSV);
+router.get("/ambientes/excel", verificarToken, verificarRol([ROLES.ADMIN]), exportarAmbientesExcel);
+router.get("/ambientes/csv", verificarToken, verificarRol([ROLES.ADMIN]), exportarAmbientesCSV);
 
 // FICHAS
-router.get("/fichas/excel", verificarToken, verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR]), exportarFichasExcel);
+router.get("/fichas/excel", verificarToken, verificarRol([ROLES.ADMIN]), exportarFichasExcel);
+router.get("/fichas/csv", verificarToken, verificarRol([ROLES.ADMIN]), exportarFichasCSV);
 
 // REPORTES POR FICHA
 router.get("/reportes/ficha/:id", verificarToken, verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR]), async (req, res) => {
@@ -41,6 +42,20 @@ router.get("/reportes/ficha/:id", verificarToken, verificarRol([ROLES.ADMIN, ROL
         );
         const [fichaRows] = await db.query("SELECT nombre FROM ficha WHERE id = ?", [id]);
         const nombreFicha = fichaRows[0]?.nombre || `Ficha ${id}`;
+        // Si el usuario es instructor, asegurarnos que sea el instructor de la ficha
+        if (req.usuario && req.usuario.rol === ROLES.INSTRUCTOR) {
+            const instId = fichaRows[0]?.id_instructor;
+            if (!instId || instId !== req.usuario.id_usuario) {
+                return res.status(403).json({ error: 'No autorizado para exportar esta ficha' });
+            }
+        }
+        // Capitalizar cadenas en filas antes de exportar
+        const capitalizeWords = (s) => typeof s === 'string' ? s.split(/\s+/).map(w => w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : '').join(' ') : s;
+        for (let i = 0; i < rows.length; i++) {
+            for (const k of Object.keys(rows[i])) {
+                if (typeof rows[i][k] === 'string') rows[i][k] = capitalizeWords(rows[i][k]);
+            }
+        }
         // Reutilizar generarExcelDiseño pasando rows directamente
         const ExcelJS = require("exceljs");
         const columnas = [

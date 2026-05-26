@@ -136,27 +136,7 @@ const FichasInstructor = () => {
 
 
 
-  const exportarExcel = async () => {
-
-    try {
-
-      const res = await fetch(`/exportar/reportes/ficha/${fichaActiva.id}`, { headers: { Authorization: `Bearer ${token}` } });
-
-      if (!res.ok) { alert('Error al exportar'); return; }
-
-      const blob = await res.blob();
-
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-
-      a.href = url; a.download = `Reportes_${fichaActiva.nombre}_${new Date().toISOString().split('T')[0]}.xlsx`; a.click();
-
-      URL.revokeObjectURL(url);
-
-    } catch { alert('Error al exportar'); }
-
-  };
+  
 
 
 
@@ -410,13 +390,7 @@ const FichasInstructor = () => {
 
               <span className="fd-estado-pill" style={{background:`${estadoColor(fichaActiva.estado)}22`,border:`1px solid ${estadoColor(fichaActiva.estado)}55`,color:estadoColor(fichaActiva.estado)}}>{fichaActiva.estado}</span>
 
-              <button onClick={exportarExcel} style={{background:'linear-gradient(135deg,#4ade80,#22c55e)',border:'none',borderRadius:'10px',padding:'8px 14px',color:'#0a0a0f',fontSize:'12px',fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:'6px'}}>
-
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-
-                Excel
-
-              </button>
+              
 
               <button className="fd-icon-btn fd-edit-btn" onClick={() => {
 

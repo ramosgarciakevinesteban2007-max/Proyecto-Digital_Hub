@@ -35,7 +35,10 @@ const ReportesInstructor = () => {
   const exportarExcel = async () => {
   const token = localStorage.getItem('token');
   try {
-    const res = await fetch('/reportes/excel', {
+    const q = new URLSearchParams();
+    if (filtros.buscar) q.set('buscar', filtros.buscar);
+    if (filtros.estado) q.set('estado', filtros.estado);
+    const res = await fetch(`/reportes/excel?${q.toString()}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -56,29 +59,6 @@ const ReportesInstructor = () => {
   } catch (err) {
     alert('Error al exportar: ' + err.message);
   }
-};
-
-const importarExcel = async (e) => {
-  const archivo = e.target.files[0];
-  if (!archivo) return;
-
-  const formData = new FormData();
-  formData.append('archivo', archivo);
-
-  try {
-    const res = await fetch('/importacion/reportes', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Error al importar');
-    alert(data.mensaje);
-    cargar(); // refresca la tabla
-  } catch (err) {
-    alert(err.message);
-  }
-  e.target.value = '';
 };
 
   const cargar = async () => {
@@ -154,23 +134,6 @@ const importarExcel = async (e) => {
               </svg>
               Exportar
             </button>
-
-            <input
-              type="file"
-              accept=".xlsx"
-              style={{ display: 'none' }}
-              id="importar-input"
-              onChange={importarExcel}
-            />
-            <button onClick={() => document.getElementById('importar-input').click()} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-              Importar
-            </button>
-
             <NotificacionesBtn />
           </div>
         </div>

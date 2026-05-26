@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db/database");
 
-const { exportarReportesExcel } = require("../controllers/reportes.controller");
+const { exportarReportesExcel, exportarReportesCSV } = require("../controllers/reportes.controller");
 const verificarToken = require("../middlewares/verificarToken");
 const verificarRol = require("../middlewares/verificarRol");
 const uploadImagen = require("../middlewares/uploadImagen");
@@ -17,8 +17,14 @@ const { createNotification, deleteNotificationsByTipoAndResourceIds } = require(
 router.get(
   "/excel",
   verificarToken,
-  verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR]),
+  verificarRol([ROLES.ADMIN]),
   exportarReportesExcel
+);
+router.get(
+  "/csv",
+  verificarToken,
+  verificarRol([ROLES.ADMIN]),
+  exportarReportesCSV
 );
 
 // =============================
