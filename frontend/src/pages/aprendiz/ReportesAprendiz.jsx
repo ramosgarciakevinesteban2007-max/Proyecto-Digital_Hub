@@ -106,7 +106,6 @@ const ReportesAprendiz = () => {
           <NotificacionesBtn />
         </div>
 
-        {/* EQUIPOS ASIGNADOS */}
         <div style={{ marginBottom: '28px' }}>
           <div style={{ fontSize:'13px', fontWeight:700, color:'#b8a8d8', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:'12px' }}>
             Equipos asignados
