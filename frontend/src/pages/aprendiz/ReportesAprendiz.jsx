@@ -23,7 +23,6 @@ const ReportesAprendiz = () => {
   const [seleccionado, setSeleccionado]   = useState(null);
   const [equipoSel, setEquipoSel]         = useState(null);
   const [submitting, setSubmitting]       = useState(false);
-  const [formData, setFormData]           = useState({ descripcion: '', fecha_reporte: new Date().toISOString().split('T')[0], correo_instructor: '' });
   const [imagenFile, setImagenFile]       = useState(null);
   const [filtros, setFiltros]             = useState({ buscar: '', estado: '' });
   const [page, setPage]                   = useState(1);
@@ -55,7 +54,7 @@ const ReportesAprendiz = () => {
 
   const abrirReporte = (equipo) => {
     setEquipoSel(equipo);
-    setFormData({ descripcion: '', fecha_reporte: new Date().toISOString().split('T')[0], correo_instructor: '' });
+    setFormData({ descripcion: '', fecha_reporte: new Date().toISOString().split('T')[0] });
     setImagenFile(null);
     setError('');
     setShowModal(true);
@@ -68,7 +67,6 @@ const ReportesAprendiz = () => {
       const fd = new FormData();
       fd.append('descripcion',       formData.descripcion);
       fd.append('fecha_reporte',     formData.fecha_reporte);
-      fd.append('correo_instructor', formData.correo_instructor);
       if (imagenFile) fd.append('archivo', imagenFile);
       const res = await fetch('/api/reportes', {
         method: 'POST',
@@ -262,10 +260,6 @@ const ReportesAprendiz = () => {
                 <div className="form-group">
                   <label>Fecha <span style={{ color:'#f87171' }}>*</span></label>
                   <input type="date" value={formData.fecha_reporte} onChange={e => setFormData({ ...formData, fecha_reporte: e.target.value })} required />
-                </div>
-                <div className="form-group">
-                  <label>Correo del instructor <span style={{ color:'#f87171' }}>*</span></label>
-                  <input type="email" placeholder="instructor@sena.edu.co" value={formData.correo_instructor} onChange={e => setFormData({ ...formData, correo_instructor: e.target.value })} required />
                 </div>
                 <div className="form-group">
                   <label>Imagen o evidencia <span style={{ color:'#b8a8d8', fontWeight:400 }}>(opcional, JPG/PNG/PDF, máx 5MB)</span></label>
