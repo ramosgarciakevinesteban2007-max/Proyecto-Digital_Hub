@@ -62,7 +62,12 @@ const HistorialAprendiz = () => {
             <h1 className="equipment-title">Mis Reportes</h1>
             <p className="equipment-subtitle">Total: <span>{reportes.length}</span></p>
           </div>
-          <NotificacionesBtn />
+          <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
+            <button onClick={cargar} style={{background:'#7f5af0',border:'1px solid #7f5af0',borderRadius:'10px',padding:'8px 16px',color:'#ffffff',fontSize:'13px',fontWeight:600,cursor:'pointer',boxShadow:'0 2px 8px rgba(127,90,240,0.25)',transition:'all 0.2s ease'}}>
+              ↻ Actualizar
+            </button>
+            <NotificacionesBtn />
+          </div>
         </div>
 
         <div className="hist-summary">

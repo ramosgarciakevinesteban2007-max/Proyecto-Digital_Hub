@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { IconHeart } from './Icons';
 import './Navbar.css';
 
 const Navbar = ({ showAuth = true }) => {
@@ -49,6 +50,10 @@ const Navbar = ({ showAuth = true }) => {
           <a href="#quienes-somos" onClick={(e) => handleNavClick(e, 'quienes-somos')}>Quiénes somos</a>
           <a href="#servicios" onClick={(e) => handleNavClick(e, 'servicios')}>Servicios</a>
           <a href="#soporte" onClick={(e) => handleNavClick(e, 'soporte')}>Soporte</a>
+          <Link to="/fuel-devs" className="nav-fuel-link">
+            <IconHeart size={14} />
+            Fuel Devs
+          </Link>
         </div>
         {showAuth && (
           <div className="nav-auth">

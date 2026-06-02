@@ -131,7 +131,7 @@
 
 - [ ] **Entorno de desarrollo** documentado y replicable (README con instrucciones de instalación)
 - [ ] **Archivo de configuración de entorno** (`.env.example` sin datos reales)
-- [ ] **Despliegue en servidor o nube** (Railway, Render, Vercel, AWS, VPS, etc.)
+- [ ] **Despliegue en servidor o nube** (Railway, Render, Netlify, AWS, VPS, etc.)
 - [ ] **URL pública funcional** del sistema en producción
 - [ ] **Dominio personalizado** (deseable)
 - [ ] **Proceso de CI/CD** básico (deseable: GitHub Actions u otro)

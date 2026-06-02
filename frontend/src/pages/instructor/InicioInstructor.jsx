@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import SidebarInstructor from '../../components/SidebarInstructor';
 
-import { IconUser, IconMonitor, IconBell, IconReport, IconClock, IconCheck } from '../../components/Icons';
+import { IconUser, IconMonitor, IconBell, IconReport, IconClock, IconCheck, IconGraduationCap, IconLaptop, IconAlertTriangle } from '../../components/Icons';
 import NotificacionesBtn from '../../components/NotificacionesBtn';
 
 import '../Inicio.css';
@@ -159,7 +159,7 @@ const InicioInstructor = () => {
 
             <div className="inst-stat-icon" style={{background:'rgba(44,185,176,0.12)',color:'#2cb9b0'}}>
 
-              <IconUser size={20} />
+              <IconGraduationCap size={20} />
 
             </div>
 
@@ -187,7 +187,7 @@ const InicioInstructor = () => {
 
             <div className="inst-stat-icon" style={{background:'rgba(127,90,240,0.15)',color:'#c9a8ff'}}>
 
-              <IconMonitor size={20} />
+              <IconLaptop size={20} />
 
             </div>
 
@@ -215,7 +215,7 @@ const InicioInstructor = () => {
 
             <div className="inst-stat-icon" style={{background:'rgba(250,204,21,0.12)',color:'#facc15'}}>
 
-              <IconClock size={20} />
+              <IconAlertTriangle size={20} />
 
             </div>
 

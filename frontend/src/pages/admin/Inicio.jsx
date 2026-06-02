@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SidebarAdmin from '../../components/SidebarAdmin';
-import { IconUser, IconMonitor, IconReport, IconBell, IconCheck, IconClock } from '../../components/Icons';
+import { IconUser, IconMonitor, IconReport, IconBell, IconCheck, IconClock, IconUsers, IconLaptop, IconAlertTriangle } from '../../components/Icons';
 import NotificacionesBtn from '../../components/NotificacionesBtn';
 import './InicioAdmin.css';
 import apiFetch from '../../utils/apiFetch';
@@ -78,7 +78,7 @@ const Inicio = () => {
         <div className="inicio-stats-grid">
           <div className="inicio-card" style={{cursor:'pointer'}} onClick={() => navigate('/admin/usuarios')}>
             <div className="admin-stat-icon" style={{background:'rgba(96,165,250,0.12)',color:'#60a5fa'}}>
-              <IconUser size={20} />
+              <IconUsers size={20} />
             </div>
             <div className="inicio-card-title">Usuarios</div>
             <ul className="inicio-card-list"><li>Registrados en el sistema</li></ul>
@@ -86,7 +86,7 @@ const Inicio = () => {
           </div>
           <div className="inicio-card" style={{cursor:'pointer'}} onClick={() => navigate('/admin/equipos')}>
             <div className="admin-stat-icon" style={{background:'rgba(127,90,240,0.15)',color:'#c9a8ff'}}>
-              <IconMonitor size={20} />
+              <IconLaptop size={20} />
             </div>
             <div className="inicio-card-title">Equipos</div>
             <ul className="inicio-card-list"><li>Total en sistema</li><li>Disponibles: {stats.disponibles}</li></ul>
@@ -94,7 +94,7 @@ const Inicio = () => {
           </div>
           <div className="inicio-card" style={{cursor:'pointer'}} onClick={() => navigate('/admin/reportes')}>
             <div className="admin-stat-icon" style={{background:'rgba(250,204,21,0.12)',color:'#facc15'}}>
-              <IconReport size={20} />
+              <IconAlertTriangle size={20} />
             </div>
             <div className="inicio-card-title">Reportes</div>
             <ul className="inicio-card-list"><li>Total: {stats.reportes}</li><li>Pendientes: {stats.pendientes}</li></ul>

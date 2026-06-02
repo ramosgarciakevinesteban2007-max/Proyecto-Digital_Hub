@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import RecuperarPassword from './pages/RecuperarPassword';
 import VerificarCodigo from './pages/VerificarCodigo';
 import NuevaPassword from './pages/NuevaPassword';
+import FuelDevs from './pages/FuelDevs';
 
 import InicioAdmin from './pages/admin/Inicio';
 import EquiposAdmin from './pages/admin/EquiposAdmin';
@@ -51,6 +52,7 @@ function App() {
         <Route path="/recuperar-password" element={<RecuperarPassword />} />
         <Route path="/verificar-codigo" element={<VerificarCodigo />} />
         <Route path="/nueva-password" element={<NuevaPassword />} />
+        <Route path="/fuel-devs" element={<FuelDevs />} />
 
         <Route path="/admin/inicio"      element={<InicioAdmin />} />
         <Route path="/admin/equipos"     element={<EquiposAdmin />} />
