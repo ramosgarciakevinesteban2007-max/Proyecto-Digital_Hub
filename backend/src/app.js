@@ -21,6 +21,11 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // ===============================
+// ARCHIVOS ESTÁTICOS (imágenes de reportes)
+// ===============================
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ===============================
 // ROUTERS
 // ===============================
 const usuarioRouter = require("./routers/usuario.routers");
@@ -48,11 +53,6 @@ app.use("/api/wompi", wompiRouter);
 app.use("/importar", importacionRoutes);
 app.use("/exportar", exportacionRoutes);
 app.use("/api/recuperacion", recuperacionRouter);
-
-// ===============================
-// ARCHIVOS ESTÁTICOS
-// ===============================
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Rutas legacy sin prefijo /api (compatibilidad con vite proxy)
 app.use("/portatil",   portatilRouter);

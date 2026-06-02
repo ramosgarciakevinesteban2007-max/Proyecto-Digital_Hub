@@ -9,8 +9,8 @@ import '../../pages/admin/EquiposAdmin.css';
 import '../../pages/admin/FichasAdmin.css';
 import ConfirmModal from '../../components/ConfirmModal';
 
-const estadoColor = (e) => ({ activa:'#4ade80', inactiva:'#f87171', cerrada:'#facc15', disponible:'#4ade80', asignado:'#facc15', 'dañado':'#f87171', mantenimiento:'#fb923c', pendiente:'#facc15', en_revision:'#fb923c', resuelto:'#4ade80' }[e] || '#c9a8ff');
-const jornadaIcon = (j) => ({ Mañana:'🌅', Tarde:'🌇', Noche:'🌙'}[j] || '📅');
+const estadoColor = (e) => ({ activa:'#4ade80', inactiva:'#f87171', cerrada:'#facc15', disponible:'#4ade80', asignado:'#facc15', danado:'#f87171', mantenimiento:'#fb923c', pendiente:'#facc15', en_revision:'#fb923c', resuelto:'#4ade80' }[e] || '#c9a8ff');
+const jornadaIcon = (j) => ({ Mañana:'🌅', tarde:'🌇', noche:'🌙'}[j] || '📅');
 
 const FichasAdmin = () => {
   const navigate = useNavigate();
@@ -40,6 +40,7 @@ const FichasAdmin = () => {
   const [confirmAmbId, setConfirmAmbId] = useState(null);
   const [page, setPage] = useState(1);
   const [errorExport, setErrorExport] = useState('');
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const [showModalFicha, setShowModalFicha] = useState(false);
   const [formFicha, setFormFicha] = useState({ nombre: '', programa_formacion: '', jornada: 'manana', cupo_maximo: 30, ambiente: '', nave: '' });
   const [errorFicha, setErrorFicha] = useState('');
@@ -304,16 +305,22 @@ const FichasAdmin = () => {
   const ambFiltrados = ambientes.filter(a => !filtroAmb || a.nombre?.toLowerCase().includes(filtroAmb.toLowerCase()) || a.direccion?.toLowerCase().includes(filtroAmb.toLowerCase()));
   const AMB_COLORS = ['#c9a8ff','#60a5fa','#4ade80','#fb923c','#f472b6','#34d399','#facc15','#a78bfa'];
 
-  const exportarFichas = async () => {
+  const exportarFichas = async (formato = 'excel') => {
     setErrorExport('');
     try {
-      const res = await fetch('/exportar/fichas/excel', { headers: { Authorization: `Bearer ${token}` } });
+      const q = new URLSearchParams();
+      if (filtro) q.set('buscar', filtro);
+      if (filtroEstado) q.set('estado', filtroEstado);
+      if (filtroJornada) q.set('jornada', filtroJornada);
+      if (filtroAmb) q.set('ambiente', filtroAmb);
+      const ruta = formato === 'csv' ? '/exportar/fichas/csv' : '/exportar/fichas/excel';
+      const res = await fetch(`${ruta}?${q.toString()}`, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) { setErrorExport('Error al exportar. Intenta de nuevo.'); return; }
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.download = 'fichas.xlsx';
+      a.download = formato === 'csv' ? 'fichas.csv' : 'fichas.xlsx';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -347,13 +354,21 @@ const FichasAdmin = () => {
             <h1 className="equipment-title">Fichas</h1>
             <p className="equipment-subtitle">Total: <span>{fichas.length}</span></p>
           </div>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexDirection: 'column' }}>
             {errorExport && <p style={{color:'#f87171',fontSize:'12px',margin:0}}>{errorExport}</p>}
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <button onClick={exportarFichas} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Excel
-            </button>
+            <div style={{ position: 'relative' }}>
+              <button onClick={() => setShowExportMenu(v => !v)} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exportar
+              </button>
+              {showExportMenu && (
+                <div style={{ position: 'absolute', right: 0, top: '46px', background: '#1a0f35', border: '1px solid rgba(127,90,240,0.25)', borderRadius: '8px', padding: '6px', zIndex: 40 }}>
+                  <button onClick={() => { exportarFichas('excel'); setShowExportMenu(false); }} style={{ display: 'block', background: '#039b5b', border: 'none', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', marginBottom: '6px' }}>Excel</button>
+                  <button onClick={() => { exportarFichas('csv'); setShowExportMenu(false); }} style={{ display: 'block', background: '#039b5b', border: 'none', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>CSV</button>
+                </div>
+              )}
+            </div>
             <NotificacionesBtn />
             </div>
           </div>
@@ -385,7 +400,7 @@ const FichasAdmin = () => {
             </select>
             <select className="filter-input" value={filtroJornada} onChange={e => { setFiltroJornada(e.target.value); setPage(1); }}>
               <option value="">Todas las jornadas</option>
-              <option value="mañana">Mañana</option>
+              <option value="Mañana">Mañana</option>
               <option value="tarde">Tarde</option>
               <option value="noche">Noche</option>
             </select>

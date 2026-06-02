@@ -47,6 +47,7 @@ const EquiposInstructor = () => {
   const [asignarMsg, setAsignarMsg] = useState("");
 
   const [filtros, setFiltros] = useState({ buscar: "", estado: "", marca: "" });
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   const [page, setPage] = useState(1);
 
@@ -61,6 +62,22 @@ useEffect(() => {
     cargar();
 
   }, []);
+
+  const exportar = async (formato) => {
+    const q = new URLSearchParams();
+    if (filtros.buscar) q.set('buscar', filtros.buscar);
+    if (filtros.estado) q.set('estado', filtros.estado);
+    if (filtros.marca) q.set('marca', filtros.marca);
+    const query = q.toString();
+    const url = `/exportar/portatiles/${formato}${query ? `?${query}` : ''}`;
+    try {
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) { const txt = await res.text().catch(()=>null); let msg = 'Error al exportar'; try { msg = JSON.parse(txt).mensaje || msg; } catch {} alert(msg); return; }
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = blobUrl; a.download = formato === 'csv' ? 'portatiles.csv' : 'portatiles.xlsx'; a.click(); URL.revokeObjectURL(blobUrl);
+    } catch (err) { alert('Error al exportar: ' + err.message); }
+  };
 
 const cargar = async () => {
 
@@ -172,7 +189,7 @@ const handleAsignar = async (e) => {
 
 const abrirVer = (p) => { setSeleccionado(p); setShowVerModal(true); };
 
-  const abrirEditar = (p) => { setSeleccionado(p); setEditData({ marca: p.marca, tipo: p.tipo || "", modelo: p.modelo, estado: p.estado, ubicacion: p.ubicacion || "", descripcion: p.descripcion || "" }); setShowEditModal(true); };
+  const abrirEditar = (p) => { setSeleccionado(p); setEditData({ marca: p.marca, tipo: p.tipo || "", modelo: p.modelo, estado: (p.estado || '').toString().toLowerCase(), ubicacion: p.ubicacion || "", descripcion: p.descripcion || "" }); setShowEditModal(true); };
 
   const abrirAsignar = (p) => { setAsignarData({ correo: "", id_portatil: p.id_portatil }); setAsignarError(""); setShowAsignarModal(true); };
 
@@ -201,10 +218,23 @@ return (
       <main className="equipment-main">
 
         <div className="equipment-header">
-
           <div><h1 className="equipment-title">Gestión de equipos</h1><p className="equipment-subtitle">Total: <span>{portatiles.length}</span></p></div>
 
-          <NotificacionesBtn />
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <div style={{ position: 'relative' }}>
+              <button onClick={() => setShowExportMenu(v => !v)} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Exportar
+              </button>
+              {showExportMenu && (
+                <div style={{ position: 'absolute', right: 0, top: '46px', background: '#1a0f35', border: '1px solid rgba(127,90,240,0.25)', borderRadius: '8px', padding: '6px', zIndex: 40 }}>
+                  <button onClick={() => { exportar('excel'); setShowExportMenu(false); }} style={{ display: 'block', background: '#039b5b', border: 'none', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', marginBottom: '6px' }}>Excel</button>
+                  <button onClick={() => { exportar('csv'); setShowExportMenu(false); }} style={{ display: 'block', background: '#039b5b', border: 'none', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>CSV</button>
+                </div>
+              )}
+            </div>
+            <NotificacionesBtn />
+          </div>
 
         </div>
 
@@ -357,7 +387,7 @@ return (
           </div>
         )}
 
-        {showAsignarModal && (<div className="modal-overlay" onClick={() => setShowAsignarModal(false)}><div className="modal-content" onClick={e => e.stopPropagation()}><h2 className="modal-title">Asignar equipo a aprendiz</h2><p style={{fontSize:"13px",color:"var(--text-muted-dark)",marginBottom:"16px"}}>Ingresa el correo del aprendiz. Se le notificar¡ por email.</p>{asignarError && <p className="table-error">{asignarError}</p>}<form onSubmit={handleAsignar}><div className="form-group"><label>Correo del aprendiz</label><input type="email" placeholder="correo@ejemplo.com" value={asignarData.correo} onChange={e => setAsignarData({...asignarData, correo: e.target.value})} required /></div><div className="modal-actions"><button type="button" className="btn-cancel" onClick={() => setShowAsignarModal(false)}>Cancelar</button><button type="submit" className="btn-save">Asignar y notificar</button></div></form></div></div>)}
+        {showAsignarModal && (<div className="modal-overlay" onClick={() => setShowAsignarModal(false)}><div className="modal-content" onClick={e => e.stopPropagation()}><h2 className="modal-title">Asignar equipo a aprendiz</h2><p style={{fontSize:"13px",color:"var(--text-muted-dark)",marginBottom:"16px"}}>Ingresa el correo del aprendiz. Se le notificará por email.</p>{asignarError && <p className="table-error">{asignarError}</p>}<form onSubmit={handleAsignar}><div className="form-group"><label>Correo del aprendiz</label><input type="email" placeholder="correo@ejemplo.com" value={asignarData.correo} onChange={e => setAsignarData({...asignarData, correo: e.target.value})} required /></div><div className="modal-actions"><button type="button" className="btn-cancel" onClick={() => setShowAsignarModal(false)}>Cancelar</button><button type="submit" className="btn-save">Asignar y notificar</button></div></form></div></div>)}
 
       </main>
 

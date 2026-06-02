@@ -56,6 +56,7 @@ const UsuariosAdmin = () => {
   const [filtro, setFiltro] = useState('');
   const [filtroRol, setFiltroRol] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('');
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   // Estados para modal de ver detalle
   const [showVerModal, setShowVerModal] = useState(false);
@@ -66,16 +67,21 @@ const UsuariosAdmin = () => {
   // Estado para confirmación de eliminación
   const [confirmId, setConfirmId] = useState(null);
 
-  const exportarExcel = async () => {
-  try {
-    const res = await fetch('/api/usuarios/excel', { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) { const text = await res.text(); let m = 'Error al exportar'; try { m = JSON.parse(text).mensaje || m; } catch {} alert(m); return; }
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'usuarios.xlsx'; a.click();
-    URL.revokeObjectURL(url);
-  } catch (err) { alert('Error al exportar: ' + err.message); }
-};
+  const exportar = async (formato = 'excel') => {
+    try {
+      const q = new URLSearchParams();
+      if (filtro) q.set('buscar', filtro);
+      if (filtroRol) q.set('rol', filtroRol);
+      if (filtroEstado) q.set('estado', filtroEstado);
+      const rutaBase = formato === 'csv' ? '/api/usuarios/csv' : '/api/usuarios/excel';
+      const url = `${rutaBase}?${q.toString()}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) { const text = await res.text(); let m = 'Error al exportar'; try { m = JSON.parse(text).mensaje || m; } catch {} alert(m); return; }
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = blobUrl; a.download = formato === 'csv' ? 'usuarios.csv' : 'usuarios.xlsx'; a.click(); URL.revokeObjectURL(blobUrl);
+    } catch (err) { alert('Error al exportar: ' + err.message); }
+  };
 
 const importarExcel = async (e) => {
   const archivo = e.target.files[0]; if (!archivo) return;
@@ -198,10 +204,18 @@ const importarExcel = async (e) => {
             <p className="equipment-subtitle">Total: <span>{usuarios.length}</span></p>
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <button onClick={exportarExcel} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ position: 'relative' }}>
+              <button onClick={() => setShowExportMenu(v => !v)} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-              Exportar
-            </button>
+                Exportar
+              </button>
+              {showExportMenu && (
+                <div style={{ position: 'absolute', right: 0, top: '46px', background: '#1a0f35', border: '1px solid rgba(127,90,240,0.25)', borderRadius: '8px', padding: '6px', zIndex: 40, boxShadow: '0 6px 18px rgba(0,0,0,0.6)' }}>
+                  <button onClick={() => { exportar('excel'); setShowExportMenu(false); }} style={{ display: 'block', background: '#039b5b', border: 'none', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', marginBottom: '6px' }}>Excel</button>
+                  <button onClick={() => { exportar('csv'); setShowExportMenu(false); }} style={{ display: 'block', background: '#039b5b', border: 'none', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>CSV</button>
+                </div>
+              )}
+            </div>
             <input type="file" accept=".xlsx" style={{ display: 'none' }} id="import-usuarios" onChange={importarExcel} />
             <button onClick={() => document.getElementById('import-usuarios').click()} style={{ background: '#039b5b', border: 'none', borderRadius: '10px', padding: '9px 16px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
