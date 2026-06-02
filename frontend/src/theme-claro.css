@@ -100,18 +100,52 @@ html[data-theme="claro"] { background: #e8e0ff !important; }
 [data-theme="claro"] .inicio-card-wide,
 [data-theme="claro"] .inicio-card-narrow {
   background: #ffffff !important;
-  border: 1.5px solid rgba(127,90,240,0.35) !important;
-  box-shadow: 0 4px 20px rgba(127,90,240,0.14), 0 1px 3px rgba(0,0,0,0.07) !important;
+  border: 1.5px solid rgba(127,90,240,0.4) !important;
+  box-shadow: 0 4px 20px rgba(127,90,240,0.18), 0 1px 3px rgba(0,0,0,0.1) !important;
 }
-[data-theme="claro"] .inicio-card:hover { border-color: #7f5af0 !important; box-shadow: 0 8px 32px rgba(127,90,240,0.22) !important; }
+[data-theme="claro"] .inicio-card:hover { 
+  border-color: #7f5af0 !important; 
+  box-shadow: 0 8px 32px rgba(127,90,240,0.25) !important; 
+  transform: translateY(-2px) !important;
+}
 [data-theme="claro"] .inicio-card-title {
   font-size: 11px !important;
-  color: #4a3a6a !important;
+  color: #2d1b4e !important;
+  font-weight: 700 !important;
 }
-[data-theme="claro"] .inicio-card-list li { color: #4a3a6a !important; font-size: 12px !important; }
+[data-theme="claro"] .inicio-card-list li { 
+  color: #4a3a6a !important; 
+  font-size: 12px !important; 
+}
 [data-theme="claro"] .inicio-card-value {
   font-size: 32px !important;
   color: #1a0a3a !important;
+  font-weight: 800 !important;
+}
+
+/* Iconos de estadísticas en tema claro */
+[data-theme="claro"] .admin-stat-icon {
+  border: 1px solid rgba(127,90,240,0.2) !important;
+  box-shadow: 0 2px 8px rgba(127,90,240,0.1) !important;
+}
+
+/* Mejorar contraste de los iconos específicos */
+[data-theme="claro"] .admin-stat-icon[style*="background:rgba(96,165,250,0.12)"] {
+  background: rgba(96,165,250,0.15) !important;
+  color: #2563eb !important;
+  border: 1px solid rgba(96,165,250,0.3) !important;
+}
+
+[data-theme="claro"] .admin-stat-icon[style*="background:rgba(127,90,240,0.15)"] {
+  background: rgba(127,90,240,0.2) !important;
+  color: #7c3aed !important;
+  border: 1px solid rgba(127,90,240,0.4) !important;
+}
+
+[data-theme="claro"] .admin-stat-icon[style*="background:rgba(250,204,21,0.12)"] {
+  background: rgba(250,204,21,0.2) !important;
+  color: #d97706 !important;
+  border: 1px solid rgba(250,204,21,0.4) !important;
 }
 
 /* ===== FILTROS ===== */
@@ -904,4 +938,1594 @@ html[data-theme="claro"] { background: #e8e0ff !important; }
 [data-theme="claro"] .admin-badge-dot {
   background: #f87171 !important;
   box-shadow: 0 0 6px #f87171 !important;
+}
+
+/* ===== MEJORAS PARA VISIBILIDAD EN TEMA CLARO ===== */
+
+/* Mejorar las barras del gráfico en tema claro */
+[data-theme="claro"] .inicio-chart-bar-real {
+  box-shadow: 0 2px 8px rgba(127,90,240,0.2) !important;
+  border: 1px solid rgba(127,90,240,0.1) !important;
+}
+
+/* Mejorar contraste de labels del gráfico */
+[data-theme="claro"] .inicio-chart-label { 
+  font-weight: 600 !important;
+}
+[data-theme="claro"] .inicio-chart-count { 
+  font-weight: 700 !important;
+}
+
+/* Mejorar el badge de "Esta semana" y similares */
+[data-theme="claro"] .inicio-card-wide span[style*="background:rgba(127,90,240,0.12)"] {
+  background: rgba(127,90,240,0.18) !important;
+  border: 1px solid rgba(127,90,240,0.35) !important;
+  color: #6d28d9 !important;
+  font-weight: 600 !important;
+}
+
+/* Mejorar bordes de elementos con borde inferior */
+[data-theme="claro"] li[style*="border-bottom:1px solid rgba(127,90,240,0.1)"] {
+  border-bottom: 1px solid rgba(127,90,240,0.2) !important;
+}
+
+/* Mejorar contraste de texto de estado en reportes */
+[data-theme="claro"] .inicio-card-list li span[style*="color:#facc15"] {
+  color: #d97706 !important;
+  font-weight: 700 !important;
+}
+
+/* Mejorar botones outline en tema claro */
+[data-theme="claro"] .admin-btn-outline {
+  background: rgba(127,90,240,0.05) !important;
+  border: 1.5px solid rgba(127,90,240,0.4) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .admin-btn-outline:hover {
+  background: rgba(127,90,240,0.12) !important;
+  border-color: #7c3aed !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(127,90,240,0.2) !important;
+}
+/* Mejorar valores de colores específicos en las tarjetas */
+[data-theme="claro"] .inicio-card-value[style*="color:#60a5fa"] {
+  color: #2563eb !important;
+  text-shadow: 0 1px 2px rgba(37,99,235,0.1) !important;
+}
+
+[data-theme="claro"] .inicio-card-value[style*="color:#c9a8ff"] {
+  color: #7c3aed !important;
+  text-shadow: 0 1px 2px rgba(124,58,237,0.1) !important;
+}
+
+[data-theme="claro"] .inicio-card-value[style*="color:#facc15"] {
+  color: #d97706 !important;
+  text-shadow: 0 1px 2px rgba(217,119,6,0.1) !important;
+}
+
+/* Mejorar el efecto hover de las tarjetas */
+[data-theme="claro"] .inicio-card::before {
+  background: linear-gradient(90deg, transparent, rgba(127,90,240,0.6), transparent) !important;
+}
+
+/* Mejorar contraste del texto de ocupación en el gráfico circular */
+[data-theme="claro"] .admin-main {
+  background:
+    radial-gradient(ellipse 900px 500px at 80% 10%, rgba(127,90,240,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 400px at 10% 80%, rgba(99,102,241,0.08) 0%, transparent 60%),
+    #e8e0ff !important;
+}
+/* ===== COMPONENTE CIRCULAR DE OCUPACIÓN ===== */
+
+/* Mejorar el fondo del círculo en tema claro */
+[data-theme="claro"] .fd-ring-svg circle[stroke="rgba(255,255,255,0.06)"] {
+  stroke: rgba(127,90,240,0.2) !important;
+  stroke-width: 10 !important;
+}
+
+/* Mejorar contraste del texto del porcentaje */
+[data-theme="claro"] .fd-ring-pct {
+  text-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+  font-weight: 900 !important;
+}
+
+/* Mejorar contraste del subtexto */
+[data-theme="claro"] .fd-ring-sub {
+  color: #4a3a6a !important;
+  font-weight: 600 !important;
+}
+
+/* Mejorar contraste del label */
+[data-theme="claro"] .fd-cupo-label {
+  color: #4a3a6a !important;
+  font-weight: 700 !important;
+}
+
+/* Mejorar el widget de ocupación */
+[data-theme="claro"] .fd-widget-cupo {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 4px 16px rgba(127,90,240,0.15) !important;
+}
+
+/* Mejorar el label del widget */
+[data-theme="claro"] .fd-widget-label {
+  color: #2d1b4e !important;
+  font-weight: 700 !important;
+}
+/* ===== MEJORAS ADICIONALES DE CONTRASTE ===== */
+
+/* Mejorar contraste de badges y pills */
+[data-theme="claro"] .fd-jornada-pill,
+[data-theme="claro"] .badge,
+[data-theme="claro"] .pill {
+  background: rgba(127,90,240,0.15) !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+/* Mejorar contraste de títulos de ficha */
+[data-theme="claro"] .fd-title {
+  color: #1a0a3a !important;
+  text-shadow: 0 1px 2px rgba(26,10,58,0.1) !important;
+}
+
+/* Mejorar contraste de elementos de programa */
+[data-theme="claro"] .programa-text,
+[data-theme="claro"] .ficha-programa {
+  color: #4a3a6a !important;
+  font-weight: 600 !important;
+}
+
+/* Mejorar contraste de números de ficha */
+[data-theme="claro"] .ficha-numero,
+[data-theme="claro"] .numero-ficha {
+  color: #2d1b4e !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(45,27,78,0.1) !important;
+}
+
+/* Mejorar separadores */
+[data-theme="claro"] span[style*="color:rgba(255,255,255,0.2)"] {
+  color: rgba(127,90,240,0.4) !important;
+}
+
+/* Mejorar contraste general de texto secundario */
+[data-theme="claro"] .text-secondary,
+[data-theme="claro"] .secondary-text {
+  color: #4a3a6a !important;
+}
+
+/* Asegurar que todos los elementos con fondo transparente tengan buen contraste */
+[data-theme="claro"] * {
+  text-shadow: none !important;
+}
+
+[data-theme="claro"] .inicio-card *,
+[data-theme="claro"] .fd-widget * {
+  color: inherit !important;
+}
+/* ===== ELEMENTOS MÁS MORADOS Y MEJOR CONTRASTE ===== */
+
+/* Botones de navegación y acciones más morados */
+[data-theme="claro"] .fd-back-btn,
+[data-theme="claro"] .btn-volver,
+[data-theme="claro"] button[style*="background:rgba(127,90,240,0.12)"] {
+  background: rgba(127,90,240,0.2) !important;
+  border: 1.5px solid rgba(127,90,240,0.4) !important;
+  color: #6d28d9 !important;
+  font-weight: 600 !important;
+}
+
+/* Pills y badges más morados */
+[data-theme="claro"] .fd-jornada-pill,
+[data-theme="claro"] .jornada-pill,
+[data-theme="claro"] span[style*="background:rgba(127,90,240,0.12)"] {
+  background: rgba(127,90,240,0.25) !important;
+  border: 1.5px solid rgba(127,90,240,0.5) !important;
+  color: #5b21b6 !important;
+  font-weight: 700 !important;
+}
+
+/* Números de ficha más morados */
+[data-theme="claro"] .ficha-numero,
+[data-theme="claro"] .numero-ficha,
+[data-theme="claro"] h1[style*="color:#fff"],
+[data-theme="claro"] .fd-title {
+  color: #5b21b6 !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 3px rgba(91,33,182,0.2) !important;
+}
+
+/* Texto de programas y descripciones más morado */
+[data-theme="claro"] .programa-text,
+[data-theme="claro"] .ficha-programa,
+[data-theme="claro"] .ambiente-text {
+  color: #6d28d9 !important;
+  font-weight: 600 !important;
+}
+/* ===== MEJORAS COMPLETAS PARA TODAS LAS VISTAS Y ROLES ===== */
+
+/* ===== BOTONES DE ACCIÓN ===== */
+[data-theme="claro"] .action-btn {
+  background: rgba(127,90,240,0.08) !important;
+  border: 1px solid rgba(127,90,240,0.2) !important;
+  color: #6d28d9 !important;
+}
+
+[data-theme="claro"] .action-btn.view:hover {
+  color: #7c3aed !important;
+  background: rgba(124,58,237,0.15) !important;
+  border-color: rgba(124,58,237,0.4) !important;
+}
+
+[data-theme="claro"] .action-btn.edit:hover {
+  color: #d97706 !important;
+  background: rgba(217,119,6,0.15) !important;
+  border-color: rgba(217,119,6,0.4) !important;
+}
+
+[data-theme="claro"] .action-btn.delete:hover {
+  color: #dc2626 !important;
+  background: rgba(220,38,38,0.15) !important;
+  border-color: rgba(220,38,38,0.4) !important;
+}
+
+/* ===== BOTONES PRINCIPALES ===== */
+[data-theme="claro"] .btn-add-equipment,
+[data-theme="claro"] .btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.4) !important;
+}
+
+[data-theme="claro"] .btn-add-equipment:hover,
+[data-theme="claro"] .btn-primary:hover {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.6) !important;
+}
+
+/* ===== BOTONES DE RESTAURAR ===== */
+[data-theme="claro"] .pap-btn-restore {
+  background: rgba(34,197,94,0.15) !important;
+  border: 1px solid rgba(34,197,94,0.4) !important;
+  color: #16a34a !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="claro"] .pap-btn-restore:hover {
+  background: rgba(34,197,94,0.25) !important;
+  border-color: rgba(34,197,94,0.6) !important;
+}
+
+/* ===== BOTONES DE LOGOUT ===== */
+[data-theme="claro"] .btn-logout {
+  background: rgba(220,38,38,0.15) !important;
+  border: 1px solid rgba(220,38,38,0.4) !important;
+  color: #dc2626 !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="claro"] .btn-logout:hover {
+  background: rgba(220,38,38,0.25) !important;
+  border-color: rgba(220,38,38,0.6) !important;
+}
+
+/* ===== ESTADOS Y BADGES ===== */
+[data-theme="claro"] .estado-badge,
+[data-theme="claro"] .status-badge {
+  font-weight: 700 !important;
+  border: 1px solid !important;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+}
+
+[data-theme="claro"] .estado-badge[style*="color:#4ade80"],
+[data-theme="claro"] .status-badge[style*="color:#4ade80"] {
+  color: #16a34a !important;
+  background: rgba(34,197,94,0.15) !important;
+  border-color: rgba(34,197,94,0.3) !important;
+}
+
+[data-theme="claro"] .estado-badge[style*="color:#facc15"],
+[data-theme="claro"] .status-badge[style*="color:#facc15"] {
+  color: #d97706 !important;
+  background: rgba(217,119,6,0.15) !important;
+  border-color: rgba(217,119,6,0.3) !important;
+}
+
+[data-theme="claro"] .estado-badge[style*="color:#f87171"],
+[data-theme="claro"] .status-badge[style*="color:#f87171"] {
+  color: #dc2626 !important;
+  background: rgba(220,38,38,0.15) !important;
+  border-color: rgba(220,38,38,0.3) !important;
+}
+
+/* ===== ERRORES Y ALERTAS ===== */
+[data-theme="claro"] .table-error,
+[data-theme="claro"] .error-message {
+  color: #dc2626 !important;
+  background: rgba(220,38,38,0.15) !important;
+  border: 1px solid rgba(220,38,38,0.3) !important;
+  font-weight: 600 !important;
+}
+
+/* ===== PAGINACIÓN ===== */
+[data-theme="claro"] .pagination-btn {
+  background: rgba(127,90,240,0.1) !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .pagination-btn:hover {
+  background: rgba(127,90,240,0.2) !important;
+  border-color: rgba(127,90,240,0.5) !important;
+}
+
+[data-theme="claro"] .pagination-btn.active {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  color: #ffffff !important;
+  border-color: #7c3aed !important;
+}
+
+/* ===== FILTROS MEJORADOS ===== */
+[data-theme="claro"] .filter-clear {
+  background: rgba(127,90,240,0.1) !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .filter-clear:hover {
+  background: rgba(127,90,240,0.2) !important;
+  border-color: rgba(127,90,240,0.5) !important;
+}
+
+/* ===== MODALES ===== */
+[data-theme="claro"] .modal-overlay {
+  background: rgba(26,10,58,0.7) !important;
+}
+
+[data-theme="claro"] .modal-content {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 20px 60px rgba(127,90,240,0.3) !important;
+}
+
+[data-theme="claro"] .modal-title {
+  color: #1a0a3a !important;
+  font-weight: 800 !important;
+}
+
+/* ===== TOGGLES Y SWITCHES ===== */
+[data-theme="claro"] .toggle-slider {
+  background: rgba(127,90,240,0.2) !important;
+  border: 1px solid rgba(127,90,240,0.4) !important;
+}
+
+[data-theme="claro"] .toggle input:checked + .toggle-slider {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  border-color: #7c3aed !important;
+}
+
+/* ===== ELEMENTOS DE FICHA ESPECÍFICOS ===== */
+[data-theme="claro"] .fd-widget {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 4px 16px rgba(127,90,240,0.15) !important;
+}
+
+[data-theme="claro"] .fd-widget-label {
+  color: #2d1b4e !important;
+  font-weight: 700 !important;
+}
+
+/* ===== ELEMENTOS DE HISTORIAL ===== */
+[data-theme="claro"] .hist-card {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 4px 16px rgba(127,90,240,0.15) !important;
+}
+
+[data-theme="claro"] .hist-card-title {
+  color: #1a0a3a !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="claro"] .hist-card-meta {
+  color: #4a3a6a !important;
+  font-weight: 600 !important;
+}
+
+/* ===== ELEMENTOS DE REPORTES ===== */
+[data-theme="claro"] .reporte-card {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 4px 16px rgba(127,90,240,0.15) !important;
+}
+
+[data-theme="claro"] .reporte-descripcion {
+  color: #1a0a3a !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .reporte-fecha {
+  color: #4a3a6a !important;
+  font-weight: 600 !important;
+}
+
+/* ===== ELEMENTOS ESPECÍFICOS DE APRENDIZ ===== */
+[data-theme="claro"] .mificha-card {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 4px 16px rgba(127,90,240,0.15) !important;
+}
+
+[data-theme="claro"] .mificha-title {
+  color: #1a0a3a !important;
+  font-weight: 800 !important;
+}
+
+[data-theme="claro"] .mificha-meta {
+  color: #4a3a6a !important;
+  font-weight: 600 !important;
+}
+
+/* ===== ELEMENTOS DE DISPOSITIVO ===== */
+[data-theme="claro"] .dispositivo-card {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 4px 16px rgba(127,90,240,0.15) !important;
+}
+
+[data-theme="claro"] .dispositivo-serial {
+  color: #7c3aed !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="claro"] .dispositivo-modelo {
+  color: #1a0a3a !important;
+  font-weight: 600 !important;
+}
+
+/* ===== MEJORAS GENERALES DE TEXTO ===== */
+[data-theme="claro"] .text-muted,
+[data-theme="claro"] .secondary-text {
+  color: #4a3a6a !important;
+  font-weight: 500 !important;
+}
+
+[data-theme="claro"] .text-primary {
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+/* ===== ELEMENTOS DE NAVEGACIÓN ===== */
+[data-theme="claro"] .breadcrumb {
+  color: #4a3a6a !important;
+}
+
+[data-theme="claro"] .breadcrumb a {
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .breadcrumb a:hover {
+  color: #5b21b6 !important;
+}
+
+/* ===== ELEMENTOS DE CARGA ===== */
+[data-theme="claro"] .loading-spinner {
+  border-color: rgba(127,90,240,0.3) !important;
+  border-top-color: #7c3aed !important;
+}
+
+[data-theme="claro"] .loading-text {
+  color: #4a3a6a !important;
+  font-weight: 600 !important;
+}
+/* ===== MEJORAS ESPECÍFICAS POR ROL ===== */
+
+/* ===== ADMIN ESPECÍFICO ===== */
+[data-theme="claro"] .admin-badge {
+  background: rgba(220,38,38,0.15) !important;
+  border: 1px solid rgba(220,38,38,0.4) !important;
+  color: #dc2626 !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="claro"] .admin-badge-dot {
+  background: #dc2626 !important;
+  box-shadow: 0 0 8px rgba(220,38,38,0.6) !important;
+}
+
+/* ===== INSTRUCTOR ESPECÍFICO ===== */
+[data-theme="claro"] .inst-badge {
+  background: rgba(20,184,166,0.15) !important;
+  border: 1px solid rgba(20,184,166,0.4) !important;
+  color: #0d9488 !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="claro"] .inst-title {
+  background: linear-gradient(135deg, #0d9488 30%, #14b8a6 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* ===== APRENDIZ ESPECÍFICO ===== */
+[data-theme="claro"] .aprendiz-badge {
+  background: rgba(124,58,237,0.15) !important;
+  border: 1px solid rgba(124,58,237,0.4) !important;
+  color: #7c3aed !important;
+  font-weight: 700 !important;
+}
+
+/* ===== ELEMENTOS DE NOTIFICACIONES ===== */
+[data-theme="claro"] .notification-item {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 2px 8px rgba(127,90,240,0.1) !important;
+}
+
+[data-theme="claro"] .notification-title {
+  color: #1a0a3a !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="claro"] .notification-text {
+  color: #4a3a6a !important;
+  font-weight: 500 !important;
+}
+
+[data-theme="claro"] .notification-time {
+  color: #6d28d9 !important;
+  font-weight: 600 !important;
+}
+
+/* ===== ELEMENTOS DE CHAT ===== */
+[data-theme="claro"] .chat-message {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.2) !important;
+  box-shadow: 0 2px 8px rgba(127,90,240,0.1) !important;
+}
+
+[data-theme="claro"] .chat-message.own {
+  background: rgba(124,58,237,0.1) !important;
+  border-color: rgba(124,58,237,0.3) !important;
+}
+
+[data-theme="claro"] .chat-input {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  color: #1a0a3a !important;
+}
+
+[data-theme="claro"] .chat-input:focus {
+  border-color: #7c3aed !important;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.15) !important;
+}
+
+/* ===== ELEMENTOS DE CONFIGURACIÓN/AJUSTES ===== */
+[data-theme="claro"] .ajustes-section {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 4px 16px rgba(127,90,240,0.15) !important;
+}
+
+[data-theme="claro"] .ajustes-section-title {
+  color: #1a0a3a !important;
+  font-weight: 800 !important;
+}
+
+[data-theme="claro"] .ajustes-row-label {
+  color: #4a3a6a !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .ajustes-row-desc {
+  color: #6d28d9 !important;
+  font-weight: 500 !important;
+}
+
+/* ===== ELEMENTOS DE ESTADÍSTICAS MEJORADAS ===== */
+[data-theme="claro"] .stat-icon {
+  background: rgba(127,90,240,0.15) !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  color: #7c3aed !important;
+}
+
+[data-theme="claro"] .stat-trend {
+  font-weight: 700 !important;
+}
+
+[data-theme="claro"] .stat-trend.up {
+  color: #16a34a !important;
+}
+
+[data-theme="claro"] .stat-trend.down {
+  color: #dc2626 !important;
+}
+
+/* ===== ELEMENTOS DE BÚSQUEDA ===== */
+[data-theme="claro"] .search-container {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 2px 8px rgba(127,90,240,0.1) !important;
+}
+
+[data-theme="claro"] .search-input {
+  background: transparent !important;
+  color: #1a0a3a !important;
+}
+
+[data-theme="claro"] .search-input::placeholder {
+  color: #9a8aba !important;
+}
+
+[data-theme="claro"] .search-results {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 8px 32px rgba(127,90,240,0.2) !important;
+}
+
+[data-theme="claro"] .search-result-item {
+  color: #1a0a3a !important;
+}
+
+[data-theme="claro"] .search-result-item:hover {
+  background: rgba(127,90,240,0.1) !important;
+}
+
+/* ===== ELEMENTOS DE PROGRESO ===== */
+[data-theme="claro"] .progress-bar {
+  background: rgba(127,90,240,0.2) !important;
+}
+
+[data-theme="claro"] .progress-fill {
+  background: linear-gradient(90deg, #7c3aed, #5b21b6) !important;
+}
+
+/* ===== ELEMENTOS DE TOOLTIP ===== */
+[data-theme="claro"] .tooltip {
+  background: #1a0a3a !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 4px 16px rgba(26,10,58,0.3) !important;
+}
+
+/* ===== ELEMENTOS DE DROPDOWN ===== */
+[data-theme="claro"] .dropdown-menu {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 8px 32px rgba(127,90,240,0.2) !important;
+}
+
+[data-theme="claro"] .dropdown-item {
+  color: #1a0a3a !important;
+}
+
+[data-theme="claro"] .dropdown-item:hover {
+  background: rgba(127,90,240,0.1) !important;
+  color: #7c3aed !important;
+}
+
+/* ===== ELEMENTOS DE TABS ===== */
+[data-theme="claro"] .tab-button {
+  background: rgba(127,90,240,0.1) !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .tab-button.active {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  color: #ffffff !important;
+  border-color: #7c3aed !important;
+}
+
+[data-theme="claro"] .tab-button:hover:not(.active) {
+  background: rgba(127,90,240,0.15) !important;
+  border-color: rgba(127,90,240,0.4) !important;
+}
+
+/* ===== ELEMENTOS DE CARDS ESPECÍFICOS ===== */
+[data-theme="claro"] .equipment-card,
+[data-theme="claro"] .user-card,
+[data-theme="claro"] .ficha-card {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  box-shadow: 0 4px 16px rgba(127,90,240,0.15) !important;
+}
+
+[data-theme="claro"] .equipment-card:hover,
+[data-theme="claro"] .user-card:hover,
+[data-theme="claro"] .ficha-card:hover {
+  border-color: rgba(127,90,240,0.5) !important;
+  box-shadow: 0 8px 24px rgba(127,90,240,0.25) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== ELEMENTOS DE INFORMACIÓN ===== */
+[data-theme="claro"] .info-label {
+  color: #4a3a6a !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .info-value {
+  color: #1a0a3a !important;
+  font-weight: 700 !important;
+}
+
+/* ===== ELEMENTOS DE FECHA Y HORA ===== */
+[data-theme="claro"] .datetime-display {
+  color: #6d28d9 !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .date-picker {
+  background: #ffffff !important;
+  border: 1px solid rgba(127,90,240,0.3) !important;
+  color: #1a0a3a !important;
+}
+
+[data-theme="claro"] .date-picker:focus {
+  border-color: #7c3aed !important;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.15) !important;
+}
+/* ===== BOTONES MORADOS PARA TEMA CLARO - TODAS LAS VISTAS Y ROLES ===== */
+
+/* ===== BOTONES PRIMARIOS GENERALES ===== */
+[data-theme="claro"] .btn-primary,
+[data-theme="claro"] .btn-submit,
+[data-theme="claro"] .button-primary {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.4) !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .btn-primary:hover,
+[data-theme="claro"] .btn-submit:hover:not(:disabled),
+[data-theme="claro"] .button-primary:hover {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.6) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== BOTONES SECUNDARIOS/OUTLINE ===== */
+[data-theme="claro"] .btn-secondary,
+[data-theme="claro"] .btn-outline,
+[data-theme="claro"] .button-secondary {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1.5px solid rgba(124,58,237,0.4) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .btn-secondary:hover,
+[data-theme="claro"] .btn-outline:hover,
+[data-theme="claro"] .button-secondary:hover {
+  background: rgba(124,58,237,0.2) !important;
+  border-color: #7c3aed !important;
+  color: #5b21b6 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(124,58,237,0.3) !important;
+}
+
+/* ===== BOTONES DE AGREGAR/CREAR ===== */
+[data-theme="claro"] .btn-add,
+[data-theme="claro"] .btn-create,
+[data-theme="claro"] .btn-new,
+[data-theme="claro"] .btn-add-equipment,
+[data-theme="claro"] .btn-add-user,
+[data-theme="claro"] .btn-add-ficha {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.4) !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .btn-add:hover,
+[data-theme="claro"] .btn-create:hover,
+[data-theme="claro"] .btn-new:hover,
+[data-theme="claro"] .btn-add-equipment:hover,
+[data-theme="claro"] .btn-add-user:hover,
+[data-theme="claro"] .btn-add-ficha:hover {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.6) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== BOTONES DE GUARDAR ===== */
+[data-theme="claro"] .btn-save,
+[data-theme="claro"] .btn-confirm,
+[data-theme="claro"] .btn-accept {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.4) !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .btn-save:hover,
+[data-theme="claro"] .btn-confirm:hover,
+[data-theme="claro"] .btn-accept:hover {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.6) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== BOTONES DE EDITAR ===== */
+[data-theme="claro"] .btn-edit,
+[data-theme="claro"] .btn-update,
+[data-theme="claro"] .btn-modify {
+  background: rgba(124,58,237,0.15) !important;
+  border: 1.5px solid rgba(124,58,237,0.4) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .btn-edit:hover,
+[data-theme="claro"] .btn-update:hover,
+[data-theme="claro"] .btn-modify:hover {
+  background: rgba(124,58,237,0.25) !important;
+  border-color: #7c3aed !important;
+  color: #5b21b6 !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== BOTONES DE FILTRO Y BÚSQUEDA ===== */
+[data-theme="claro"] .btn-filter,
+[data-theme="claro"] .btn-search,
+[data-theme="claro"] .filter-btn,
+[data-theme="claro"] .search-btn {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .btn-filter:hover,
+[data-theme="claro"] .btn-search:hover,
+[data-theme="claro"] .filter-btn:hover,
+[data-theme="claro"] .search-btn:hover {
+  background: rgba(124,58,237,0.2) !important;
+  border-color: rgba(124,58,237,0.5) !important;
+  color: #5b21b6 !important;
+}
+
+/* ===== BOTONES DE NAVEGACIÓN ===== */
+[data-theme="claro"] .btn-back,
+[data-theme="claro"] .btn-next,
+[data-theme="claro"] .btn-prev,
+[data-theme="claro"] .btn-continue {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .btn-back:hover,
+[data-theme="claro"] .btn-next:hover,
+[data-theme="claro"] .btn-prev:hover,
+[data-theme="claro"] .btn-continue:hover {
+  background: rgba(124,58,237,0.2) !important;
+  border-color: rgba(124,58,237,0.5) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ===== BOTONES DE EXPORTAR/IMPORTAR ===== */
+[data-theme="claro"] .btn-export,
+[data-theme="claro"] .btn-import,
+[data-theme="claro"] .btn-download,
+[data-theme="claro"] .btn-upload {
+  background: rgba(124,58,237,0.15) !important;
+  border: 1.5px solid rgba(124,58,237,0.4) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .btn-export:hover,
+[data-theme="claro"] .btn-import:hover,
+[data-theme="claro"] .btn-download:hover,
+[data-theme="claro"] .btn-upload:hover {
+  background: rgba(124,58,237,0.25) !important;
+  border-color: #7c3aed !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(124,58,237,0.3) !important;
+}
+
+/* ===== BOTONES DE MODAL ===== */
+[data-theme="claro"] .modal-btn-primary,
+[data-theme="claro"] .modal .btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.4) !important;
+}
+
+[data-theme="claro"] .modal-btn-secondary,
+[data-theme="claro"] .modal .btn-secondary {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+}
+
+/* ===== BOTONES DE TABS ===== */
+[data-theme="claro"] .tab-btn,
+[data-theme="claro"] .tab-button {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .tab-btn.active,
+[data-theme="claro"] .tab-button.active {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  color: #ffffff !important;
+  border-color: #7c3aed !important;
+}
+
+[data-theme="claro"] .tab-btn:hover:not(.active),
+[data-theme="claro"] .tab-button:hover:not(.active) {
+  background: rgba(124,58,237,0.15) !important;
+  border-color: rgba(124,58,237,0.4) !important;
+}
+
+/* ===== BOTONES ESPECÍFICOS POR VISTA ===== */
+
+/* Botones de equipos */
+[data-theme="claro"] .equipment-btn,
+[data-theme="claro"] .btn-assign,
+[data-theme="claro"] .btn-unassign {
+  background: rgba(124,58,237,0.15) !important;
+  border: 1px solid rgba(124,58,237,0.4) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+/* Botones de reportes */
+[data-theme="claro"] .report-btn,
+[data-theme="claro"] .btn-resolve,
+[data-theme="claro"] .btn-pending {
+  background: rgba(124,58,237,0.15) !important;
+  border: 1px solid rgba(124,58,237,0.4) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+/* Botones de fichas */
+[data-theme="claro"] .ficha-btn,
+[data-theme="claro"] .btn-activate,
+[data-theme="claro"] .btn-deactivate {
+  background: rgba(124,58,237,0.15) !important;
+  border: 1px solid rgba(124,58,237,0.4) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+/* ===== BOTONES DE PAGINACIÓN ===== */
+[data-theme="claro"] .pagination-btn,
+[data-theme="claro"] .page-btn {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .pagination-btn.active,
+[data-theme="claro"] .page-btn.active {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  color: #ffffff !important;
+  border-color: #7c3aed !important;
+}
+
+[data-theme="claro"] .pagination-btn:hover:not(.active),
+[data-theme="claro"] .page-btn:hover:not(.active) {
+  background: rgba(124,58,237,0.15) !important;
+  border-color: rgba(124,58,237,0.4) !important;
+}
+
+/* ===== BOTONES FLOTANTES Y FAB ===== */
+[data-theme="claro"] .fab,
+[data-theme="claro"] .floating-btn,
+[data-theme="claro"] .btn-float {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.4) !important;
+}
+
+[data-theme="claro"] .fab:hover,
+[data-theme="claro"] .floating-btn:hover,
+[data-theme="claro"] .btn-float:hover {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  box-shadow: 0 12px 32px rgba(124,58,237,0.6) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* ===== BOTONES DE TOGGLE ===== */
+[data-theme="claro"] .btn-toggle {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+}
+
+[data-theme="claro"] .btn-toggle.active {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  color: #ffffff !important;
+  border-color: #7c3aed !important;
+}
+
+/* ===== BOTONES PEQUEÑOS ===== */
+[data-theme="claro"] .btn-sm,
+[data-theme="claro"] .btn-small,
+[data-theme="claro"] .small-btn {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+}
+
+[data-theme="claro"] .btn-sm:hover,
+[data-theme="claro"] .btn-small:hover,
+[data-theme="claro"] .small-btn:hover {
+  background: rgba(124,58,237,0.2) !important;
+  border-color: rgba(124,58,237,0.5) !important;
+}
+
+/* ===== BOTONES DE ACCIÓN RÁPIDA ===== */
+[data-theme="claro"] .quick-action-btn,
+[data-theme="claro"] .action-btn-primary {
+  background: rgba(124,58,237,0.15) !important;
+  border: 1px solid rgba(124,58,237,0.4) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .quick-action-btn:hover,
+[data-theme="claro"] .action-btn-primary:hover {
+  background: rgba(124,58,237,0.25) !important;
+  border-color: #7c3aed !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ===== OVERRIDE PARA BOTONES CON ESTILOS INLINE ===== */
+[data-theme="claro"] button[style*="background:rgba(127,90,240"] {
+  background: rgba(124,58,237,0.15) !important;
+  border: 1px solid rgba(124,58,237,0.4) !important;
+  color: #7c3aed !important;
+}
+
+[data-theme="claro"] button[style*="background:linear-gradient"] {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  color: #ffffff !important;
+}
+
+/* ===== ESTADOS DISABLED ===== */
+[data-theme="claro"] .btn-primary:disabled,
+[data-theme="claro"] .btn-secondary:disabled,
+[data-theme="claro"] button:disabled {
+  background: rgba(124,58,237,0.3) !important;
+  color: rgba(255,255,255,0.7) !important;
+  border-color: rgba(124,58,237,0.2) !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+/* ===== BOTONES ESPECÍFICOS DE ROLES Y VISTAS ADICIONALES ===== */
+
+/* ===== BOTONES DE LOGIN Y REGISTRO ===== */
+[data-theme="claro"] .login-btn,
+[data-theme="claro"] .register-btn,
+[data-theme="claro"] .auth-btn {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.4) !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .login-btn:hover,
+[data-theme="claro"] .register-btn:hover,
+[data-theme="claro"] .auth-btn:hover {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.6) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== BOTONES DE CHAT ===== */
+[data-theme="claro"] .chat-send-btn,
+[data-theme="claro"] .send-btn,
+[data-theme="claro"] .message-btn {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.4) !important;
+}
+
+[data-theme="claro"] .chat-send-btn:hover,
+[data-theme="claro"] .send-btn:hover,
+[data-theme="claro"] .message-btn:hover {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== BOTONES DE NOTIFICACIONES ===== */
+[data-theme="claro"] .notification-btn,
+[data-theme="claro"] .notif-btn {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+}
+
+[data-theme="claro"] .notification-btn:hover,
+[data-theme="claro"] .notif-btn:hover {
+  background: rgba(124,58,237,0.2) !important;
+  border-color: rgba(124,58,237,0.5) !important;
+}
+
+/* ===== BOTONES DE CONFIGURACIÓN ===== */
+[data-theme="claro"] .settings-btn,
+[data-theme="claro"] .config-btn,
+[data-theme="claro"] .ajustes-btn {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .settings-btn:hover,
+[data-theme="claro"] .config-btn:hover,
+[data-theme="claro"] .ajustes-btn:hover {
+  background: rgba(124,58,237,0.2) !important;
+  border-color: rgba(124,58,237,0.5) !important;
+}
+
+/* ===== BOTONES DE HISTORIAL ===== */
+[data-theme="claro"] .history-btn,
+[data-theme="claro"] .historial-btn {
+  background: rgba(124,58,237,0.15) !important;
+  border: 1px solid rgba(124,58,237,0.4) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .history-btn:hover,
+[data-theme="claro"] .historial-btn:hover {
+  background: rgba(124,58,237,0.25) !important;
+  border-color: #7c3aed !important;
+}
+
+/* ===== BOTONES DE PAPELERA ===== */
+[data-theme="claro"] .trash-btn,
+[data-theme="claro"] .papelera-btn {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+}
+
+[data-theme="claro"] .trash-btn:hover,
+[data-theme="claro"] .papelera-btn:hover {
+  background: rgba(124,58,237,0.2) !important;
+  border-color: rgba(124,58,237,0.5) !important;
+}
+
+/* ===== BOTONES DE FORMULARIO ===== */
+[data-theme="claro"] .form-btn,
+[data-theme="claro"] .form-submit,
+[data-theme="claro"] .form-button {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.4) !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .form-btn:hover,
+[data-theme="claro"] .form-submit:hover,
+[data-theme="claro"] .form-button:hover {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.6) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== BOTONES DE DROPDOWN ===== */
+[data-theme="claro"] .dropdown-btn,
+[data-theme="claro"] .dropdown-toggle {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .dropdown-btn:hover,
+[data-theme="claro"] .dropdown-toggle:hover {
+  background: rgba(124,58,237,0.2) !important;
+  border-color: rgba(124,58,237,0.5) !important;
+}
+
+/* ===== BOTONES DE REFRESH/RELOAD ===== */
+[data-theme="claro"] .refresh-btn,
+[data-theme="claro"] .reload-btn,
+[data-theme="claro"] .actualizar-btn {
+  background: rgba(124,58,237,0.15) !important;
+  border: 1px solid rgba(124,58,237,0.4) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .refresh-btn:hover,
+[data-theme="claro"] .reload-btn:hover,
+[data-theme="claro"] .actualizar-btn:hover {
+  background: rgba(124,58,237,0.25) !important;
+  border-color: #7c3aed !important;
+  transform: rotate(180deg) !important;
+}
+
+/* ===== BOTONES DE VISTA/VISUALIZACIÓN ===== */
+[data-theme="claro"] .view-btn,
+[data-theme="claro"] .ver-btn,
+[data-theme="claro"] .visualizar-btn {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .view-btn:hover,
+[data-theme="claro"] .ver-btn:hover,
+[data-theme="claro"] .visualizar-btn:hover {
+  background: rgba(124,58,237,0.2) !important;
+  border-color: rgba(124,58,237,0.5) !important;
+}
+
+/* ===== BOTONES DE SELECCIÓN ===== */
+[data-theme="claro"] .select-btn,
+[data-theme="claro"] .seleccionar-btn,
+[data-theme="claro"] .choose-btn {
+  background: rgba(124,58,237,0.15) !important;
+  border: 1px solid rgba(124,58,237,0.4) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .select-btn:hover,
+[data-theme="claro"] .seleccionar-btn:hover,
+[data-theme="claro"] .choose-btn:hover {
+  background: rgba(124,58,237,0.25) !important;
+  border-color: #7c3aed !important;
+}
+
+/* ===== BOTONES CON ICONOS ===== */
+[data-theme="claro"] .icon-btn,
+[data-theme="claro"] .btn-icon {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+}
+
+[data-theme="claro"] .icon-btn:hover,
+[data-theme="claro"] .btn-icon:hover {
+  background: rgba(124,58,237,0.2) !important;
+  border-color: rgba(124,58,237,0.5) !important;
+  transform: scale(1.05) !important;
+}
+
+/* ===== BOTONES DE CARD/TARJETA ===== */
+[data-theme="claro"] .card-btn,
+[data-theme="claro"] .tarjeta-btn {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .card-btn:hover,
+[data-theme="claro"] .tarjeta-btn:hover {
+  background: rgba(124,58,237,0.2) !important;
+  border-color: rgba(124,58,237,0.5) !important;
+}
+
+/* ===== BOTONES DE LINK/ENLACE ===== */
+[data-theme="claro"] .link-btn,
+[data-theme="claro"] .enlace-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+  text-decoration: underline !important;
+}
+
+[data-theme="claro"] .link-btn:hover,
+[data-theme="claro"] .enlace-btn:hover {
+  color: #5b21b6 !important;
+  text-decoration: none !important;
+}
+
+/* ===== BOTONES ESPECÍFICOS DE COMPONENTES ===== */
+
+/* Botones del sidebar */
+[data-theme="claro"] .sidebar-btn {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+}
+
+/* Botones de header */
+[data-theme="claro"] .header-btn {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+}
+
+/* Botones de footer */
+[data-theme="claro"] .footer-btn {
+  background: rgba(124,58,237,0.15) !important;
+  border: 1px solid rgba(124,58,237,0.4) !important;
+  color: #7c3aed !important;
+}
+
+/* ===== OVERRIDE FINAL PARA CUALQUIER BOTÓN NO CUBIERTO ===== */
+[data-theme="claro"] button:not(.btn-cancel):not(.btn-danger):not(.btn-warning):not(.btn-success):not(.btn-info):not(.btn-logout):not(.btn-delete):not(.pap-btn-restore) {
+  background: rgba(124,58,237,0.1) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] button:not(.btn-cancel):not(.btn-danger):not(.btn-warning):not(.btn-success):not(.btn-info):not(.btn-logout):not(.btn-delete):not(.pap-btn-restore):hover {
+  background: rgba(124,58,237,0.2) !important;
+  border-color: rgba(124,58,237,0.5) !important;
+  transform: translateY(-1px) !important;
+}
+/* ===== AJUSTES PARA BOTONES MÁS SUTILES EN TEMA CLARO ===== */
+
+/* Override para los botones del hero section que se ven muy saturados */
+[data-theme="claro"] .admin-btn-primary {
+  background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(99,102,241,0.3) !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .admin-btn-primary:hover {
+  background: linear-gradient(135deg, #7c3aed, #6366f1) !important;
+  box-shadow: 0 6px 20px rgba(99,102,241,0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+[data-theme="claro"] .admin-btn-outline {
+  background: rgba(99,102,241,0.08) !important;
+  border: 1.5px solid rgba(99,102,241,0.25) !important;
+  color: #4f46e5 !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .admin-btn-outline:hover {
+  background: rgba(99,102,241,0.15) !important;
+  border-color: rgba(99,102,241,0.4) !important;
+  color: #4338ca !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.2) !important;
+}
+
+/* Ajustes para botones de instructor */
+[data-theme="claro"] .inst-btn-primary {
+  background: linear-gradient(135deg, #0891b2, #0e7490) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(8,145,178,0.3) !important;
+}
+
+[data-theme="claro"] .inst-btn-outline {
+  background: rgba(8,145,178,0.08) !important;
+  border: 1.5px solid rgba(8,145,178,0.25) !important;
+  color: #0e7490 !important;
+}
+
+/* Ajustes para botones de aprendiz */
+[data-theme="claro"] .aprendiz-btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(124,58,237,0.3) !important;
+}
+
+[data-theme="claro"] .aprendiz-btn-outline {
+  background: rgba(124,58,237,0.08) !important;
+  border: 1.5px solid rgba(124,58,237,0.25) !important;
+  color: #6d28d9 !important;
+}
+
+/* Botones más sutiles para el tema claro */
+[data-theme="claro"] .btn-primary,
+[data-theme="claro"] .btn-submit {
+  background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 12px rgba(99,102,241,0.25) !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .btn-primary:hover,
+[data-theme="claro"] .btn-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7c3aed, #6366f1) !important;
+  box-shadow: 0 6px 20px rgba(99,102,241,0.35) !important;
+  transform: translateY(-2px) !important;
+}
+
+[data-theme="claro"] .btn-secondary,
+[data-theme="claro"] .btn-outline {
+  background: rgba(99,102,241,0.06) !important;
+  border: 1.5px solid rgba(99,102,241,0.2) !important;
+  color: #4f46e5 !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .btn-secondary:hover,
+[data-theme="claro"] .btn-outline:hover {
+  background: rgba(99,102,241,0.12) !important;
+  border-color: rgba(99,102,241,0.35) !important;
+  color: #4338ca !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 10px rgba(99,102,241,0.15) !important;
+}
+
+/* Botones más sutiles para acciones comunes */
+[data-theme="claro"] .btn-add,
+[data-theme="claro"] .btn-create,
+[data-theme="claro"] .btn-save {
+  background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 12px rgba(99,102,241,0.25) !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .btn-edit,
+[data-theme="claro"] .btn-filter,
+[data-theme="claro"] .btn-search {
+  background: rgba(99,102,241,0.08) !important;
+  border: 1px solid rgba(99,102,241,0.25) !important;
+  color: #4f46e5 !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] .btn-edit:hover,
+[data-theme="claro"] .btn-filter:hover,
+[data-theme="claro"] .btn-search:hover {
+  background: rgba(99,102,241,0.15) !important;
+  border-color: rgba(99,102,241,0.4) !important;
+  color: #4338ca !important;
+}
+
+/* Override para botones que se ven muy saturados */
+[data-theme="claro"] button[style*="background:rgba(124,58,237"] {
+  background: rgba(99,102,241,0.08) !important;
+  border: 1px solid rgba(99,102,241,0.25) !important;
+  color: #4f46e5 !important;
+}
+
+[data-theme="claro"] button[style*="background:linear-gradient(135deg, #7c3aed"] {
+  background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+  color: #ffffff !important;
+}
+
+/* Ajuste específico para el override general que era muy agresivo */
+[data-theme="claro"] button:not(.btn-cancel):not(.btn-danger):not(.btn-warning):not(.btn-success):not(.btn-info):not(.btn-logout):not(.btn-delete):not(.pap-btn-restore) {
+  background: rgba(99,102,241,0.06) !important;
+  border: 1px solid rgba(99,102,241,0.2) !important;
+  color: #4f46e5 !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="claro"] button:not(.btn-cancel):not(.btn-danger):not(.btn-warning):not(.btn-success):not(.btn-info):not(.btn-logout):not(.btn-delete):not(.pap-btn-restore):hover {
+  background: rgba(99,102,241,0.12) !important;
+  border-color: rgba(99,102,241,0.35) !important;
+  transform: translateY(-1px) !important;
+}
+/* ===== REVERTIR BOTONES DEL HERO SECTION AL ESTILO ORIGINAL ===== */
+
+/* Botones del hero de admin como en la segunda imagen */
+[data-theme="claro"] .admin-hero .admin-btn-primary {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(220,38,38,0.35) !important;
+  font-weight: 600 !important;
+  border-radius: 50px !important;
+}
+
+[data-theme="claro"] .admin-hero .admin-btn-primary:hover {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  box-shadow: 0 8px 24px rgba(220,38,38,0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+[data-theme="claro"] .admin-hero .admin-btn-outline {
+  background: transparent !important;
+  border: 2px solid #dc2626 !important;
+  color: #dc2626 !important;
+  font-weight: 600 !important;
+  border-radius: 50px !important;
+}
+
+[data-theme="claro"] .admin-hero .admin-btn-outline:hover {
+  background: rgba(220,38,38,0.1) !important;
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Botones del hero de instructor */
+[data-theme="claro"] .inst-hero .inst-btn-primary {
+  background: linear-gradient(135deg, #0891b2, #0e7490) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(8,145,178,0.35) !important;
+  font-weight: 600 !important;
+  border-radius: 50px !important;
+}
+
+[data-theme="claro"] .inst-hero .inst-btn-primary:hover {
+  background: linear-gradient(135deg, #0ea5e9, #0891b2) !important;
+  box-shadow: 0 8px 24px rgba(8,145,178,0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+[data-theme="claro"] .inst-hero .inst-btn-outline {
+  background: transparent !important;
+  border: 2px solid #0891b2 !important;
+  color: #0891b2 !important;
+  font-weight: 600 !important;
+  border-radius: 50px !important;
+}
+
+[data-theme="claro"] .inst-hero .inst-btn-outline:hover {
+  background: rgba(8,145,178,0.1) !important;
+  border-color: #0ea5e9 !important;
+  color: #0ea5e9 !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Botones del hero de aprendiz */
+[data-theme="claro"] .aprendiz-hero .aprendiz-btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.35) !important;
+  font-weight: 600 !important;
+  border-radius: 50px !important;
+}
+
+[data-theme="claro"] .aprendiz-hero .aprendiz-btn-primary:hover {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+[data-theme="claro"] .aprendiz-hero .aprendiz-btn-outline {
+  background: transparent !important;
+  border: 2px solid #7c3aed !important;
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+  border-radius: 50px !important;
+}
+
+[data-theme="claro"] .aprendiz-hero .aprendiz-btn-outline:hover {
+  background: rgba(124,58,237,0.1) !important;
+  border-color: #8b5cf6 !important;
+  color: #8b5cf6 !important;
+  transform: translateY(-2px) !important;
 }

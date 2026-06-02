@@ -67,6 +67,25 @@
 
 .nav-links a::after { display: none; }
 
+.nav-fuel-link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,0.7) !important;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 15px;
+  padding: 8px 18px !important;
+  border-radius: 8px;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.nav-fuel-link:hover {
+  color: #fff !important;
+  background: rgba(127, 90, 240, 0.12) !important;
+}
+
 .nav-auth {
   display: flex;
   gap: 10px;

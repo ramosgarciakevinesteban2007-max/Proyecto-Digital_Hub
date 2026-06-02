@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SidebarAprendiz from '../../components/SidebarAprendiz';
-import { IconMonitor, IconReport, IconBell, IconUser, IconCheck, IconClock } from '../../components/Icons';
+import { IconMonitor, IconReport, IconBell, IconUser, IconCheck, IconClock, IconLaptop, IconAlertTriangle, IconBookOpen, IconUserCheck } from '../../components/Icons';
 import NotificacionesBtn from '../../components/NotificacionesBtn';
 import '../Inicio.css';
 import './InicioAprendiz.css';
@@ -78,7 +78,7 @@ const InicioAprendiz = () => {
         <div className="inicio-stats-grid">
           <div className="inicio-card aprendiz-stat-card" style={{cursor:'pointer'}} onClick={() => navigate('/aprendiz/dispositivo')}>
             <div className="aprendiz-stat-icon" style={{background:'rgba(127,90,240,0.15)',color:'#c9a8ff'}}>
-              <IconMonitor size={20} />
+              <IconLaptop size={20} />
             </div>
             <div className="inicio-card-body">
               <div className="inicio-card-title">Mi Dispositivo</div>
@@ -95,7 +95,7 @@ const InicioAprendiz = () => {
 
           <div className="inicio-card aprendiz-stat-card" style={{cursor:'pointer'}} onClick={() => navigate('/aprendiz/historial')}>
             <div className="aprendiz-stat-icon" style={{background:'rgba(250,204,21,0.12)',color:'#facc15'}}>
-              <IconClock size={20} />
+              <IconAlertTriangle size={20} />
             </div>
             <div className="inicio-card-body">
               <div className="inicio-card-title">Reportes Pendientes</div>
@@ -109,7 +109,7 @@ const InicioAprendiz = () => {
 
           <div className="inicio-card aprendiz-stat-card">
             <div className="aprendiz-stat-icon" style={{background:'rgba(74,222,128,0.12)',color:'#4ade80'}}>
-              <IconUser size={20} />
+              <IconBookOpen size={20} />
             </div>
             <div className="inicio-card-body">
               <div className="inicio-card-title">Mi Ficha</div>
@@ -150,7 +150,7 @@ const InicioAprendiz = () => {
 
           <div className="inicio-card-narrow aprendiz-profile-card">
             <div className="aprendiz-stat-icon" style={{background:'rgba(44,185,176,0.12)',color:'#2cb9b0'}}>
-              <IconUser size={20} />
+              <IconUserCheck size={20} />
             </div>
             <div className="inicio-card-title">Mi Perfil</div>
             <ul className="inicio-card-list">

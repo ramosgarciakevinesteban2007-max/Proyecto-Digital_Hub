@@ -60,7 +60,7 @@ const HistorialInstructor = () => {
             <p className="equipment-subtitle">Registro completo de todos los equipos en el sistema</p>
           </div>
           <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
-            <button onClick={cargar} style={{background:'rgba(127,90,240,0.15)',border:'1px solid rgba(127,90,240,0.35)',borderRadius:'10px',padding:'8px 16px',color:'#c9a8ff',fontSize:'13px',fontWeight:600,cursor:'pointer'}}>
+            <button onClick={cargar} style={{background:'#7f5af0',border:'1px solid #7f5af0',borderRadius:'10px',padding:'8px 16px',color:'#ffffff',fontSize:'13px',fontWeight:600,cursor:'pointer',boxShadow:'0 2px 8px rgba(127,90,240,0.25)',transition:'all 0.2s ease'}}>
               ↻ Actualizar
             </button>
             <NotificacionesBtn />
