@@ -253,7 +253,6 @@
 @media (max-width: 960px) {
   .fd-bento { grid-template-columns: 1fr 1fr 1fr; }
   .ficha-chat-wrapper { grid-template-columns: 1fr; }
-}
   .fd-widget-cupo { grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 28px; }
   .fd-widget-asignar { grid-column: 1 / -1; }
 }

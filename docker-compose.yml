@@ -1,24 +1,49 @@
 services:
-  frontend:
-    image: mi-react-app
-    container_name: digitalhub-front
+  db:
+    image: mysql:8
+    container_name: digitalhub-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
     ports:
-      - "3000:3000"
+      - "3306:3306"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    stdin_open: true
-    tty: true
-    command: npm run dev -- --host 0.0.0.0
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
-    image: mi-node-app
+    build:
+      context: ./backend
+      dockerfile: dockerfile
     container_name: digitalhub-back
+    restart: always
     ports:
       - "3001:3001"
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    stdin_open: true
-    tty: true
-    command: npm run dev
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    container_name: digitalhub-front
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
