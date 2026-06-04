@@ -25,6 +25,7 @@ const ReportesAprendiz = () => {
   const [submitting, setSubmitting]       = useState(false);
   const [imagenFile, setImagenFile]       = useState(null);
   const [filtros, setFiltros]             = useState({ buscar: '', estado: '' });
+  const [formData, setFormData]           = useState({ descripcion: '', fecha_reporte: new Date().toISOString().split('T')[0] });
   const [page, setPage]                   = useState(1);
   const PER_PAGE = 6;
   const token = localStorage.getItem('token');

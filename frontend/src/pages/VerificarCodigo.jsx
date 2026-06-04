@@ -43,7 +43,7 @@ const VerificarCodigo = () => {
     setLoading(true);
     setError("");
     try {
-      const resp = await fetch(`${API_URL}/recuperacion/validar-codigo`, {
+      const resp = await fetch(`/api/recuperacion/validar-codigo`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo, codigo: completo })
