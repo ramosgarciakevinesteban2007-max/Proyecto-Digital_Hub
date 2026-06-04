@@ -168,7 +168,7 @@ router.post(
         if (instructorRows.length > 0) instructor = instructorRows[0];
       }
 
-      const archivo = req.file ? req.file.filename : null;
+      const archivo = req.file ? req.file.originalname : null;
 
       const [insertResult] = await pool.query(
         `INSERT INTO reportes (estado_reporte, fecha_reporte, archivo, descripcion, id_aprendiz, id_instructor)
