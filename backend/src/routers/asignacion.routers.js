@@ -2,14 +2,19 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db/database");
 
+const verificarToken = require("../middlewares/verificarToken");
+const verificarRol = require("../middlewares/verificarRol");
 const validarPortatilNoDanado = require("../middlewares/validarPortatilNoDanado");
 const actualizarEstadoPortatil = require("../middlewares/actualizarEstadoPortatil");
+const { ROLES } = require("../constants/dominio");
 
 /**
  * ASIGNAR PORTÁTIL
  */
 router.post(
   "/",
+  verificarToken,
+  verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR]),
   validarPortatilNoDanado,
   actualizarEstadoPortatil,
   async (req, res) => {
