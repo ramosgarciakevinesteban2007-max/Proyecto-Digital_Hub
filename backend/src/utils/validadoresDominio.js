@@ -1,6 +1,6 @@
 const rolesValidos = ["administrador", "instructor", "aprendiz"];
 
-const estadosUsuarioValidos = ["activo", "inactivo"];
+const estadosUsuarioValidos = ["activo", "inhabilitado"];
 
 function validarRol(rol) {
     return rolesValidos.includes(rol);
