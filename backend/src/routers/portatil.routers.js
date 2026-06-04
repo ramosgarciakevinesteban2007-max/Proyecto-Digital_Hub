@@ -21,7 +21,7 @@ Solo ADMIN o INSTRUCTOR
 router.post(
   "/",
   verificarToken,
-  verificarRol(["administrador", "instructor"]),
+  verificarRol([ROLES.ADMIN, ROLES.INSTRUCTOR]),
   validarCamposObligatorios(["num_serie", "marca", "tipo", "modelo", "estado"]),
   validarSerialUnico,
   async (req, res) => {
