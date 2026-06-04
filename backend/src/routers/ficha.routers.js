@@ -88,7 +88,7 @@ router.delete(
 router.post(
   "/:id/unirse",
   verificarToken,
-  verificarRol(ROLES.APRENDIZ),
+  verificarRol([ROLES.APRENDIZ]),
   validarFichaActiva,
   validarCupoMaximo,
   validarAprendizNoRepetido,
@@ -99,7 +99,7 @@ router.post(
 router.post(
   "/:id/asignar",
   verificarToken,
-  verificarRol(ROLES.INSTRUCTOR),
+  verificarRol([ROLES.INSTRUCTOR]),
   validarFichaActiva,
   validarCupoMaximo,
   fichaController.asignarAprendiz

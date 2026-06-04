@@ -110,7 +110,7 @@ router.get("/:id", verificarToken, async (req, res) => {
 router.post(
   "/",
   verificarToken,
-  verificarRol(ROLES.APRENDIZ),
+  verificarRol([ROLES.APRENDIZ]),
   uploadImagen.single("archivo"),
   async (req, res) => {
     try {
