@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/api/(.*)",       "destination": "https://digitalhub-backend-i7og.onrender.com/api/$1" },
+    { "source": "/exportar/(.*)",  "destination": "https://digitalhub-backend-i7og.onrender.com/exportar/$1" },
+    { "source": "/importar/(.*)",  "destination": "https://digitalhub-backend-i7og.onrender.com/importar/$1" },
+    { "source": "/uploads/(.*)",   "destination": "https://digitalhub-backend-i7og.onrender.com/uploads/$1" },
+    { "source": "/(.*)",           "destination": "/index.html" }
+  ]
+}
