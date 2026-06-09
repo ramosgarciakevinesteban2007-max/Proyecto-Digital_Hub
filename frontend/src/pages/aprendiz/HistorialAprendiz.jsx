@@ -26,16 +26,25 @@ const HistorialAprendiz = () => {
   const [filtros, setFiltros] = useState({ buscar: '', estado: '', desde: '', hasta: '' });
   const token = localStorage.getItem('token');
 
-  useEffect(() => {
+  const cargar = async () => {
     if (!token) { navigate('/login'); return; }
-    fetch('/api/reportes', { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => { if (r.status === 401) { navigate('/login'); return []; } return r.json(); })
-      .then(data => {
-        if (Array.isArray(data)) setReportes(data);
-        else setReportes([]);
-      })
-      .catch(() => setError('Error al cargar el historial'))
-      .finally(() => setLoading(false));
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/reportes', { headers: { Authorization: `Bearer ${token}` } });
+      if (res.status === 401) { navigate('/login'); return; }
+      const data = await res.json();
+      if (Array.isArray(data)) setReportes(data);
+      else setReportes([]);
+    } catch (e) {
+      setError('Error al cargar el historial');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    cargar();
   }, []);
 
   const filtrados = reportes.filter(r => {
