@@ -38,6 +38,8 @@ const enviarCodigo = async (req, res) => {
       [correo, codigo, expiracion]
     );
 
+    console.log(`📨 Recuperación: código generado para ${correo}. Código: ${codigo}`);
+    console.log(`📨 Recuperación: enviando correo para ${correo}`);
     // 🔹 enviar correo
     await enviarCodigoRecuperacion(correo, codigo, generarTemplateCodigo);
 

@@ -2,7 +2,13 @@ const nodemailer = require("nodemailer");
 
 // Intentar con Resend primero si está configurado, luego fallback a nodemailer/Gmail
 const enviarCorreo = async (destinatario, asunto, htmlContent) => {
-  console.log('📬 enviarCorreo: iniciando. RESEND_API_KEY set?', !!process.env.RESEND_API_KEY);
+  console.log('📬 enviarCorreo: iniciando.', {
+    destinatario,
+    asunto,
+    usanResend: !!process.env.RESEND_API_KEY,
+    emailUserSet: !!process.env.EMAIL_USER,
+    emailPassSet: !!process.env.EMAIL_PASS,
+  });
 
   // Si hay API key de Resend, usarla
   if (process.env.RESEND_API_KEY) {
