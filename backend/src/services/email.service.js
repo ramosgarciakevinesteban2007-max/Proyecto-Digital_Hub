@@ -24,32 +24,32 @@ const enviarCorreo = async (destinatario, asunto, htmlContent) => {
   }
 
   // Fallback a nodemailer/Gmail
+  const userSet = !!process.env.EMAIL_USER;
+  const passSet = !!process.env.EMAIL_PASS;
+  console.log(`📬 Nodemailer fallback. EMAIL_USER set? ${userSet}. EMAIL_PASS set? ${passSet}`);
+
+  if (!userSet || !passSet) {
+    throw new Error('No hay credenciales de correo configuradas en las variables de entorno (EMAIL_USER / EMAIL_PASS).');
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  // Verificar configuración del transporter
   try {
-    const userSet = !!process.env.EMAIL_USER;
-    const passSet = !!process.env.EMAIL_PASS;
-    console.log(`📬 Nodemailer fallback. EMAIL_USER set? ${userSet}. EMAIL_PASS set? ${passSet}`);
+    await transporter.verify();
+    console.log('🔎 Nodemailer transporter verificado correctamente');
+  } catch (vErr) {
+    console.error('❌ Nodemailer verify falló:', vErr && (vErr.stack || vErr.message || vErr));
+    // No abortar aún: puede que el envío funcione a pesar de la verificación fallida
+  }
 
-    if (!userSet || !passSet) {
-      console.error('❌ No hay credenciales de correo configuradas en las variables de entorno (EMAIL_USER / EMAIL_PASS).');
-      return;
-    }
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    // Verificar configuración del transporter
-    try {
-      await transporter.verify();
-      console.log('🔎 Nodemailer transporter verificado correctamente');
-    } catch (vErr) {
-      console.error('❌ Nodemailer verify falló:', vErr && (vErr.stack || vErr.message || vErr));
-    }
-
+  try {
     await transporter.sendMail({
       from: `"Digital Hub" <${process.env.EMAIL_USER}>`,
       to: destinatario,
@@ -59,19 +59,16 @@ const enviarCorreo = async (destinatario, asunto, htmlContent) => {
     console.log(`✅ Correo enviado via Gmail a: ${destinatario}`);
   } catch (error) {
     console.error("❌ Error enviando correo (nodemailer):", error && (error.stack || error.message || error));
+    throw new Error('No se pudo enviar el correo de recuperación. Revisa la configuración de Gmail o Resend.');
   }
 };
 
 const enviarCodigoRecuperacion = async (correo, codigo, template) => {
-  try {
-    await enviarCorreo(
-      correo,
-      "Recuperación de contraseña - Digital Hub",
-      template(codigo)
-    );
-  } catch (error) {
-    console.error("❌ ERROR COMPLETO:", error);
-  }
+  await enviarCorreo(
+    correo,
+    "Recuperación de contraseña - Digital Hub",
+    template(codigo)
+  );
 };
 
 module.exports = { enviarCorreo, enviarCodigoRecuperacion };
